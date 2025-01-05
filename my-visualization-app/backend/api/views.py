@@ -9,14 +9,21 @@ class DataVisualizationView(APIView):
         if not data:
             return Response({"error": "No data provided"}, status=400)
 
-        # 将数据转换为 Pandas DataFrame
-        df = pd.DataFrame(data)
+        try:
+            # 将数据转换为 Pandas DataFrame
+            df = pd.DataFrame(data)
 
-        # 简单统计：计算每列的均值和标准差
-        summary = {
-            "columns": df.columns.tolist(),
-            "mean": df.mean().tolist(),
-            "std": df.std().tolist(),
-        }
+            # 清洗数据：确保所有列是数值类型
+            df = df.apply(pd.to_numeric, errors='coerce')  # 转换非数值为 NaN
 
-        return Response(summary)
+            # 简单统计：计算每列的均值和标准差
+            summary = {
+                "columns": df.columns.tolist(),
+                "mean": df.mean().tolist(),
+                "std": df.std().tolist(),
+            }
+
+            return Response(summary)
+        except Exception as e:
+            # 捕捉异常并返回错误信息
+            return Response({"error": str(e)}, status=500)

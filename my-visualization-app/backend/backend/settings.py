@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-jva$dsl4gi2-&q@+k(q(@9nn+y(1$*_0!0q(t%9+rw^_m&)e1c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -128,4 +128,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React 开发服务器的地址
+    "http://localhost:3001",  # React 开发服务器的地址
+    "http://localhost:3002",  # React 开发服务器的地址
+    "http://localhost:3003",  # React 开发服务器的地址
+    "http://localhost:3004",  # React 开发服务器的地址
+    "http://localhost:3005",  # React 开发服务器的地址
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+
