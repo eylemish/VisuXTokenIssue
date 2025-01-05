@@ -13,7 +13,7 @@ class DataVisualizationView(APIView):
             # 将数据转换为 Pandas DataFrame
             df = pd.DataFrame(data)
 
-            # 清洗数据：确保所有列是数值类型
+            # 清洗数据：确保所有列是数值类型 e
             df = df.apply(pd.to_numeric, errors='coerce')  # 转换非数值为 NaN
 
             # 简单统计：计算每列的均值和标准差
