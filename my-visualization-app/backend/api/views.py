@@ -37,7 +37,7 @@ class UploadView(APIView):
 
         if not file:
             return Response({"Error": "Please upload a file."}, status = 400)
-
+        #Accept CSV and XLSX files
         filename = file.name.lower()
         if filename.endswith(".csv"):
             df = pd.read_csv(file)
