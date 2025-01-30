@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import DataVisualizationView
+from .views import DataVisualizationView, UploadView
 
 urlpatterns = [
     path('visualize/', DataVisualizationView.as_view(), name='visualize'),
+    path("upload/", UploadView.as_view(), name="upload_csv")
 ]
