@@ -1,10 +1,12 @@
 import React, { useState, useRef } from "react";
 import Plot from "react-plotly.js";
 import Papa from "papaparse";
+import GraphManager from '../graphs/GraphManager'; 
 import "./Desktop1UI.css";
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
+  const [graphManager] = useState(new GraphManager());
   const fileInputRef = useRef(null);
 
   const handleUploadClick = () => {
