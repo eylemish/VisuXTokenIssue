@@ -4,12 +4,12 @@ import Plot from 'react-plotly.js';
 
 const Chart = () => {
     const [fileData, setFileData] = useState(null);
-    const [uploadStatus, setUploadStatus] = useState(null);  // 用于显示上传状态
-    const [errorMessage, setErrorMessage] = useState(null);   // 用于显示错误信息
+    const [uploadStatus, setUploadStatus] = useState(null);  // show upload state
+    const [errorMessage, setErrorMessage] = useState(null);   // show error message
 
     const handleUpload = async (event) => {
-        setUploadStatus(null);  // 清除之前的状态
-        setErrorMessage(null);   // 清除错误信息
+        setUploadStatus(null);  // clear state
+        setErrorMessage(null);   // clear error message
 
         const file = event.target.files[0];
         if (!file) {
@@ -36,13 +36,13 @@ const Chart = () => {
                 });
 
                 if (response.data) {
-                    setFileData(response.data);  // 设置文件处理后的数据
-                    setUploadStatus('File processed successfully');  // 显示成功通知
+                    setFileData(response.data);
+                    setUploadStatus('File processed successfully');
                 } else {
                     setUploadStatus('No data to visualize');
                 }
             } catch (error) {
-                setErrorMessage('Error uploading the file');  // 出现错误时显示错误信息
+                setErrorMessage('Error uploading the file');
                 console.error('Error during API call:', error);
             }
         };
@@ -54,14 +54,11 @@ const Chart = () => {
         <div>
             <h1>Data Visualization</h1>
 
-            {/* 文件上传 */}
             <input type="file" accept=".csv" onChange={handleUpload} />
 
-            {/* 显示上传状态 */}
             {uploadStatus && <div className="status-message success">{uploadStatus}</div>}
             {errorMessage && <div className="status-message error">{errorMessage}</div>}
 
-            {/* 显示图表 */}
             {fileData && (
                 <Plot
                     data={[

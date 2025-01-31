@@ -14,8 +14,8 @@ class DataVisualizationView(APIView):
             # Transfer data into Pandas DataFrame
             df = pd.DataFrame(data)
 
-            # 清洗数据：确保所有列是数值类型 e
-            df = df.apply(pd.to_numeric, errors='coerce')  # 转换非数值为 NaN
+            # Clean the data: ensure that all columns are of numeric type
+            df = df.apply(pd.to_numeric, errors='coerce')  # Convert non-numeric values to NaN
 
             # Calculate the mean and standard deviation for each column.
             summary = {

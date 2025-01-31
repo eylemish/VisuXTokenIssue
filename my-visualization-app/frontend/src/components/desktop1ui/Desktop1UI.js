@@ -1,10 +1,9 @@
 import React from "react";
-import "./Desktop1UI.css"; // 引入样式文件
+import "./Desktop1UI.css";
 
 const Desktop1UI = () => {
   return (
     <div className="desktop1-container">
-      {/* 顶部导航栏 */}
       <div className="navbar">
         <span className="title">VisuX</span>
         <img
@@ -19,9 +18,7 @@ const Desktop1UI = () => {
         />
       </div>
 
-      {/* 侧边栏 + 内容区域 */}
       <div className="main-content">
-        {/* 侧边栏 */}
         <div className="sidebar">
           <img
             className="sidebar-icon"
@@ -42,7 +39,6 @@ const Desktop1UI = () => {
           </div>
         </div>
 
-        {/* 右侧内容 */}
         <div className="content">
           <span className="content-title">Graph List</span>
           <ul className="graph-list">
