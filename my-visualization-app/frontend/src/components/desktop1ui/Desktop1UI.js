@@ -6,8 +6,10 @@ import "./Desktop1UI.css";
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
-  const [graphManager] = useState(new GraphManager());
+  const [graphNames, setGraphNames] = useState([]);
   const fileInputRef = useRef(null);
+
+  const graphManager = new GraphManager();
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -47,7 +49,6 @@ const Desktop1UI = () => {
         setFileData({ columns, mean, std });
 
         graphManager.addGraph({ name: `Graph ${graphManager.getGraphs().length + 1}`, data: { columns, mean, std } });
-
         setGraphNames(graphManager.getGraphs().map(graph => graph.data.name));
       },
       header: false,
