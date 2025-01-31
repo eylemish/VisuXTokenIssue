@@ -1,4 +1,4 @@
-class toolManager {
+class ToolManager {
     constructor() {
         this.tools = [];
     }
