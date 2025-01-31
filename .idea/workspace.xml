@@ -5,13 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="09ffe3d9-d390-4716-b061-c04336943da2" name="Changes" comment="details">
-      <change afterPath="$PROJECT_DIR$/.bash_history" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.ssh/known_hosts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.ssh/known_hosts.old" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Desktop" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LauncherFolder" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MyDocuments" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -111,7 +104,7 @@
       <workItem from="1736082953851" duration="9641000" />
       <workItem from="1737576396387" duration="3551000" />
       <workItem from="1738172110800" duration="1701000" />
-      <workItem from="1738320482064" duration="9140000" />
+      <workItem from="1738320482064" duration="9815000" />
     </task>
     <task id="LOCAL-00001" summary="2246">
       <option name="closed" value="true" />
@@ -169,7 +162,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738326338419</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="details">
+      <option name="closed" value="true" />
+      <created>1738342670801</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1738342670801</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
