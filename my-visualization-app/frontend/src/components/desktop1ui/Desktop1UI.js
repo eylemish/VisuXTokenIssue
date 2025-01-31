@@ -1,11 +1,15 @@
 import React, { useState, useRef } from "react";
 import Plot from "react-plotly.js";
 import Papa from "papaparse";
+import GraphManager from '../graphs/GraphManager'; 
 import "./Desktop1UI.css";
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
+  const [graphNames, setGraphNames] = useState([]);
   const fileInputRef = useRef(null);
+
+  const graphManager = new GraphManager();
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -43,6 +47,9 @@ const Desktop1UI = () => {
         });
 
         setFileData({ columns, mean, std });
+
+        graphManager.addGraph({ name: `Graph ${graphManager.getGraphs().length + 1}`, data: { columns, mean, std } });
+        setGraphNames(graphManager.getGraphs().map(graph => graph.name));
       },
       header: false,
       skipEmptyLines: true,
@@ -102,6 +109,10 @@ const Desktop1UI = () => {
         <div className="content">
           <span className="content-title">Graph List</span>
           <ul className="graph-list">
+            {/* Dinamik olarak grafikleri listele */}
+            {graphNames.map((graphName, index) => (
+              <li key={index}>{graphName}</li>
+            ))}
             <li>graph1</li>
             <li>graph2</li>
             <li>graph3</li>
