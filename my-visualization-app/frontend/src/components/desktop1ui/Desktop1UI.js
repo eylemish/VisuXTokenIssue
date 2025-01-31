@@ -49,7 +49,7 @@ const Desktop1UI = () => {
         setFileData({ columns, mean, std });
 
         graphManager.addGraph({ name: `Graph ${graphManager.getGraphs().length + 1}`, data: { columns, mean, std } });
-        setGraphNames(graphManager.getGraphs().map(graph => graph.data.name));
+        setGraphNames(graphManager.getGraphs().map(graph => graph.name));
       },
       header: false,
       skipEmptyLines: true,
