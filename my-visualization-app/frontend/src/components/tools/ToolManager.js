@@ -1,14 +1,17 @@
+import Tool from "./Tool";
+
 class ToolManager {
     constructor() {
-        this.tools = [];
+        this.tools = [
+            new Tool('createGraph', 'Create Graph1'),
+            new Tool('addDataset', 'Add Dataset'),
+            new Tool('dataInterpolate', 'Interpolate'),
+            new Tool('dataExtrapolate', 'Extrapolate'),
+        ];
     }
 
     addTool(tool) {
         this.tools.push(tool);
-    }
-
-    deleteTool(toolId) {
-        this.tools = this.tools.filter(tool => tool.id !== toolId);
     }
 
     getTools() {

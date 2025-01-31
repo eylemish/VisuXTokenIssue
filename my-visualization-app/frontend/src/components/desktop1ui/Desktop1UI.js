@@ -4,6 +4,8 @@ import Papa from "papaparse";
 import GraphManager from '../graphs/GraphManager'; 
 import ToolManager from '../tools/ToolManager'; 
 import Tool from '../tools/Tool'; 
+import Modal from '../modals/Modal'; 
+import ModalController from '../modals/ModalController'; 
 import "./Desktop1UI.css";
 
 const Desktop1UI = () => {
@@ -11,8 +13,10 @@ const Desktop1UI = () => {
   const [graphNames, setGraphNames] = useState([]);
   const fileInputRef = useRef(null);
 
+
   const graphManager = new GraphManager();
   const toolManager = new ToolManager();
+  const modalController = new ModalController();
 
   //create graph tool
   const graphTool = new Tool("graph", "Create Graph");
@@ -23,9 +27,10 @@ const Desktop1UI = () => {
 
     if (tool.type === "graph") {
      tool.createGraph();
-     }
-     
+    }
+
   };
+
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -170,6 +175,8 @@ const Desktop1UI = () => {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 };
