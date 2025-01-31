@@ -52,7 +52,7 @@ const Chart = () => {
 
     return (
         <div>
-            <h1>Data Visualization</h1>
+            <h1>Upload file</h1>
 
             <input type="file" accept=".csv" onChange={handleUpload} />
 
