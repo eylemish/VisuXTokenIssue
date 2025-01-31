@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import Plot from "react-plotly.js";
 import Papa from "papaparse";
 import GraphManager from '../graphs/GraphManager'; 
+import ToolManager from '../tools/ToolManager'; 
+import Tool from '../tools/Tool'; 
 import "./Desktop1UI.css";
 
 const Desktop1UI = () => {
@@ -10,6 +12,20 @@ const Desktop1UI = () => {
   const fileInputRef = useRef(null);
 
   const graphManager = new GraphManager();
+  const toolManager = new ToolManager();
+
+  //create graph tool
+  const graphTool = new Tool("Graph Tool", "Create Graph");
+  toolManager.addTool(graphTool);
+
+  const handleToolClick = (tool) => {
+    console.log(`${tool.name} clicked.`);
+
+    
+    // if (tool.type === "graph") {
+    //   handleCreateGraph();
+    // }
+  };
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -102,6 +118,18 @@ const Desktop1UI = () => {
               src="https://ide.code.fun/api/image?token=679cb304defdb1001113adff&name=4372127d7244c4cef2ee145ebb658a3f.png"
               alt="Menu Item 2"
             />
+          </div>
+          {/* Tool'ları listeleyen bölüm */}
+          <div className="tool-list">
+            {toolManager.getTools().map((tool) => (
+              <button
+                key={tool.id}
+                onClick={() => handleToolClick(tool)}
+                className="tool-button"
+              >
+                {tool.name}
+              </button>
+            ))}
           </div>
         </div>
 

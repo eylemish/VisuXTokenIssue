@@ -1,12 +1,17 @@
 class Tool {
-    constructor(id, name = "Unnamed Tool") {  // Default name is "Unnamed Tool"
-        this.id = id;       // Unique id
-        this.name = name;   // Name if the tool
+    constructor(type, name) {
+        this.type = type
+        this.name = name;        
     }
 
     getDescription() {
         return `Tool: ${this.name}`;
     }
+
+    //will fix it
+    createGraph() {
+        console.log("Creating new graph...");
+      }
 }
 
 export default Tool;
