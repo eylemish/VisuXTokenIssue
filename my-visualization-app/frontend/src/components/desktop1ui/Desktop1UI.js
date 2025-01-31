@@ -8,6 +8,22 @@ import Modal from '../modals/Modal';
 import ModalController from '../modals/ModalController'; 
 import "./Desktop1UI.css";
 
+
+const ToolList = ({ tools, onToolClick }) => (
+  <div className="tool-list">
+    {tools.map((tool) => (
+      <button
+        key={tool.name}
+        onClick={() => onToolClick(tool)}
+        className="tool-button"
+      >
+        {tool.name}
+      </button>
+    ))}
+  </div>
+);
+
+
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
   const [graphNames, setGraphNames] = useState([]);
@@ -124,18 +140,8 @@ const Desktop1UI = () => {
               alt="Menu Item 2"
             />
           </div>
-          {/* Tool'ları listeleyen bölüm */}
-          <div className="tool-list">
-            {toolManager.getTools().map((tool) => (
-              <button
-                key={tool.id}
-                onClick={() => handleToolClick(tool)}
-                className="tool-button"
-              >
-                {tool.name}
-              </button>
-            ))}
-          </div>
+          {/* Tool Listing */}
+          <ToolList tools={toolManager.getTools()} onToolClick={handleToolClick} />
         </div>
 
         {/* middle */}
