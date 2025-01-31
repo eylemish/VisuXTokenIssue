@@ -3,9 +3,8 @@ class ToolManager {
         this.tools = [];
     }
 
-    addTool(toolData) {
-        const newTool = { id: Date.now(), ...toolData }; // Unique ID assigned via Date.now()
-        this.tools.push(newTool);
+    addTool(tool) {
+        this.tools.push(tool);
     }
 
     deleteTool(toolId) {

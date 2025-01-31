@@ -15,16 +15,16 @@ const Desktop1UI = () => {
   const toolManager = new ToolManager();
 
   //create graph tool
-  const graphTool = new Tool("Graph Tool", "Create Graph");
+  const graphTool = new Tool("graph", "Create Graph");
   toolManager.addTool(graphTool);
 
   const handleToolClick = (tool) => {
     console.log(`${tool.name} clicked.`);
 
-    
-    // if (tool.type === "graph") {
-    //   handleCreateGraph();
-    // }
+    if (tool.type === "graph") {
+     tool.createGraph();
+     }
+     
   };
 
   const handleUploadClick = () => {

@@ -11,7 +11,7 @@ class Tool {
     //will fix it
     createGraph() {
         console.log("Creating new graph...");
-      }
+    }
 }
 
 export default Tool;
