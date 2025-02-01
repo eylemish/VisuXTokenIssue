@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+//we dont need it anymore -ezgi
 
-const Modal = ({ isOpen, onClose, children }) => {
-  return (
-    isOpen && (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <button onClick={onClose} className="close-button">X</button>
-          {children}
-        </div>
-      </div>
-    )
-  );
-};
+// import React, { useState } from 'react';
 
-export default Modal;
+// const Modal = ({ isOpen, onClose, children }) => {
+//   return (
+//     isOpen && (
+//       <div className="modal-overlay">
+//         <div className="modal-content">
+//           <button onClick={onClose} className="close-button">X</button>
+//           {children}
+//         </div>
+//       </div>
+//     )
+//   );
+// };
+
+// export default Modal;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CreateGraphModal from "./CreateGraphModal.js";
-import AddDatasetModal from "./AddDatasetModal";
+import AddDatasetModal from "./AddDatasetModal.js";
 import TestModal from "./TestModal";
 //Will add more Modal later
 
@@ -10,7 +10,7 @@ const ModalController = ({ activeTool , onClose, onCreate }) => {
   switch (activeTool) {
     case "Create Graph":
         return <CreateGraphModal onClose={onClose} />;
-    case "addDataset":
+    case "Add Dataset":
       return <AddDatasetModal onClose={onClose} onCreate={onCreate} />;
     case "Test Modal":
         return <TestModal onClose={onClose} />;
