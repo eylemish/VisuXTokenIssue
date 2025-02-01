@@ -1,23 +1,23 @@
 import React, { useState } from "react";
 
 const CreateGraphModal = ({ onClose }) => {
-  const [inputValue, setInputValue] = useState(""); // Kullanıcıdan alınan metin
-  const [submittedName, setSubmittedName] = useState(""); // "Tamam" butonuna basıldığında gösterilecek isim
+  const [inputValue, setInputValue] = useState(""); // Text from user
+  const [submittedName, setSubmittedName] = useState(""); // The name to be sended after clicking OK
 
-  // Kullanıcı input değerini güncelleyen fonksiyon
+  // Function to handle user interaction
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
 
-  // "Tamam" butonuna tıklanıldığında tetiklenen fonksiyon
+  // The function that occurs after clicking OK
   const handleSubmit = () => {
-    setSubmittedName(inputValue); // Girilen metni submittedName'e kaydediyoruz
-    setInputValue(""); // Input'u sıfırlıyoruz
+    setSubmittedName(inputValue); // Saving the string written by the user
+    setInputValue(""); // Reseting the input
   };
 
   return (
-    <div className="modal-container">
-      <div className="modal-content">
+    <div style={styles.overlay}>
+      <div style={styles.modal}>
         <h2>Create Graph</h2>
         <div>
           <label>Enter your name:</label>
@@ -29,15 +29,37 @@ const CreateGraphModal = ({ onClose }) => {
           />
         </div>
 
-        <button onClick={handleSubmit}>Tamam</button>
+        <button onClick={handleSubmit}>OK</button>
 
-        {/* Eğer bir isim yazılmışsa, aşağıda gösteriyoruz */}
-        {submittedName && <p>Bu kişinin ismi: "{submittedName}"</p>}
+        {/* Showing if the string is wriiten */}
+        {submittedName && <p>The name of this person: "{submittedName}"</p>}
 
         <button onClick={onClose}>Close</button>
       </div>
     </div>
   );
+};
+
+const styles = {
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "5px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    textAlign: "center",
+    width: "300px",
+  },
 };
 
 export default CreateGraphModal;
