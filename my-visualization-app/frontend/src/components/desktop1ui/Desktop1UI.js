@@ -3,48 +3,56 @@ import Plot from "react-plotly.js";
 import Papa from "papaparse";
 import GraphManager from '../graphs/GraphManager'; 
 import ToolManager from '../tools/ToolManager'; 
-import Tool from '../tools/Tool'; 
-import Modal from '../modals/Modal'; 
 import ModalController from '../modals/ModalController'; 
 import "./Desktop1UI.css";
 
+const ToolList = ({ tools, onToolClick }) => {
+  return (
+    <div className="tool-list">
+      {tools.map((tool) => (
+        <button
+          key={tool.name}
+          onClick={() => {
+            onToolClick(tool);
+          }}
+          className="tool-button"
+        >
+          {tool.name}
+        </button>
+      ))}
+    </div>
+  );
+};
 
-const ToolList = ({ tools, onToolClick }) => (
-  <div className="tool-list">
-    {tools.map((tool) => (
-      <button
-        key={tool.name}
-        onClick={() => onToolClick(tool)}
-        className="tool-button"
-      >
-        {tool.name}
-      </button>
-    ))}
-  </div>
-);
 
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
   const [graphNames, setGraphNames] = useState([]);
+  const [activeTool, setActiveTool] = useState(null); //for modal
   const fileInputRef = useRef(null);
-
 
   const graphManager = new GraphManager();
   const toolManager = new ToolManager();
-  const modalController = new ModalController();
 
-  //create graph tool
-  const graphTool = new Tool("graph", "Create Graph");
-  toolManager.addTool(graphTool);
 
   const handleToolClick = (tool) => {
-    console.log(`${tool.name} clicked.`);
+   setActiveTool(tool.name);
+  };
 
-    if (tool.type === "graph") {
-     tool.createGraph();
-    }
+  const handleModalClose = () => {
+    setActiveTool(null);
+  };
 
+  const handleCreateGraph = ({ graphName, selectedXFeature, selectedYFeature }) => {
+  console.log(`Graph Created: ${graphName} - X: ${selectedXFeature} Y: ${selectedYFeature}`);
+   handleModalClose();
+  };
+
+
+  const handleAddDataset = ({ datasetName }) => {
+    console.log(`Dataset Added: ${datasetName}`);
+    handleModalClose();
   };
 
 
@@ -144,6 +152,7 @@ const Desktop1UI = () => {
           <ToolList tools={toolManager.getTools()} onToolClick={handleToolClick} />
         </div>
 
+
         {/* middle */}
         <div className="content">
           <span className="content-title">Graph List</span>
@@ -181,6 +190,13 @@ const Desktop1UI = () => {
           </div>
         </div>
       </div>
+
+      {/* ModalController */}
+      <ModalController
+        activeTool={activeTool}
+        onClose={handleModalClose}
+        onCreate={handleCreateGraph}
+      />
 
 
     </div>

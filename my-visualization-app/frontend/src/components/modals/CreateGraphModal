@@ -1,0 +1,15 @@
+const CreateGraphModal = ({ onClose, onCreate }) => {
+    console.log("CreateGraphModal Props - onClose:", onClose, "onCreate:", onCreate);
+    
+    return (
+      <div className="modal">
+        <div className="modal-content">
+          <span className="close" onClick={onClose}>&times;</span> {/* This should be fine */}
+          <h2>Create Graph</h2>
+          <p>This is where the graph creation form will go.</p>
+        </div>
+      </div>
+    );
+  };
+  
+  export default CreateGraphModal;

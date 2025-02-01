@@ -3,16 +3,19 @@ import Tool from "./Tool";
 class ToolManager {
     constructor() {
         this.tools = [
-            new Tool('createGraph', 'Create Graph1'),
+            //more will be added dont worry:)
+            new Tool('createGraph', 'Create Graph'),
             new Tool('addDataset', 'Add Dataset'),
             new Tool('dataInterpolate', 'Interpolate'),
             new Tool('dataExtrapolate', 'Extrapolate'),
+            new Tool('testModal', 'Test Modal'),
         ];
     }
 
-    addTool(tool) {
-        this.tools.push(tool);
-    }
+    //can define in constructor so probably wont need it
+    // addTool(tool) {
+    //     this.tools.push(tool);
+    // }
 
     getTools() {
         return this.tools;
