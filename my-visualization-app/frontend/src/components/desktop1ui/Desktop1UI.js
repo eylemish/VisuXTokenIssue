@@ -45,10 +45,9 @@ const Desktop1UI = () => {
   };
 
   const handleCreateGraph = ({ graphName, selectedXFeature, selectedYFeature }) => {
-  console.log(`Graph Created: ${graphName} - X: ${selectedXFeature} Y: ${selectedYFeature}`);
+   console.log(`Graph Created: ${graphName} - X: ${selectedXFeature} Y: ${selectedYFeature}`);
    handleModalClose();
   };
-
 
   const handleAddDataset = ({ datasetName }) => {
     console.log(`Dataset Added: ${datasetName}`);

@@ -5,7 +5,7 @@ const TestModal = ({ onClose }) => {
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <h2>Hello!</h2>
-        <button onClick={onClose}>Kapat</button>
+        <button onClick={onClose}>X</button>
       </div>
     </div>
   );
