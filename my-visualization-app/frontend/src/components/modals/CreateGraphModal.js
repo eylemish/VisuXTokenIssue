@@ -1,34 +1,52 @@
+
 import React, { useState } from "react";
 import WindowManager from "../windows/WindowManager";
+import CreateGraphWindow from "../windows/CreateGraphWindow"; 
+import VisualizationManager from "../graphs/VisualizationManager"; // VisualizationManager'ı ekledik
+
 const CreateGraphModal = ({ onClose }) => {
   const [inputValue, setInputValue] = useState(""); // Graph name
-  const [submittedName, setSubmittedName] = useState(""); // Graph name by user
   const [file, setFile] = useState(null); // File uploaded
+  const [features, setFeatures] = useState([]); // CSV'den alınan feature'lar
 
-  // Uploading file
+  // Dosya değişikliği
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile && selectedFile.name.endsWith(".csv")) {
       setFile(selectedFile);
+      // Dosyayı VisualizationManager'a gönderip feature'ları alıyoruz
+      VisualizationManager.extractFeaturesFromCSV(selectedFile)
+        .then((features) => {
+          setFeatures(features); // Feature isimlerini state'e kaydediyoruz
+        })
+        .catch((err) => {
+          alert(err);
+        });
     } else {
       alert("Please upload a valid CSV file.");
     }
   };
 
   const handleSubmit = () => {
-    setSubmittedName(inputValue);
-    
-    // If the file is uploaded, we open the new window and show the message "File Uploaded"
-    if (file) {
-      WindowManager.openWindow(
-        `<h2>Graph Name: ${inputValue}</h2><p>File Uploaded: ${file.name}</p>`,
-        "Create Graph Window"
-      );
-    } else {
-      alert("Please upload a CSV file.");
+    if (!inputValue.trim()) {
+      alert("Please enter a graph name.");
+      return;
     }
-    setInputValue(""); // We clear the input field
-    onClose(); // Closing the modal
+
+    if (file && features.length > 0) {
+      // Create the window content using CreateGraphWindow function
+      const windowContent = CreateGraphWindow(inputValue, file.name, features);
+      // Open the new window and pass the content (graph name, file name, and features)
+      WindowManager.openWindow(windowContent, "Create Graph Window");
+    } else {
+      alert("Please upload a CSV file and ensure it has valid features.");
+    }
+
+    // Clear input and file selection after submit
+    setInputValue("");
+    setFile(null);
+    setFeatures([]);
+    onClose(); // Close the modal
   };
 
   return (
@@ -55,9 +73,6 @@ const CreateGraphModal = ({ onClose }) => {
         </div>
 
         <button onClick={handleSubmit}>OK</button>
-
-        {submittedName && <p>The name of this graph: "{submittedName}"</p>}
-
         <button onClick={onClose}>Close</button>
       </div>
     </div>
