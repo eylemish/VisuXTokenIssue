@@ -1,20 +1,34 @@
 import React, { useState } from "react";
-import CreateGraphWindow from "../windows/CreateGraphWindow";
 import WindowManager from "../windows/WindowManager";
-
 const CreateGraphModal = ({ onClose }) => {
-  const [inputValue, setInputValue] = useState(""); // Text from user
-  const [submittedName, setSubmittedName] = useState(""); // The name to be sended after clicking OK
+  const [inputValue, setInputValue] = useState(""); // Graph name
+  const [submittedName, setSubmittedName] = useState(""); // Graph name by user
+  const [file, setFile] = useState(null); // File uploaded
 
-  // Function to handle user interaction
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+  // Uploading file
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile.name.endsWith(".csv")) {
+      setFile(selectedFile);
+    } else {
+      alert("Please upload a valid CSV file.");
+    }
   };
 
   const handleSubmit = () => {
     setSubmittedName(inputValue);
-    WindowManager.openWindow(CreateGraphWindow(inputValue), "Create Graph Window");
-    setInputValue("");
+    
+    // If the file is uploaded, we open the new window and show the message "File Uploaded"
+    if (file) {
+      WindowManager.openWindow(
+        `<h2>Graph Name: ${inputValue}</h2><p>File Uploaded: ${file.name}</p>`,
+        "Create Graph Window"
+      );
+    } else {
+      alert("Please upload a CSV file.");
+    }
+    setInputValue(""); // We clear the input field
+    onClose(); // Closing the modal
   };
 
   return (
@@ -26,14 +40,22 @@ const CreateGraphModal = ({ onClose }) => {
           <input
             type="text"
             value={inputValue}
-            onChange={handleInputChange}
-            placeholder="Enter something"
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Enter graph name"
+          />
+        </div>
+
+        <div>
+          <label>Upload CSV file:</label>
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
           />
         </div>
 
         <button onClick={handleSubmit}>OK</button>
 
-        {/* Showing if the string is wriiten */}
         {submittedName && <p>The name of this graph: "{submittedName}"</p>}
 
         <button onClick={onClose}>Close</button>
