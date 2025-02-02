@@ -20,7 +20,7 @@ const CreateGraphModal = ({ onClose }) => {
       <div style={styles.modal}>
         <h2>Create Graph</h2>
         <div>
-          <label>Enter your name:</label>
+          <label>Enter your graph name:</label>
           <input
             type="text"
             value={inputValue}
@@ -32,7 +32,7 @@ const CreateGraphModal = ({ onClose }) => {
         <button onClick={handleSubmit}>OK</button>
 
         {/* Showing if the string is wriiten */}
-        {submittedName && <p>The name of this person: "{submittedName}"</p>}
+        {submittedName && <p>The name of this graph: "{submittedName}"</p>}
 
         <button onClick={onClose}>Close</button>
       </div>

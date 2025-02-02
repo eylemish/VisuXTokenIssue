@@ -1,15 +1,22 @@
-import React from "react";
+import WindowManager from "../windows/WindowManager";
+import { TestWindow } from "../windows/TestWindow";
 
 const TestModal = ({ onClose }) => {
+  const handleClose = () => {
+    onClose();
+    WindowManager.openWindow(TestWindow(), "Test Window");
+  };
+
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <h2>Hello!</h2>
-        <button onClick={onClose}>X</button>
+        <button onClick={handleClose}>X</button>
       </div>
     </div>
   );
 };
+
 
 const styles = {
   overlay: {
