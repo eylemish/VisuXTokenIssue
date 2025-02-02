@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import CreateGraphWindow from "../windows/CreateGraphWindow";
+import WindowManager from "../windows/WindowManager";
 
 const CreateGraphModal = ({ onClose }) => {
   const [inputValue, setInputValue] = useState(""); // Text from user
@@ -9,10 +11,10 @@ const CreateGraphModal = ({ onClose }) => {
     setInputValue(event.target.value);
   };
 
-  // The function that occurs after clicking OK
   const handleSubmit = () => {
-    setSubmittedName(inputValue); // Saving the string written by the user
-    setInputValue(""); // Reseting the input
+    setSubmittedName(inputValue);
+    WindowManager.openWindow(CreateGraphWindow(inputValue), "Create Graph Window");
+    setInputValue("");
   };
 
   return (
