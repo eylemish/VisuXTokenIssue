@@ -33,7 +33,7 @@ class WindowManager {
           <body>
             <div id="root">${content}</div>
             <script>
-              // onClose fonksiyonunu global bir değişken olarak tanımlıyoruz
+              // onClose defined as global variable
               const onClose = ${onClose};
               ${script}
             </script>
