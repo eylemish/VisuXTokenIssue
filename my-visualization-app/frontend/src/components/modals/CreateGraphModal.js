@@ -7,7 +7,8 @@ const CreateGraphModal = ({ onClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [file, setFile] = useState(null);
   const [features, setFeatures] = useState([]);
-  const [graphScript, setGraphScript] = useState(""); 
+  const [csvContent, setCsvContent] = useState(null);
+  const [selectedFeatureIndices, setSelectedFeatureIndices] = useState([]);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -16,29 +17,10 @@ const CreateGraphModal = ({ onClose }) => {
       VisualizationManager.extractFeaturesFromCSV(selectedFile)
         .then((features) => {
           setFeatures(features);
-
-          // CSV'den verileri okuyup grafiği oluşturacak scripti hazırlıyoruz
           const reader = new FileReader();
           reader.onload = (e) => {
             const content = e.target.result;
-            const rows = content.split("\n").map(row => row.trim().split(","));
-
-            const dataRows = rows.slice(1); // Başlık dışında kalan veriler
-            const xValues = dataRows.map(row => parseFloat(row[0])); // İlk feature X
-            const yValues = dataRows.map(row => parseFloat(row[1])); // İkinci feature Y
-
-            const script = `
-              Plotly.newPlot('graph', [{
-                x: ${JSON.stringify(xValues)},
-                y: ${JSON.stringify(yValues)},
-                type: 'scatter',
-                mode: 'lines+markers',
-                marker: { color: 'blue' }
-              }], {
-                title: 'Graph Visualization'
-              });
-            `;
-            setGraphScript(script);
+            setCsvContent(content);
           };
           reader.readAsText(selectedFile);
         })
@@ -50,23 +32,60 @@ const CreateGraphModal = ({ onClose }) => {
     }
   };
 
+  const handleCheckboxChange = (index) => {
+    if (selectedFeatureIndices.includes(index)) {
+      setSelectedFeatureIndices(selectedFeatureIndices.filter(i => i !== index));
+    } else {
+      if (selectedFeatureIndices.length < 2) {
+        setSelectedFeatureIndices([...selectedFeatureIndices, index]);
+      } else {
+        alert("You can only choose two features.");
+      }
+    }
+  };
+
   const handleSubmit = () => {
     if (!inputValue.trim()) {
-      alert("Please enter a graph name.");
+      alert("Please enter a name for the chart.");
+      return;
+    }
+    if (!file || !csvContent || features.length === 0) {
+      alert("Please upload a valid CSV file and make sure the features are pulled.");
+      return;
+    }
+    if (selectedFeatureIndices.length !== 2) {
+      alert("Please select two features.");
       return;
     }
 
-    if (file && features.length > 0) {
-      const windowContent = CreateGraphWindow(inputValue, file.name); // Feature'ları buradan kaldırdık
-      WindowManager.openWindow(windowContent, graphScript, "Create Graph Window");
-    } else {
-      alert("Please upload a CSV file and ensure it has valid features.");
-    }
+    const rows = csvContent.split("\n").map(row => row.trim().split(","));
+    const dataRows = rows.slice(1);
+    const xIndex = selectedFeatureIndices[0];
+    const yIndex = selectedFeatureIndices[1];
+
+    const xValues = dataRows.map(row => parseFloat(row[xIndex]));
+    const yValues = dataRows.map(row => parseFloat(row[yIndex]));
+
+    const graphScript = `
+      Plotly.newPlot('graph', [{
+        x: ${JSON.stringify(xValues)},
+        y: ${JSON.stringify(yValues)},
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { color: 'blue' }
+      }], {
+        title: 'Graph Visualization'
+      });
+    `;
+
+    const windowContent = CreateGraphWindow(inputValue, file.name);
+    WindowManager.openWindow(windowContent, graphScript, "Create Graph Window");
 
     setInputValue("");
     setFile(null);
     setFeatures([]);
-    setGraphScript("");
+    setCsvContent(null);
+    setSelectedFeatureIndices([]);
     onClose();
   };
 
@@ -75,17 +94,18 @@ const CreateGraphModal = ({ onClose }) => {
       <div style={styles.modal}>
         <h2>Create Graph</h2>
         <div>
-          <label>Enter your graph name:</label>
+          <label>Enter graph name:</label>
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Enter graph name"
+            placeholder="Graph name"
           />
         </div>
 
         <div>
-          <label>Upload CSV file:</label>
+          <label>Upload a CSV file.
+          </label>
           <input
             type="file"
             accept=".csv"
@@ -93,15 +113,21 @@ const CreateGraphModal = ({ onClose }) => {
           />
         </div>
 
-        {/* Feature Listesi */}
         {features.length > 0 && (
           <div>
-            <h3>Features:</h3>
-            <ul>
+            <h3>Pick two features for visualization:</h3>
+            <div style={styles.gridContainer}>
               {features.map((feature, index) => (
-                <li key={index}>{feature}</li>
+                <div key={index} style={styles.gridItem}>
+                  <input
+                    type="checkbox"
+                    checked={selectedFeatureIndices.includes(index)}
+                    onChange={() => handleCheckboxChange(index)}
+                  />
+                  <label>{feature}</label>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
@@ -127,10 +153,24 @@ const styles = {
   modal: {
     backgroundColor: "white",
     padding: "20px",
-    borderRadius: "5px",
+    borderRadius: "10px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     textAlign: "center",
-    width: "300px",
+    width: "400px",
+    maxHeight: "90vh",
+    overflowY: "auto",
+  },
+  gridContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+    gap: "10px",
+    textAlign: "left",
+    marginTop: "10px",
+  },
+  gridItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
 };
 
