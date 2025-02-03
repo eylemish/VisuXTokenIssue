@@ -1,5 +1,5 @@
 class VisualizationManager {
-    // Dosyayı analiz edip feature isimlerini çıkaran bir fonksiyon
+    // A function that analyzes the file and extracts feature names
     static extractFeaturesFromCSV(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -8,9 +8,9 @@ class VisualizationManager {
           const content = e.target.result;
           const rows = content.split("\n").map(row => row.trim());
           
-          // İlk satırdaki kolon isimlerini alalım
+          // Get the column names in the first row
           const header = rows[0].split(",");
-          resolve(header); // Feature isimlerini döndürüyoruz
+          resolve(header); //Returning the feature names
         };
         
         reader.onerror = (err) => {
