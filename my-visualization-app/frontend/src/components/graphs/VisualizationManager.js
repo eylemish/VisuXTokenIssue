@@ -1,4 +1,9 @@
+import Graph from "./Graph";
+import GraphManager from "./GraphManager";
+
 class VisualizationManager {
+
+  static graphManager = new GraphManager();
   // A function that analyzes the file and extracts feature names
   static extractFeaturesFromCSV(file) {
     return new Promise((resolve, reject) => {
@@ -51,6 +56,15 @@ class VisualizationManager {
     
     return graphScript;
   }
+
+  static createGraph(graphName, csvContent, selectedFeatures) {
+    console.log("createGraph called with:", graphName, selectedFeatures);
+    const newGraph = new Graph(graphName, csvContent, selectedFeatures);
+    VisualizationManager.graphManager.addGraph(newGraph);
+    return newGraph;
+  }
+
+  
 }
 
 export default VisualizationManager;

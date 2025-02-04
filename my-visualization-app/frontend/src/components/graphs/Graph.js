@@ -51,3 +51,16 @@
   
 //   export default Graph;
   
+
+// Graph.js
+class Graph {
+    constructor(name, csvContent, selectedFeatures) {
+      this.name = name;
+      this.csvContent = csvContent;
+      this.selectedFeatures = selectedFeatures;
+    }
+  
+  }
+  
+  export default Graph;
+  

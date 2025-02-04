@@ -240,7 +240,7 @@ const CreateGraphModal = ({ onClose }) => {
     const graphScript = VisualizationManager.visualize(csvContent, selectedFeatureIndices, inputValue);
 
     // Create the window content and open the window
-    const windowContent = CreateGraphWindow(inputValue, file.name);
+    const windowContent = CreateGraphWindow(inputValue, file.name, csvContent, selectedFeatureIndices);
     WindowManager.openWindow(windowContent, graphScript, "Create Graph Window");
 
     // Reset states and close the modal
