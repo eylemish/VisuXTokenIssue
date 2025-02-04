@@ -23,7 +23,7 @@ class ServerHandler(object):
             self.data_manager.store_data(file_name, df)
 
             self.engine = Engine(df)
-            reduced_data = self.engine.perform_pca()
+            reduced_data = self.engine.apply_pca()
 
             self.database_manager.save_to_database(pd.DataFrame(reduced_data), 'reduced_data')
             self.log_manager.log_info("Process and Load Success")
