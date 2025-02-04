@@ -205,11 +205,11 @@
 // export default Desktop1UI;
 
 import React, { useState, useRef, useEffect } from "react";
-import Plot from "react-plotly.js";
 import Papa from "papaparse";
-import GraphManager from '../graphs/GraphManager'; 
-import ToolManager from '../tools/ToolManager'; 
-import ModalController from '../modals/ModalController'; 
+import GraphManager from "../graphs/GraphManager"; 
+import ToolManager from "../tools/ToolManager"; 
+import ModalController from "../modals/ModalController"; 
+import VisualizationManager from "../graphs/VisualizationManager"; 
 import "./Desktop1UI.css";
 
 const ToolList = ({ tools, onToolClick }) => {
@@ -230,22 +230,56 @@ const ToolList = ({ tools, onToolClick }) => {
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
-  const [graphNames, setGraphNames] = useState([]); // Grafik isimlerini tutar
-  const [activeGraph, setActiveGraph] = useState(null); // Seçili grafiği tutar
-  const [activeTool, setActiveTool] = useState(null); 
+  const [graphNames, setGraphNames] = useState([]);
+  const [activeGraph, setActiveGraph] = useState(null);
+  const [graphScript, setGraphScript] = useState(null); // VisualizationManager'dan gelen script
+  const [activeTool, setActiveTool] = useState(null);
   const fileInputRef = useRef(null);
 
   const toolManager = new ToolManager();
 
-  // GraphManager'daki grafikleri takip etmek için useEffect
   useEffect(() => {
     const interval = setInterval(() => {
       const graphs = GraphManager.getAllGraphs();
       setGraphNames(graphs.map(graph => graph.name));
-    }, 1000); // Her saniyede bir günceller
+    }, 1000); 
 
-    return () => clearInterval(interval); // Bileşen unmount olduğunda temizler
+    return () => clearInterval(interval);
   }, []);
+
+  // activeGraph değiştiğinde grafiği güncelle
+  useEffect(() => {
+    if (activeGraph) {
+      const selectedGraph = GraphManager.getGraph(activeGraph);
+      if (selectedGraph) {
+        // CSV içeriğini güncelle (eğer CSV verisini böyle saklıyorsanız)
+        setFileData(selectedGraph.csvContent);
+
+        // VisualizationManager'dan scripti oluştur (örnekte seçilen özellikler [0,1])
+        const script = VisualizationManager.visualize(
+          selectedGraph.csvContent, 
+          [0, 1],  // Örnek olarak ilk iki sütun seçildi
+          activeGraph
+        );
+
+        setGraphScript(script);
+      }
+    }
+  }, [activeGraph]);
+
+  // graphScript değiştiğinde Plotly grafiğini oluşturmak için scripti çalıştır
+  useEffect(() => {
+    if (graphScript) {
+      // "graph" id'li div'in hazır olduğundan emin olun
+      try {
+        // Dikkat: eval kullanmak güvenlik riskleri taşıyabilir. Bu örnekte mantığı göstermek için kullanıyoruz.
+        // Alternatif olarak new Function() da kullanılabilir.
+        eval(graphScript);
+      } catch (err) {
+        console.error("Grafik oluşturulurken hata:", err);
+      }
+    }
+  }, [graphScript]);
 
   const handleToolClick = (tool) => {
     setActiveTool(tool.name);
@@ -296,10 +330,11 @@ const Desktop1UI = () => {
         });
 
         const graphName = `Graph ${GraphManager.getAllGraphs().length + 1}`;
-        GraphManager.addGraph({ name: graphName, data: { columns, mean, std } });
+        // GraphManager'a eklerken csvContent bilgisini de ekleyin
+        GraphManager.addGraph({ name: graphName, csvContent: data.join("\n"), data: { columns, mean, std } });
 
-        setFileData({ columns, mean, std }); // Yüklenen veriyi göster
-        setActiveGraph(graphName); // Yeni eklenen grafiği otomatik göster
+        setFileData({ columns, mean, std });
+        setActiveGraph(graphName);
       },
       header: false,
       skipEmptyLines: true,
@@ -307,11 +342,7 @@ const Desktop1UI = () => {
   };
 
   const handleGraphClick = (graphName) => {
-    const selectedGraph = GraphManager.getGraph(graphName);
-    if (selectedGraph) {
-      setFileData(selectedGraph.data); // Seçilen grafiğin verilerini gösterir
-      setActiveGraph(graphName);
-    }
+    setActiveGraph(graphName);  // Seçili grafiği güncelle
   };
 
   return (
@@ -339,7 +370,11 @@ const Desktop1UI = () => {
           <span className="content-title">Graph List</span>
           <ul className="graph-list">
             {graphNames.map((graphName, index) => (
-              <li key={index} onClick={() => handleGraphClick(graphName)} className={activeGraph === graphName ? "active-graph" : ""}>
+              <li
+                key={index}
+                onClick={() => handleGraphClick(graphName)}
+                className={activeGraph === graphName ? "active-graph" : ""}
+              >
                 {graphName}
               </li>
             ))}
@@ -347,17 +382,8 @@ const Desktop1UI = () => {
 
           {/* Graph Visualization */}
           <div className="plot-container">
-            {fileData ? (
-              <Plot
-                data={[
-                  { x: fileData.columns, y: fileData.mean, type: "bar", name: "Mean" },
-                  { x: fileData.columns, y: fileData.std, type: "bar", name: "Standard Deviation" }
-                ]}
-                layout={{ title: activeGraph || "Data Visualization" }}
-              />
-            ) : (
-              <p>No graph selected</p>
-            )}
+            {/* VisualizationManager'ın scriptinin çalışacağı div */}
+            <div id="graph" style={{ width: "100%", height: "100%" }}></div>
           </div>
         </div>
       </div>
