@@ -107,3 +107,19 @@
   margin-top: 20px;
 }
 
+.graph-list li {
+  cursor: pointer;
+  padding: 5px;
+  transition: background-color 0.3s;
+}
+
+.graph-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.active-graph {
+  background-color: #d0e0ff;
+  font-weight: bold;
+}
+
+

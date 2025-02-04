@@ -238,7 +238,7 @@ const CreateGraphModal = ({ onClose }) => {
 
     // Use the new visualize function to create the graph script
     const graphScript = VisualizationManager.visualize(csvContent, selectedFeatureIndices, inputValue);
-
+    VisualizationManager.createGraph(inputValue, csvContent, selectedFeatureIndices);
     // Create the window content and open the window
     const windowContent = CreateGraphWindow(inputValue, file.name, csvContent, selectedFeatureIndices);
     WindowManager.openWindow(windowContent, graphScript, "Create Graph Window");
