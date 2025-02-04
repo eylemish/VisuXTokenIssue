@@ -2,14 +2,58 @@ import React, { useState, useRef } from "react";
 import Plot from "react-plotly.js";
 import Papa from "papaparse";
 import GraphManager from '../graphs/GraphManager'; 
+import ToolManager from '../tools/ToolManager'; 
+import ModalController from '../modals/ModalController'; 
 import "./Desktop1UI.css";
+
+const ToolList = ({ tools, onToolClick }) => {
+  return (
+    <div className="tool-list">
+      {tools.map((tool) => (
+        <button
+          key={tool.name}
+          onClick={() => {
+            onToolClick(tool);
+          }}
+          className="tool-button"
+        >
+          {tool.name}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
   const [graphNames, setGraphNames] = useState([]);
+  const [activeTool, setActiveTool] = useState(null); //for modal
   const fileInputRef = useRef(null);
 
   const graphManager = new GraphManager();
+  const toolManager = new ToolManager();
+
+
+  const handleToolClick = (tool) => {
+   setActiveTool(tool.name);
+  };
+
+  const handleModalClose = () => {
+    setActiveTool(null);
+  };
+
+  const handleCreateGraph = ({ graphName, selectedXFeature, selectedYFeature }) => {
+   console.log(`Graph Created: ${graphName} - X: ${selectedXFeature} Y: ${selectedYFeature}`);
+   handleModalClose();
+  };
+
+  const handleAddDataset = ({ datasetName }) => {
+    console.log(`Dataset Added: ${datasetName}`);
+    handleModalClose();
+  };
+
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -103,7 +147,10 @@ const Desktop1UI = () => {
               alt="Menu Item 2"
             />
           </div>
+          {/* Tool Listing */}
+          <ToolList tools={toolManager.getTools()} onToolClick={handleToolClick} />
         </div>
+
 
         {/* middle */}
         <div className="content">
@@ -142,6 +189,15 @@ const Desktop1UI = () => {
           </div>
         </div>
       </div>
+
+      {/* ModalController */}
+      <ModalController
+        activeTool={activeTool}
+        onClose={handleModalClose}
+        onCreate={handleCreateGraph}
+      />
+
+
     </div>
   );
 };

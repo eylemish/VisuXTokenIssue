@@ -1,16 +1,21 @@
+import Tool from "./Tool";
+
 class ToolManager {
     constructor() {
-        this.tools = [];
+        this.tools = [
+            //more will be added dont worry:)
+            new Tool('createGraph', 'Create Graph'),
+            new Tool('addDataset', 'Add Dataset'),
+            new Tool('dataInterpolate', 'Interpolate'),
+            new Tool('dataExtrapolate', 'Extrapolate'),
+            new Tool('testModal', 'Test Modal'),
+        ];
     }
 
-    addTool(toolData) {
-        const newTool = { id: Date.now(), ...toolData }; // Unique ID assigned via Date.now()
-        this.tools.push(newTool);
-    }
-
-    deleteTool(toolId) {
-        this.tools = this.tools.filter(tool => tool.id !== toolId);
-    }
+    //can define in constructor so probably wont need it
+    // addTool(tool) {
+    //     this.tools.push(tool);
+    // }
 
     getTools() {
         return this.tools;
