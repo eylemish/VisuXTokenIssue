@@ -5,7 +5,55 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="09ffe3d9-d390-4716-b061-c04336943da2" name="Changes" comment="details">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/data_loader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/data_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/database_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/download_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/engine.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/log_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/backend/server_handler/server_handler.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/graphs/VisualizationManager.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/modals/AddDatasetModal.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/modals/CreateGraphModal.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/modals/Modal.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/modals/TestModal.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/windows/CreateGraphWindow.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/windows/TestWindow.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/windows/WindowManager.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/.eslintrc.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/.github/workflows/node.js.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/Gruntfile.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/LICENSE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/bower.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/papaparse.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/papaparse.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/player/player.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/player/player.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/player/player.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/.eslintrc.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/long-sample.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/node-tests.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/sample-header.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/sample.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/test-cases.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/test.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/tests.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/utf-8-bom-sample.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/node_modules/papaparse/tests/verylong-sample.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/UIController.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/UIController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/desktop1ui/Desktop1UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/desktop1ui/Desktop1UI.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/graphs/Graph.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/graphs/Graph.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/graphs/GraphManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/graphs/GraphManager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/modals/ModalController.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/modals/ModalController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/tools/Tool.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/tools/Tool.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/tools/ToolManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/tools/ToolManager.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +110,7 @@
     "Python.views.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Merging main",
     "last_opened_file_path": "D:/Visux/my-visualization-app/backend/backend",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
