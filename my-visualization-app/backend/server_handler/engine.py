@@ -146,9 +146,9 @@ class Engine:
     #suggest feature combining：
     #1. high correlation（correlation > `correlation_threshold`）
     
-    #:param dataset: pandas.DataFrame，输入数据集
-    #:param correlation_threshold: float，相关性阈值
-    #:return: List[dict]，建议合并的特征列表
+    #:param dataset: pandas.DataFrame，
+    #:param correlation_threshold: float，
+    #:return: List[dict]，features to combine
         if isinstance(dataset, list):
             dataset = pd.DataFrame(dataset)
 
