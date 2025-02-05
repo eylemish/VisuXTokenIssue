@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 import pandas as pd
+import json
+import sqlite3
 
 class DataVisualizationView(APIView):
     def post(self, request):
@@ -48,3 +50,27 @@ class UploadView(APIView):
         data = df.to_dict(orient="records")
 
         return Response({"message": "Success", "data": data})
+
+class AddDataView(APIView):
+    def post(self, request):
+        table_name = "uploaded_data"
+        new_data = request.data.get("new_data", {})
+
+        if not new_data:
+            return Response({"error": "No data provided"}, status=400)
+
+        try:
+            conn = sqlite3.connect("database.sqlite3")
+            df = pd.read_sql(f"SELECT * FROM {table_name} LIMIT 1", conn)
+
+            if set(df.columns) != set(new_data.keys()):
+                conn.close()
+                return Response({"error": "Column mismatch"}, status=400)
+
+            new_df = pd.DataFrame([new_data])
+            new_df.to_sql(table_name, conn, if_exists="append", index=False)
+            conn.close()
+
+            return Response({"message": "Data added successfully"})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
