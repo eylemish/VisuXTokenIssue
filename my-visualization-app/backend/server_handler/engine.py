@@ -7,6 +7,7 @@ from scipy.optimize import curve_fit
 from imblearn.over_sampling import SMOTE
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.feature_selection import VarianceThreshold
 
 class engine:
     def __init__(self):
@@ -110,3 +111,32 @@ class engine:
             raise ValueError("invalid dimensional reduction")
     
         return reducer.fit_transform(data)
+
+    def suggest_feature_dropping(dataset, correlation_threshold=0.95, variance_threshold=0.01):
+    #identify features suggest to be dropped：
+    #1. low variance（lower than `variance_threshold`）
+    #2. high correlation（higher than `correlation_threshold`）
+    
+    #:param dataset: pandas.DataFrame，input dataset
+    #:param correlation_threshold: float，
+    #:param variance_threshold: float，
+    #:return: List[str]，features to drop.
+        if isinstance(dataset, list):
+            dataset = pd.DataFrame(dataset)
+
+        features_to_drop = set()
+
+    # 1. low variance
+        selector = VarianceThreshold(threshold=variance_threshold)
+        selector.fit(dataset)
+        low_variance_features = dataset.columns[~selector.get_support()].tolist()
+        features_to_drop.update(low_variance_features)
+
+    # 2. high correlation
+        corr_matrix = dataset.corr().abs()
+        upper_triangle = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+
+        highly_correlated_features = [column for column in upper_triangle.columns if any(upper_triangle[column] > correlation_threshold)]
+        features_to_drop.update(highly_correlated_features)
+
+        return list(features_to_drop)
