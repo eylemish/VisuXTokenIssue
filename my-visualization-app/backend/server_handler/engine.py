@@ -66,7 +66,7 @@ class engine:
             return spline_func(target_x).tolist()
 
         else:
-            raise ValueError("不支持的外推方法")
+            raise ValueError("Unsupported extrapolation method.")
 
     # Do curve fitting with given data, target function and initial parameters.
     def fit_curve(self, x: np.ndarray, y: np.ndarray, func, initial_params: list):
