@@ -56,7 +56,7 @@ class VisualizationManager {
     return graphScript;
   }
 
-  static createGraph(graphName, csvContent, selectedFeatures) {
+  static createGraph(graphName, csvContent, selectedFeatures, graphScript) {
     console.log("createGraph called with:", graphName, selectedFeatures);
     const newGraph = new Graph(graphName, csvContent, selectedFeatures);
     GraphManager.addGraph(newGraph);
