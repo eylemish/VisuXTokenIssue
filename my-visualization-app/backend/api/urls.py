@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DataVisualizationView, UploadView
+from .views import DataVisualizationView, UploadView, AddDataView
 
 urlpatterns = [
     path('visualize/', DataVisualizationView.as_view(), name='visualize'),
