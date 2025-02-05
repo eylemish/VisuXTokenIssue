@@ -478,7 +478,7 @@ const Desktop1UI = () => {
       <div className="main-content">
         {/* Sidebar */}
         <div className="sidebar">
-          <img className="upload-folder" src="https://ide.code.fun/api/image?token=679cb304defdb1001113adff&name=c86c16bc02b71b9757aae220923c8652.png" alt="Upload Folder" onClick={handleUploadClick} />
+          <img className="upload-folder" src="/image/folder.png" alt="Upload Folder" onClick={handleUploadClick} />
           <input type="file" accept=".csv" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
 
           {/* Tools */}
