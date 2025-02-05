@@ -47,7 +47,7 @@ class VisualizationManager {
         y: ${JSON.stringify(yValues)},
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { color: 'blue' }
+        marker: { color: 'red' }
       }], {
         title: '${inputValue}'
       });

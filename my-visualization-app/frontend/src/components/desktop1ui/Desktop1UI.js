@@ -252,20 +252,21 @@ const Desktop1UI = () => {
     if (activeGraph) {
       const selectedGraph = GraphManager.getGraph(activeGraph);
       if (selectedGraph) {
-        // CSV içeriğini güncelle (eğer CSV verisini böyle saklıyorsanız)
         setFileData(selectedGraph.csvContent);
-
-        // VisualizationManager'dan scripti oluştur (örnekte seçilen özellikler [0,1])
+  
+        // Seçilen özellikleri kullanarak grafik oluştur
+        const selectedFeatures = selectedGraph.selectedFeatures || [0, 1];  // Seçili özellikler yoksa ilk iki sütunu kullan
         const script = VisualizationManager.visualize(
           selectedGraph.csvContent, 
-          [0, 1],  // Örnek olarak ilk iki sütun seçildi
+          selectedFeatures, 
           activeGraph
         );
-
+  
         setGraphScript(script);
       }
     }
   }, [activeGraph]);
+  
 
   // graphScript değiştiğinde Plotly grafiğini oluşturmak için scripti çalıştır
   useEffect(() => {
