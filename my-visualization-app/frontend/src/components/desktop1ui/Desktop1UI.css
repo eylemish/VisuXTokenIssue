@@ -125,12 +125,14 @@
 .feature-table table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 10px;
 }
 
 .feature-table th, .feature-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
+  font-size: 14px;
 }
 
 .feature-table tr:hover {
@@ -143,5 +145,7 @@
   color: white;
 }
 
-
-
+.feature-table th {
+  background-color: #333;
+  color: white;
+}

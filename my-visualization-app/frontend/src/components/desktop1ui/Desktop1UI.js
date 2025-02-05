@@ -228,7 +228,7 @@ const ToolList = ({ tools, onToolClick }) => {
   );
 };
 
-const FeatureTable = ({ features, selectedFeatures, onFeatureClick }) => {
+const FeatureTable = ({ features, data, selectedFeatures, onFeatureClick }) => {
   return (
     <div className="feature-table">
       <h3>Feature List</h3>
@@ -236,16 +236,22 @@ const FeatureTable = ({ features, selectedFeatures, onFeatureClick }) => {
         <thead>
           <tr>
             <th>Feature Name</th>
+            {[...Array(8)].map((_, index) => (
+              <th key={index}>Data {index + 1}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {features.map((feature, index) => (
+          {features.map((feature, featureIndex) => (
             <tr
-              key={index}
-              className={selectedFeatures.includes(index) ? 'selected-feature' : ''}
-              onClick={() => onFeatureClick(index)}
+              key={featureIndex}
+              className={selectedFeatures.includes(featureIndex) ? 'selected-feature' : ''}
+              onClick={() => onFeatureClick(featureIndex)}
             >
               <td>{feature}</td>
+              {data.slice(0, 8).map((row, dataIndex) => (
+                <td key={dataIndex}>{row[feature]}</td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -253,7 +259,6 @@ const FeatureTable = ({ features, selectedFeatures, onFeatureClick }) => {
     </div>
   );
 };
-
 
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
@@ -284,16 +289,20 @@ const Desktop1UI = () => {
       if (selectedGraph) {
         setFileData(selectedGraph.csvContent);
   
-        // CSV'nin başlığından (header) özellik isimlerini çıkar
+        // CSV'yi parse edip hem header hem de veri içeriğini çekiyoruz
         Papa.parse(selectedGraph.csvContent, {
           header: true,
+          skipEmptyLines: true,
           complete: (result) => {
-            const featureNames = result.meta.fields;
+            const featureNames = result.meta.fields;  // Özellik isimleri (başlıklar)
+            const rowData = result.data;              // Veri satırları
+  
             setFeatures(featureNames);
+            setFileData(rowData); // Veriyi FeatureTable'a göndermek için saklıyoruz
           },
         });
   
-        // Grafik için seçili özellikleri güncelle
+        // Seçilen özelliklerle grafiği oluştur
         const initialFeatures = selectedGraph.selectedFeatures || [0, 1];
         setSelectedFeatures(initialFeatures);
   
@@ -306,6 +315,7 @@ const Desktop1UI = () => {
       }
     }
   }, [activeGraph]);
+  
   
   
 
@@ -455,13 +465,15 @@ const Desktop1UI = () => {
           </ul>
 
           {/* Feature Table */}
-           {activeGraph && (
-           <FeatureTable
-             features={features}
-             selectedFeatures={selectedFeatures}
-             onFeatureClick={handleFeatureClick}
-            />
+          {activeGraph && (
+          <FeatureTable
+          features={features}
+          data={fileData}
+          selectedFeatures={selectedFeatures}
+          onFeatureClick={handleFeatureClick}
+          />
           )}
+
 
           {/* Graph Visualization */}
           <div className="plot-container">
