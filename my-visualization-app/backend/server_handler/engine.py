@@ -8,8 +8,9 @@ from imblearn.over_sampling import SMOTE
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.feature_selection import VarianceThreshold
+from itertools import combinations
 
-class engine:
+class Engine:
     def __init__(self):
         pass
 
@@ -140,3 +141,29 @@ class engine:
         features_to_drop.update(highly_correlated_features)
 
         return list(features_to_drop)
+
+    def suggest_feature_combining(dataset, correlation_threshold=0.9):
+    #suggest feature combining：
+    #1. high correlation（correlation > `correlation_threshold`）
+    
+    #:param dataset: pandas.DataFrame，
+    #:param correlation_threshold: float，
+    #:return: List[dict]，features to combine
+        if isinstance(dataset, list):
+            dataset = pd.DataFrame(dataset)
+
+        suggested_combinations = []
+
+    # calculate correlation
+        corr_matrix = dataset.corr()
+        feature_pairs = list(combinations(dataset.columns, 2))
+
+        for feature1, feature2 in feature_pairs:
+            correlation = abs(corr_matrix.loc[feature1, feature2])
+            if correlation > correlation_threshold:
+                suggested_combinations.append({
+                    "features": [feature1, feature2],
+                    "combinedFeature": f"{feature1}_{feature2}_combined"
+                })
+
+        return suggested_combinations
