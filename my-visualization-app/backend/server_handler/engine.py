@@ -2,8 +2,11 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 from scipy.interpolate import interp1d
+from sklearn.linear_model import LinearRegression
 from scipy.optimize import curve_fit
 from imblearn.over_sampling import SMOTE
+from sklearn.manifold import TSNE
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 class engine:
     def __init__(self):
@@ -37,6 +40,33 @@ class engine:
             return pd.DataFrame({'x': x_new, 'y': y_new})
         except Exception as e:
             raise ValueError(f"Error in interpolation: {e}")
+    def extrapolate(data, target_x, method="linear"):
+    #进行数据外推
+    #param data: List[List[float]]，inputdata in format [[x1, y1], [x2, y2], ...]
+    #param target_x: List[float]，target x that need extrapolation
+    #param method: str，extrapolate methods ("linear", "polynomial", "spline")
+    #return: List[float]，y after extrapolation
+        data = np.array(data)
+        X = data[:, 0].reshape(-1, 1)  #  x 
+        y = data[:, 1]  #  y 
+
+        if method == "linear":
+            model = LinearRegression()
+            model.fit(X, y)
+            return model.predict(np.array(target_x).reshape(-1, 1)).tolist()
+
+        elif method == "polynomial":
+            degree = 2  # can adjust degree of polynom
+            coeffs = np.polyfit(X.flatten(), y, degree)
+            poly_func = np.poly1d(coeffs)
+            return poly_func(target_x).tolist()
+
+        elif method == "spline":
+            spline_func = interp1d(X.flatten(), y, kind="cubic", fill_value="extrapolate")
+            return spline_func(target_x).tolist()
+
+        else:
+            raise ValueError("不支持的外推方法")
 
     # Do curve fitting with given data, target function and initial parameters.
     def fit_curve(self, x: np.ndarray, y: np.ndarray, func, initial_params: list):
@@ -57,3 +87,26 @@ class engine:
             return x_resampled, y_oversampled
         except Exception as e:
             raise ValueError(f"Error in oversampling: {e}")
+
+    def dimensional_reduction(data, method="PCA", n_components=2):
+    # Do dimensional reduction
+    #param data: pandas.DataFrame, input data
+    #param method: str，reduction method（"PCA", "t-SNE", "LDA"）
+    #param n_components: int，dimension after reduction
+    #return: numpy.ndarray，data after dimensional reduction
+    ##
+        if isinstance(data, list):
+            data = np.array(data)
+        elif isinstance(data, pd.DataFrame):
+            data = data.values
+    
+        if method == "PCA":
+            reducer = PCA(n_components=n_components)
+        elif method == "t-SNE":
+            reducer = TSNE(n_components=n_components)
+        elif method == "LDA":
+            reducer = LDA(n_components=n_components)
+        else:
+            raise ValueError("invalid dimensional reduction")
+    
+        return reducer.fit_transform(data)
