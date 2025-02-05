@@ -24,7 +24,12 @@ import Graph from './Graph';
 
 class GraphManager {
   constructor() {
+    if (GraphManager.instance) {
+      return GraphManager.instance;  // Daha önce oluşturulmuşsa onu döndür
+    }
+    
     this.graphs = [];
+    GraphManager.instance = this;  // Yeni oluşturulan örneği sakla
   }
 
   addGraph(graph) {
@@ -44,5 +49,7 @@ class GraphManager {
   }
 }
 
-export default GraphManager;
+const instance = new GraphManager();
+Object.freeze(instance);  // Örneği değiştirilemez hale getirir
 
+export default instance;

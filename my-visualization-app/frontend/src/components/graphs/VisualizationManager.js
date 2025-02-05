@@ -3,7 +3,6 @@ import GraphManager from "./GraphManager";
 
 class VisualizationManager {
 
-  static graphManager = new GraphManager();
   // A function that analyzes the file and extracts feature names
   static extractFeaturesFromCSV(file) {
     return new Promise((resolve, reject) => {
@@ -48,7 +47,7 @@ class VisualizationManager {
         y: ${JSON.stringify(yValues)},
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { color: 'blue' }
+        marker: { color: 'red' }
       }], {
         title: '${inputValue}'
       });
@@ -60,10 +59,9 @@ class VisualizationManager {
   static createGraph(graphName, csvContent, selectedFeatures) {
     console.log("createGraph called with:", graphName, selectedFeatures);
     const newGraph = new Graph(graphName, csvContent, selectedFeatures);
-    VisualizationManager.graphManager.addGraph(newGraph);
+    GraphManager.addGraph(newGraph);
     return newGraph;
   }
-
   
 }
 

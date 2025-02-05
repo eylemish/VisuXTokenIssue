@@ -107,3 +107,45 @@
   margin-top: 20px;
 }
 
+.graph-list li {
+  cursor: pointer;
+  padding: 5px;
+  transition: background-color 0.3s;
+}
+
+.graph-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.active-graph {
+  background-color: #d0e0ff;
+  font-weight: bold;
+}
+
+.feature-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.feature-table th, .feature-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.feature-table tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+.selected-feature {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.feature-table th {
+  background-color: #333;
+  color: white;
+}
