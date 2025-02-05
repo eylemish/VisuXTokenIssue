@@ -264,12 +264,11 @@ const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
   const [graphNames, setGraphNames] = useState([]);
   const [activeGraph, setActiveGraph] = useState(null);
-  const [graphScript, setGraphScript] = useState(null); // VisualizationManager'dan gelen script
+  const [graphScript, setGraphScript] = useState(null); // Script received from VisualizationManager
   const [activeTool, setActiveTool] = useState(null);
-  const [features, setFeatures] = useState([]);  // CSV'den gelen tüm özellikler
-  const [selectedFeatures, setSelectedFeatures] = useState([0, 1]);  // Varsayılan ilk iki özellik
+  const [features, setFeatures] = useState([]);  // All features from the CSV
+  const [selectedFeatures, setSelectedFeatures] = useState([0, 1]);  // Default the first two features
   const [dropdownValues, setDropdownValues] = useState([]);
-
 
   const fileInputRef = useRef(null);
 
@@ -284,27 +283,27 @@ const Desktop1UI = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // activeGraph değiştiğinde grafiği güncelle
+  // Update the graph when activeGraph changes
   useEffect(() => {
     if (activeGraph) {
       const selectedGraph = GraphManager.getGraph(activeGraph);
       if (selectedGraph) {
         setFileData(selectedGraph.csvContent);
   
-        // CSV'yi parse edip hem header hem de veri içeriğini çekiyoruz
+        // Parse the CSV to get both the header and the data content
         Papa.parse(selectedGraph.csvContent, {
           header: true,
           skipEmptyLines: true,
           complete: (result) => {
-            const featureNames = result.meta.fields;  // Özellik isimleri (başlıklar)
-            const rowData = result.data;              // Veri satırları
+            const featureNames = result.meta.fields;  // Feature names (headers)
+            const rowData = result.data;              // Data rows
   
             setFeatures(featureNames);
-            setFileData(rowData); // Veriyi FeatureTable'a göndermek için saklıyoruz
+            setFileData(rowData); // Store data to send to FeatureTable
           },
         });
   
-        // Seçilen özelliklerle grafiği oluştur
+        // Create the graph with the selected features
         const initialFeatures = selectedGraph.selectedFeatures || [0, 1];
         setSelectedFeatures(initialFeatures);
   
@@ -318,19 +317,16 @@ const Desktop1UI = () => {
     }
   }, [activeGraph]);
   
-  
-  
-
-  // graphScript değiştiğinde Plotly grafiğini oluşturmak için scripti çalıştır
+  // Run the script to create the Plotly graph when graphScript changes
   useEffect(() => {
     if (graphScript) {
-      // "graph" id'li div'in hazır olduğundan emin olun
+      // Ensure the "graph" div is ready
       try {
-        // Dikkat: eval kullanmak güvenlik riskleri taşıyabilir. Bu örnekte mantığı göstermek için kullanıyoruz.
-        // Alternatif olarak new Function() da kullanılabilir.
+        // Caution: using eval can pose security risks. It is used here to demonstrate the logic.
+        // An alternative such as new Function() can be used.
         eval(graphScript);
       } catch (err) {
-        console.error("Grafik oluşturulurken hata:", err);
+        console.error("Error creating the graph:", err);
       }
     }
   }, [graphScript]);
@@ -355,22 +351,22 @@ const Desktop1UI = () => {
   const handleFeatureClick = (index) => {
     let updatedFeatures = [];
   
-    // Eğer tıklanan özellik zaten seçilmişse, onu başa al ve diğerlerini sırala
+    // If the clicked feature is already selected, bring it to the front and reorder the others
     if (selectedFeatures.includes(index)) {
       updatedFeatures = [index, ...selectedFeatures.filter(f => f !== index)];
     } else {
-      // Tıklanan yeni bir özellikse, onu başa al ve diğerlerini sırayla ekle
+      // If it's a new feature, bring it to the front and add the others in order
       updatedFeatures = [index, ...selectedFeatures];
     }
   
-    // Seçili özellikleri maksimum 2 ile sınırla
+    // Limit the selected features to a maximum of 2
     if (updatedFeatures.length > 2) {
       updatedFeatures = updatedFeatures.slice(0, 2);
     }
   
     setSelectedFeatures(updatedFeatures);
   
-    // Grafiği güncelle
+    // Update the graph
     const selectedGraph = GraphManager.getGraph(activeGraph);
     if (selectedGraph) {
       const script = VisualizationManager.visualize(
@@ -388,7 +384,7 @@ const Desktop1UI = () => {
   
     setSelectedFeatures(updatedFeatures);
   
-    // Grafiği güncelle
+    // Update the graph
     const selectedGraph = GraphManager.getGraph(activeGraph);
     if (selectedGraph) {
       const script = VisualizationManager.visualize(
@@ -400,8 +396,6 @@ const Desktop1UI = () => {
     }
   };
   
-  
-
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -434,7 +428,7 @@ const Desktop1UI = () => {
         });
 
         const graphName = `Graph ${GraphManager.getAllGraphs().length + 1}`;
-        // GraphManager'a eklerken csvContent bilgisini de ekleyin
+        // Add to GraphManager while including the csvContent information
         GraphManager.addGraph({ name: graphName, csvContent: data.join("\n"), data: { columns, mean, std } });
 
         setFileData({ columns, mean, std });
@@ -446,7 +440,7 @@ const Desktop1UI = () => {
   };
 
   const handleGraphClick = (graphName) => {
-    setActiveGraph(graphName);  // Seçili grafiği güncelle
+    setActiveGraph(graphName);  // Update the selected graph
   };
 
   const FeatureDropdown = ({ featureIndex }) => {
@@ -519,7 +513,7 @@ const Desktop1UI = () => {
 
           {/* Graph Visualization */}
           <div className="plot-container">
-            {/* VisualizationManager'ın scriptinin çalışacağı div */}
+            {/* The div where the VisualizationManager's script will run */}
             <div id="graph" style={{ width: "100%", height: "100%" }}></div>
           </div>
         </div>
