@@ -122,4 +122,26 @@
   font-weight: bold;
 }
 
+.feature-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.feature-table th, .feature-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.feature-table tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+.selected-feature {
+  background-color: #4CAF50;
+  color: white;
+}
+
+
 

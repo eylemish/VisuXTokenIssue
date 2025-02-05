@@ -228,12 +228,42 @@ const ToolList = ({ tools, onToolClick }) => {
   );
 };
 
+const FeatureTable = ({ features, selectedFeatures, onFeatureClick }) => {
+  return (
+    <div className="feature-table">
+      <h3>Feature List</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {features.map((feature, index) => (
+            <tr
+              key={index}
+              className={selectedFeatures.includes(index) ? 'selected-feature' : ''}
+              onClick={() => onFeatureClick(index)}
+            >
+              <td>{feature}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+
 const Desktop1UI = () => {
   const [fileData, setFileData] = useState(null);
   const [graphNames, setGraphNames] = useState([]);
   const [activeGraph, setActiveGraph] = useState(null);
   const [graphScript, setGraphScript] = useState(null); // VisualizationManager'dan gelen script
   const [activeTool, setActiveTool] = useState(null);
+  const [features, setFeatures] = useState([]);  // CSV'den gelen tüm özellikler
+  const [selectedFeatures, setSelectedFeatures] = useState([0, 1]);  // Varsayılan ilk iki özellik
+
   const fileInputRef = useRef(null);
 
   const toolManager = new ToolManager();
@@ -254,18 +284,29 @@ const Desktop1UI = () => {
       if (selectedGraph) {
         setFileData(selectedGraph.csvContent);
   
-        // Seçilen özellikleri kullanarak grafik oluştur
-        const selectedFeatures = selectedGraph.selectedFeatures || [0, 1];  // Seçili özellikler yoksa ilk iki sütunu kullan
+        // CSV'nin başlığından (header) özellik isimlerini çıkar
+        Papa.parse(selectedGraph.csvContent, {
+          header: true,
+          complete: (result) => {
+            const featureNames = result.meta.fields;
+            setFeatures(featureNames);
+          },
+        });
+  
+        // Grafik için seçili özellikleri güncelle
+        const initialFeatures = selectedGraph.selectedFeatures || [0, 1];
+        setSelectedFeatures(initialFeatures);
+  
         const script = VisualizationManager.visualize(
-          selectedGraph.csvContent, 
-          selectedFeatures, 
+          selectedGraph.csvContent,
+          initialFeatures,
           activeGraph
         );
-  
         setGraphScript(script);
       }
     }
   }, [activeGraph]);
+  
   
 
   // graphScript değiştiğinde Plotly grafiğini oluşturmak için scripti çalıştır
@@ -298,6 +339,38 @@ const Desktop1UI = () => {
   const handleUploadClick = () => {
     fileInputRef.current.click();
   };
+
+  const handleFeatureClick = (index) => {
+    let updatedFeatures = [];
+  
+    // Eğer tıklanan özellik zaten seçilmişse, onu başa al ve diğerlerini sırala
+    if (selectedFeatures.includes(index)) {
+      updatedFeatures = [index, ...selectedFeatures.filter(f => f !== index)];
+    } else {
+      // Tıklanan yeni bir özellikse, onu başa al ve diğerlerini sırayla ekle
+      updatedFeatures = [index, ...selectedFeatures];
+    }
+  
+    // Seçili özellikleri maksimum 2 ile sınırla
+    if (updatedFeatures.length > 2) {
+      updatedFeatures = updatedFeatures.slice(0, 2);
+    }
+  
+    setSelectedFeatures(updatedFeatures);
+  
+    // Grafiği güncelle
+    const selectedGraph = GraphManager.getGraph(activeGraph);
+    if (selectedGraph) {
+      const script = VisualizationManager.visualize(
+        selectedGraph.csvContent,
+        updatedFeatures,
+        activeGraph
+      );
+      setGraphScript(script);
+    }
+  };
+  
+  
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -380,6 +453,15 @@ const Desktop1UI = () => {
               </li>
             ))}
           </ul>
+
+          {/* Feature Table */}
+           {activeGraph && (
+           <FeatureTable
+             features={features}
+             selectedFeatures={selectedFeatures}
+             onFeatureClick={handleFeatureClick}
+            />
+          )}
 
           {/* Graph Visualization */}
           <div className="plot-container">
