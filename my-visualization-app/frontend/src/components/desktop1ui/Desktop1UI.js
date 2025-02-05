@@ -268,6 +268,8 @@ const Desktop1UI = () => {
   const [activeTool, setActiveTool] = useState(null);
   const [features, setFeatures] = useState([]);  // CSV'den gelen tüm özellikler
   const [selectedFeatures, setSelectedFeatures] = useState([0, 1]);  // Varsayılan ilk iki özellik
+  const [dropdownValues, setDropdownValues] = useState([]);
+
 
   const fileInputRef = useRef(null);
 
@@ -380,6 +382,24 @@ const Desktop1UI = () => {
     }
   };
   
+  const handleFeatureChange = (featureIndex, newFeature) => {
+    let updatedFeatures = [...selectedFeatures];
+    updatedFeatures[featureIndex] = newFeature;
+  
+    setSelectedFeatures(updatedFeatures);
+  
+    // Grafiği güncelle
+    const selectedGraph = GraphManager.getGraph(activeGraph);
+    if (selectedGraph) {
+      const script = VisualizationManager.visualize(
+        selectedGraph.csvContent,
+        updatedFeatures,
+        activeGraph
+      );
+      setGraphScript(script);
+    }
+  };
+  
   
 
   const handleFileChange = (event) => {
@@ -429,6 +449,22 @@ const Desktop1UI = () => {
     setActiveGraph(graphName);  // Seçili grafiği güncelle
   };
 
+  const FeatureDropdown = ({ featureIndex }) => {
+    return (
+      <select
+        value={selectedFeatures[featureIndex] || ""}
+        onChange={(e) => handleFeatureChange(featureIndex, parseInt(e.target.value))}
+      >
+        {features.map((feature, index) => (
+          <option key={index} value={index}>
+            {feature}
+          </option>
+        ))}
+      </select>
+    );
+  };
+  
+
   return (
     <div className="desktop1-container">
       {/* Navigator */}
@@ -473,6 +509,12 @@ const Desktop1UI = () => {
           onFeatureClick={handleFeatureClick}
           />
           )}
+
+<div className="dropdown-container">
+  {selectedFeatures.map((_, index) => (
+    <FeatureDropdown key={index} featureIndex={index} />
+  ))}
+</div>
 
 
           {/* Graph Visualization */}
