@@ -41,7 +41,7 @@ class engine:
         except Exception as e:
             raise ValueError(f"Error in interpolation: {e}")
     def extrapolate(data, target_x, method="linear"):
-    #进行数据外推
+    #Do extrapolation
     #param data: List[List[float]]，inputdata in format [[x1, y1], [x2, y2], ...]
     #param target_x: List[float]，target x that need extrapolation
     #param method: str，extrapolate methods ("linear", "polynomial", "spline")
