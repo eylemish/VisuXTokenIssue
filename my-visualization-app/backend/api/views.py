@@ -117,7 +117,7 @@ class ApplyPcaView(APIView):
             n_components = body.get("n_components", 2)
 
             if not dataset:
-                return JsonResponse({"error": "数据集不能为空"}, status=400)
+                return JsonResponse({"error": "dataset empty"}, status=400)
 
             dataset_df = pd.DataFrame(dataset)
             transformed_df = Engine.apply_pca(dataset_df, n_components=n_components)
