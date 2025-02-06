@@ -3,7 +3,7 @@ import { Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-// ✅ 获取 CSRF Token（Django 会在 Cookie 中设置）
+// Get CSRF Token (Django will set it in a cookie)
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -22,23 +22,23 @@ function getCookie(name) {
 const csrfToken = getCookie("csrftoken");
 
 const FileUpload = ({ uiController }) => {
-    const [file, setFile] = useState(null); // 当前选中的文件
-    const [fileName, setFileName] = useState("No file selected"); // 显示文件名
-    const [uploading, setUploading] = useState(false); // 是否正在上传
-    const [filePreview, setFilePreview] = useState(null); // 文件数据预览
+    const [file, setFile] = useState(null);
+    const [fileName, setFileName] = useState("No file selected"); // Display the file name
+    const [uploading, setUploading] = useState(false); // Whether the upload is in progress
+    const [filePreview, setFilePreview] = useState(null); // File data preview
 
     const uploadProps = {
         beforeUpload: (file) => {
-            setFile(file); // 保存文件到 state
-            setFileName(file.name); // 设置文件名
-            return false; // 阻止自动上传
+            setFile(file); // Save the file to state
+            setFileName(file.name); // Set the file name
+            return false; // Block automatic uploads
         },
         onRemove: () => {
-            setFile(null); // 清空文件
-            setFileName("No file selected"); // 重置文件名
-            setFilePreview(null); // 清空预览数据
+            setFile(null); // Empty the file
+            setFileName("No file selected"); // Reset filename
+            setFilePreview(null); // Clear the preview data
         },
-        showUploadList: false, // 不显示文件列表
+        showUploadList: false, // Do not show the file list
     };
 
     const handleUpload = async () => {
@@ -48,36 +48,36 @@ const FileUpload = ({ uiController }) => {
         }
 
         const formData = new FormData();
-        formData.append("file", file); // 添加文件
-        formData.append("db_path", "database.sqlite3"); // 可选，提供数据库路径给后端
+        formData.append("file", file); // Add files
+        formData.append("db_path", "database.sqlite3"); // Optional, provide database path to backend
 
         setUploading(true);
         try {
-            // ✅ 发送 CSRF Token + 允许 Cookie 传输
+            // Send CSRF Token + Allow Cookie Transfer
             const response = await axios.post("http://127.0.0.1:8000/api/upload/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    "X-CSRFToken": csrfToken, // ✅ 发送 CSRF Token
+                    "X-CSRFToken": csrfToken, // Send CSRF Token
                 },
-                withCredentials: true, // ✅ 允许跨域携带 Cookie
+                withCredentials: true, // allow Cookie
             });
 
-            // 显示成功消息并处理响应数据
+            // Display success message and process response data
             message.success(response.data.message || "Upload successful!");
-            setFilePreview(response.data.data_preview || []); // 设置文件预览数据
-            setFile(null); // 清空文件
+            setFilePreview(response.data.data_preview || []); // Setting the file preview data
+            setFile(null); // Empty the file
             setFileName("No file selected");
         } catch (error) {
-            // 显示错误消息
+            // Display error messages
             message.error("Upload failed: " + (error.response?.data.error || error.message));
         } finally {
-            setUploading(false); // 恢复上传状态
+            setUploading(false); // Restore upload status
         }
     };
 
     if (!uiController || !uiController.getModalController) {
         console.error("uiController is undefined in FileUpload!");
-        return null; // 避免 `undefined` 访问
+        return null; // Avoid `undefined` access
     }
 
     return (

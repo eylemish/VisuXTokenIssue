@@ -5,7 +5,7 @@ import FileDownload from "./FileDownload";
 const FileManager = ({ uiController }) => {
     if (!uiController) {
     console.error("uiController is undefined in FileManager!");
-    return null; // 避免渲染空组件导致错误
+    return null; // Avoid rendering empty components that cause errors
   }
 
   return (

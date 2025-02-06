@@ -10,25 +10,25 @@ import pandas as pd
 import sqlite3
 
 
-# 定义 BASE_DIR 指向项目根目录
+# Define BASE_DIR to point to the project root directory.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class DataVisualizationView(APIView):
     def post(self, request):
-        # 获取数据
+        # Getting data
         data = request.data.get("data", [])
         if not data:
             return Response({"error": "No data provided"}, status=400)
 
         try:
-            # 转换数据为 Pandas DataFrame
+            # Convert data to Pandas DataFrame
             df = pd.DataFrame(data)
 
-            # 清理数据：确保所有列都是数值型
+            # Cleaning up the data: making sure all columns are numeric
             df = df.apply(pd.to_numeric, errors='coerce')  # 非数值值转换为 NaN
 
-            # 计算每列的均值和标准差
+            # Calculate the mean and standard deviation for each column
             summary = {
                 "columns": df.columns.tolist(),
                 "mean": df.mean().tolist(),
@@ -48,22 +48,22 @@ class UploadView(APIView):
         if not file:
             return Response({"Error": "Please upload a file."}, status=400)
 
-        # 使用 BASE_DIR 定义上传目录
+        # Defining the upload directory using BASE_DIR
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
-        os.makedirs(UPLOAD_DIR, exist_ok=True)  # 如果目录不存在则创建
+        os.makedirs(UPLOAD_DIR, exist_ok=True)  # If the directory does not exist then create
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # 保存文件到服务器
+            # Saving files to the server
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # 检查文件是否保存成功
+            # Check if the file was saved successfully
             if not os.path.exists(file_path):
                 return Response({"error": "File was not saved correctly."}, status=500)
 
-            # 解析文件内容
+            # Parsing the contents of a file
             if file.name.lower().endswith(".csv"):
                 df = pd.read_csv(file_path)
             elif file.name.lower().endswith(".xlsx"):
@@ -71,7 +71,7 @@ class UploadView(APIView):
             else:
                 return Response({"Error": "Only CSV and XLSX files are supported"}, status=400)
 
-            # 返回数据预览（前 5 行）
+            # Return data preview (first 5 rows)
             data_preview = df.head().to_dict(orient="records")
             return Response({
                 "message": f"File '{file.name}' uploaded successfully.",
