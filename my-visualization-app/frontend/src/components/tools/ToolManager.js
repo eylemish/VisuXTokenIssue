@@ -3,7 +3,7 @@ import Tool from "./Tool";
 class ToolManager {
     constructor() {
         this.tools = [
-            //more will be added dont worry:)
+            //more will be added dont worry:) fighting! :)
             new Tool('createGraph', 'Create Graph'),
             new Tool('addDataset', 'Add Dataset'),
             new Tool('dataInterpolate', 'Interpolate'),

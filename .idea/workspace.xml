@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09ffe3d9-d390-4716-b061-c04336943da2" name="Changes" comment="ui merge 1.0.1 (continue debugging)">
+    <list default="true" id="09ffe3d9-d390-4716-b061-c04336943da2" name="Changes" comment="merge (continue debugging)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/desktop1ui/Desktop1UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/desktop1ui/Desktop1UI.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/tools/ToolManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/tools/ToolManager.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,7 +222,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738832853441</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="merge (continue debugging)">
+      <option name="closed" value="true" />
+      <created>1738833679319</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1738833679319</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -251,7 +259,8 @@
     <MESSAGE value="details" />
     <MESSAGE value="ui merge 1.0 (continue debugging)" />
     <MESSAGE value="ui merge 1.0.1 (continue debugging)" />
-    <option name="LAST_COMMIT_MESSAGE" value="ui merge 1.0.1 (continue debugging)" />
+    <MESSAGE value="merge (continue debugging)" />
+    <option name="LAST_COMMIT_MESSAGE" value="merge (continue debugging)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Visux$settings.coverage" NAME="settings Coverage Results" MODIFIED="1736089322663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/my-visualization-app/backend/backend" />
