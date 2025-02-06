@@ -54,7 +54,7 @@ const FileUpload = ({ uiController }) => {
         setUploading(true);
         try {
             // ✅ 发送 CSRF Token + 允许 Cookie 传输
-            const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
+            const response = await axios.post("http://127.0.0.1:8000/api/upload/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "X-CSRFToken": csrfToken, // ✅ 发送 CSRF Token
