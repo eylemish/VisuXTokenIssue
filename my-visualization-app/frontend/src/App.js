@@ -31,7 +31,6 @@ const App = () => {
             showGraph={showGraph} setShowGraph={setShowGraph}
             showData={showData} setShowData={setShowData}
             showLog={showLog} setShowLog={setShowLog}/>
-            <Desktop1UI />
         </Sider>
 
         {/* Content 可滚动 */}
@@ -47,6 +46,7 @@ const App = () => {
                              showGraph={showGraph}
                              showData={showData}
                              showLog={showLog} />
+              <Desktop1UI />
           </Content>
         </Layout>
       </Layout>
