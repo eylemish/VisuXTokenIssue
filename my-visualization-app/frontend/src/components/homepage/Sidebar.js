@@ -11,6 +11,11 @@ import {
 import DimReductionModal from "../modal/DimReductionModal";
 import modalController from "../modal/ModalController";
 import NewGraphModal from "../modal/NewGraphModal";
+import CurveFittingModal from "../modal/CurveFittingModal";
+import InterpolationModal from "../modal/InterpolationModal";
+import ExtrapolationModal from "../modal/ExtrapolationModal";
+import OversampleModal from "../modal/OversampleModal";
+import CorrelationModal from "../modal/CorrelationModal";
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -20,6 +25,11 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
   const [openKeys, setOpenKeys] = useState([]); // 控制展开菜单
   const [newGraphModalVisible, setNewGraphModalVisible] = useState(false);
   const [dimReductionModalVisible, setDimReductionModalVisible] = useState(false);
+  const [curveFittingModalVisible, setCurveFittingModalVisible] = useState(false);
+  const [interpolationModalVisible, setInterpolationModalVisible] = useState(false);
+  const [extrapolationModalVisible, setExtrapolationModalVisible] = useState(false);
+  const [oversampleModalVisible, setOversampleModalVisible] = useState(false);
+  const [correlationModalVisible, setCorrelationModalVisible] = useState(false);
 
   const handleOpenChange = (keys) => {
     setOpenKeys(keys);
@@ -72,6 +82,25 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
             Dimensionality Reduction
           </Menu.Item>
         </SubMenu>
+
+      {/* Data Analysis */}
+        <SubMenu key="dataAnalysis" icon={<SettingOutlined />} title="Data Analysis">
+          <Menu.Item key="Curve Fitting" onClick={() => setCurveFittingModalVisible(true)}>
+            Curve Fitting
+          </Menu.Item>
+          <Menu.Item key="Interpolate Data" onClick={() => setInterpolationModalVisible(true)}>
+            Interpolate Data
+          </Menu.Item>
+          <Menu.Item key="Extrapolate Data" onClick={() => setExtrapolationModalVisible(true)}>
+            Extrapolate Data
+          </Menu.Item>
+          <Menu.Item key="Oversample Data" onClick={() => setOversampleModalVisible(true)}>
+            Oversample Data
+          </Menu.Item>
+          <Menu.Item key="Correlate Data" onClick={() => setCorrelationModalVisible(true)}>
+            Correlate Data
+          </Menu.Item>
+        </SubMenu>
       </Menu>
 
 
@@ -82,6 +111,42 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
       <NewGraphModal
         visible={newGraphModalVisible}
         onCancel={() => setNewGraphModalVisible(false)}
+        uiController={uiController}
+      />
+
+      {/* curve fitting 的 Modal */}
+      <CurveFittingModal
+        visible={curveFittingModalVisible}
+        onCancel={() => setCurveFittingModalVisible(false)}
+        uiController={uiController}
+      />
+
+      {/* interpolation 的 Modal */}
+      <InterpolationModal
+        visible={interpolationModalVisible}
+        onCancel={() => setInterpolationModalVisible(false)}
+        uiController={uiController}
+      />
+
+      {/* extrapolation 的 Modal */}
+      <ExtrapolationModal
+        visible={extrapolationModalVisible}
+        onCancel={() => setExtrapolationModalVisible(false)}
+        uiController={uiController}
+      />
+
+      {/* oversample data 的 Modal */}
+      <OversampleModal
+        visible={oversampleModalVisible}
+        onCancel={() => setOversampleModalVisible(false)}
+        uiController={uiController}
+      />
+
+
+      {/* correlate data 的 Modal */}
+      <CorrelationModal
+        visible={correlationModalVisible}
+        onCancel={() => setCorrelationModalVisible(false)}
         uiController={uiController}
       />
 
