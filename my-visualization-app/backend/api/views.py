@@ -29,7 +29,7 @@ class DataVisualizationView(APIView):
             df = pd.DataFrame(data)
 
             # Cleaning up the data: making sure all columns are numeric
-            df = df.apply(pd.to_numeric, errors='coerce')  # 非数值值转换为 NaN
+            df = df.apply(pd.to_numeric, errors='coerce')
 
             # Calculate the mean and standard deviation for each column
             summary = {
