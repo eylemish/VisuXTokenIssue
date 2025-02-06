@@ -25,6 +25,14 @@ class Engine:
         except Exception as e:
             raise ValueError(f"Error in PCA processing: {e}")
 
+    def apply_tsne(self, n_components):
+        tsne = TSNE(n_components=n_components)
+        return tsne.fit_transform(self.data)
+
+    def apply_umap(self, n_components):
+        reducer = umap.UMAP(n_components=n_components)
+        return reducer.fit_transform(self.data)
+
     # Do interpolate with given data, given kind of interpolation, the number of generated data and the given range.
     # The default generated kind is linear.
     # The default number of generated data is 100.
