@@ -6,6 +6,9 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from server_handler.engine import Engine
+from django.http import JsonResponse
+import json
 import pandas as pd
 import sqlite3
 
@@ -105,3 +108,23 @@ class AddDataView(APIView):
             return Response({"message": "Data added successfully"})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+class ApplyPcaView(APIView):
+    def post(self,request):
+        try:
+            body = json.loads(request.body)
+            dataset = body.get("dataset", [])
+            n_components = body.get("n_components", 2)
+
+            if not dataset:
+                return JsonResponse({"error": "数据集不能为空"}, status=400)
+
+            dataset_df = pd.DataFrame(dataset)
+            transformed_df = Engine.apply_pca(dataset_df, n_components=n_components)
+
+            return JsonResponse({
+                "pca_result": transformed_df.to_dict(orient="records")
+            })
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
