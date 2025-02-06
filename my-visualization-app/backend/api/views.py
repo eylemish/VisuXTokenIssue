@@ -128,3 +128,47 @@ class ApplyPcaView(APIView):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+class SuggestFeatureDroppingView(APIView):
+    def post(self, request):
+        try:
+            body = json.loads(request.body)
+            dataset = body.get("dataset", [])
+            correlation_threshold = body.get("correlation_threshold", 0.95)
+            variance_threshold = body.get("variance_threshold", 0.01)
+
+            if not dataset:
+                return JsonResponse({"error": "empty dataset"}, status=400)
+
+            dataset_df = pd.DataFrame(dataset)
+            features_to_drop = Engine.suggest_feature_dropping(
+                dataset_df,
+                correlation_threshold=correlation_threshold,
+                variance_threshold=variance_threshold
+            )
+
+            return JsonResponse({"features_to_drop": features_to_drop})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+class SuggestFeatureCombiningView(APIView):
+    def post(self, request):
+        try:
+            body = json.loads(request.body)
+            dataset = body.get("dataset", [])
+            correlation_threshold = body.get("correlation_threshold", 0.9)
+
+            if not dataset:
+                return JsonResponse({"error": "empty dataset"}, status=400)
+
+            dataset_df = pd.DataFrame(dataset)
+            feature_combinations = Engine.suggest_feature_combining(
+                dataset_df,
+                correlation_threshold=correlation_threshold
+            )
+
+            return JsonResponse({"feature_combinations": feature_combinations})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

@@ -171,7 +171,6 @@ class Engine:
             if correlation > correlation_threshold:
                 suggested_combinations.append({
                     "features": [feature1, feature2],
-                    "combinedFeature": f"{feature1}_{feature2}_combined"
                 })
 
         return suggested_combinations
