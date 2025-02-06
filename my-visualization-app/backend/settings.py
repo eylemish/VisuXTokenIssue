@@ -24,11 +24,18 @@ CSRF_TRUSTED_ORIGINS = [
 ] + [f"http://localhost:{port}" for port in range(3000, 90000)]  # 允许 localhost 端口 3000-90000 访问
 
 # **2️⃣ 允许所有跨域请求（仅开发环境）**
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    f"http://localhost:{port}" for port in range(3000, 90001)
+] + [
+    f"http://127.0.0.1:{port}" for port in range(3000, 90001)
+]
+
 CORS_ALLOW_CREDENTIALS = True  # 允许前端跨域携带 Cookie 或 Session
 
 # **3️⃣ CSRF Cookie 配置**
-CSRF_USE_SESSIONS = True
+CSRF_COOKIE_NAME = "csrftoken"
+CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SECURE = False  # 允许 HTTP 访问 CSRF Cookie
 CSRF_COOKIE_HTTPONLY = False  # 允许 JavaScript 访问 CSRF Token
 CSRF_COOKIE_SAMESITE = None  # 允许跨站请求
@@ -43,7 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',   # Django REST Framework
     'corsheaders',      # 解决跨域问题
-    'api',              # 我们创建的应用
+    'backend.api',              # 我们创建的应用
 ]
 
 MIDDLEWARE = [
