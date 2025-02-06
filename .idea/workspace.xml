@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09ffe3d9-d390-4716-b061-c04336943da2" name="Changes" comment="change structure, delete inside backend folder">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/file/FileUpload.js" beforeDir="false" afterPath="$PROJECT_DIR$/my-visualization-app/frontend/src/components/file/FileUpload.js" afterDir="false" />
-    </list>
+    <list default="true" id="09ffe3d9-d390-4716-b061-c04336943da2" name="Changes" comment="file reading succeed" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -144,7 +141,7 @@
       <workItem from="1738682097513" duration="2815000" />
       <workItem from="1738750078084" duration="2463000" />
       <workItem from="1738845175835" duration="11847000" />
-      <workItem from="1738863836701" duration="3031000" />
+      <workItem from="1738863836701" duration="3490000" />
     </task>
     <task id="LOCAL-00001" summary="2246">
       <option name="closed" value="true" />
@@ -258,7 +255,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738866345883</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="file reading succeed">
+      <option name="closed" value="true" />
+      <created>1738866960206</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1738866960206</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -290,7 +295,8 @@
     <MESSAGE value="merge (continue debugging)" />
     <MESSAGE value="Connection Try: Let backend read the frontend uploaded file(Unsuccessful, should be rolled back if something goes wrong)" />
     <MESSAGE value="change structure, delete inside backend folder" />
-    <option name="LAST_COMMIT_MESSAGE" value="change structure, delete inside backend folder" />
+    <MESSAGE value="file reading succeed" />
+    <option name="LAST_COMMIT_MESSAGE" value="file reading succeed" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Visux$settings.coverage" NAME="settings Coverage Results" MODIFIED="1736089322663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/my-visualization-app/backend/backend" />
