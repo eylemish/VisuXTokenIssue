@@ -20,17 +20,30 @@ class AnalysisResult(models.Model):
 
 class AuditLog(models.Model):
     # Model for logs, should be corrected after all actions are implemented.
-    ACTION_TYPES = [
-        ('CREATE', 'Create'),
-        ('UPDATE', 'Update'),
-        ('DELETE', 'Delete'),
-        ('VIEW', 'View'),
+    TOOL_TYPES = [
+        ('ADD_FEATURE', 'Add Feature'),
+        ('DELETE_FEATURE', 'Delete Feature'),
+        ('PCA', 'PCA'),
+        ('TSNE', 't-sne'),
+        ('UMAP', 'UMAP'),
+        ('LINEAR_CURVEFITTING', 'Linear Curve Fitting'),
+        ('POLYNOMIAL_CURVEFITTING', 'Polynomial Curve Fitting'),
+        ('EXPONENTIAL_CURVEFITTING', 'Exponential Curve Fitting'),
+        ('LINEAR_INTERPOLATION', 'Linear Interpolation'),
+        ('POLYNOMIAL_INTERPOLATION', 'Polynomial Interpolation'),
+        ('SPLINE_INTERPOLATION', 'Spline Interpolation'),
+        ('LINEAR_EXTRAPOLATION', 'Linear Extrapolation'),
+        ('POLYNOMIAL_EXTRAPOLATION', 'Polynomial Extrapolation'),
+        ('EXPONENTIAL_EXTRAPOLATION', 'Exponential Extrapolation'),
+        ('PEARSON_CORRELATION', 'Pearson correlation'),
+        ('SPEARMAN_CORRELATION', 'Spearman correlation'),
+        ('KENDALL_CORRELATION', 'Kendall correlation'),
+        ('DATA_OVERSAMPLE', 'Data Oversample')
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    action_type = models.CharField(max_length=10, choices=ACTION_TYPES)
-    description = models.TextField()
+    tool_type = models.CharField(max_length=50, choices=TOOL_TYPES)
     timestamp = models.DateTimeField(default=now)
+    params = models.CharField(max_length=50)
     is_reverted = models.BooleanField(default=False)
 
     def revert(self):
