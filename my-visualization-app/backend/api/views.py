@@ -121,7 +121,8 @@ class UploadView(APIView):
 
             return_data = {
                 "message": f"File '{file.name}' uploaded successfully.",
-                "file_path": file_path,
+                "dataset_id": file_instance.id,
+                "file_path": file_path, #要改成传输dataset_id的形式
                 "data_preview": data_preview
             }
 
@@ -207,36 +208,50 @@ class SuggestFeatureDroppingView(APIView):
     def post(self, request):
         try:
             body = json.loads(request.body)
-            dataset = body.get("dataset", [])
-            correlation_threshold = body.get("correlation_threshold", 0.95)
-            variance_threshold = body.get("variance_threshold", 0.01)
+            dataset_id = body.get("dataset_id")  
+            correlation_threshold = float(body.get("correlation_threshold", 0.95))
+            variance_threshold = float(body.get("variance_threshold", 0.01))
 
-            if not dataset:
-                return JsonResponse({"error": "empty dataset"}, status=400)
+            if not dataset_id:
+                return JsonResponse({"error": "Missing dataset_id"}, status=400)
 
-            dataset_df = pd.DataFrame(dataset)
+            uploaded_file = UploadedFile.objects.get(id=dataset_id)
+            df = Engine.data_to_panda(uploaded_file)
+
             features_to_drop = Engine.suggest_feature_dropping(
-                dataset_df,
-                correlation_threshold=correlation_threshold,
+                df, 
+                correlation_threshold=correlation_threshold, 
                 variance_threshold=variance_threshold
             )
 
             return JsonResponse({"features_to_drop": features_to_drop})
 
+        except UploadedFile.DoesNotExist:
+            return JsonResponse({"error": "Dataset not found"}, status=404)
+        except ValueError as ve:
+            return JsonResponse({"error": f"Invalid parameter: {str(ve)}"}, status=400)
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            return JsonResponse({"error": str(e)}, status=500)
 
 class SuggestFeatureCombiningView(APIView):
     def post(self, request):
         try:
             body = json.loads(request.body)
-            dataset = body.get("dataset", [])
+            dataset_id = body.get("dataset_id")
             correlation_threshold = body.get("correlation_threshold", 0.9)
 
-            if not dataset:
-                return JsonResponse({"error": "empty dataset"}, status=400)
+            if not dataset_id:
+                return JsonResponse({"error": "Missing dataset_id"}, status=400)
 
-            dataset_df = pd.DataFrame(dataset)
+            # get file
+            try:
+                data_file = UploadedFile.objects.get(id=dataset_id)
+            except UploadedFile.DoesNotExist:
+                return JsonResponse({"error": "Dataset not found"}, status=404)
+
+            # read file
+            dataset_df = Engine.data_to_panda(data_file)
+
             feature_combinations = Engine.suggest_feature_combining(
                 dataset_df,
                 correlation_threshold=correlation_threshold
