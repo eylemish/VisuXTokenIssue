@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from api.models import AuditLog
+from backend.api.models import AuditLog
 
 
 def log_action(tool_type, params):
@@ -20,9 +20,9 @@ def revert_log(log_id):
     else:
         return JsonResponse({"error": "log revert failed"}, status=403)
 
-def export_logs(request):
+def export_logs():
     # export logs
-    logs = AuditLog.objects.filter(user=request.user, is_reverted=False)
+    logs = AuditLog.objects.all()
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="audit_logs.csv"'
