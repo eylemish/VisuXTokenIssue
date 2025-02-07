@@ -8,6 +8,7 @@ class UploadedFile(models.Model):
     name = models.CharField(max_length=255)  # file name
     upload_time = models.DateTimeField(auto_now_add=True)  # upload time
     file_path = models.FileField(upload_to='uploads/')  # file path
+    file_type = models.CharField(max_length=10) # file type
 
 class AnalysisResult(models.Model):
     # Save analysis consequense

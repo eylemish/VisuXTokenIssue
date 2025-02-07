@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from sklearn.decomposition import PCA
 from scipy.interpolate import interp1d
 from sklearn.linear_model import LinearRegression
@@ -9,10 +10,26 @@ from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.feature_selection import VarianceThreshold
 from itertools import combinations
+from backend.api.models import UploadedFile
 
 class Engine:
     def __init__(self):
         pass
+
+    def data_to_panda(data: UploadedFile):
+        file_path = data.file_path.path
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        if data.file_type == "csv":
+            return pd.read_csv(file_path)
+        elif data.file_type == "xlsx":
+            return pd.read_excel(file_path, engine="openpyxl")
+        else:
+            raise ValueError(f"Unsupported file type: {data.file_type}")
+
+
 
     # Apply PCA with given data and number of dimensions after dimensionality reduction.
     # The default number of dimensions after dimensionality reduction is 2.
@@ -98,18 +115,19 @@ class Engine:
         except Exception as e:
             raise ValueError(f"Error in oversampling: {e}")
 
-    def dimensional_reduction(data, method="PCA", n_components=2):
-    # Do dimensional reduction
-    #param data: pandas.DataFrame, input data
-    #param method: str，reduction method（"PCA", "t-SNE", "LDA"）
-    #param n_components: int，dimension after reduction
-    #return: numpy.ndarray，data after dimensional reduction
-    ##
-        if isinstance(data, list):
-            data = np.array(data)
-        elif isinstance(data, pd.DataFrame):
-            data = data.values
-    
+    def dimensional_reduction(data: pd.DataFrame, method="PCA", n_components=2):
+        """
+        Perform dimensionality reduction on a given pandas DataFrame.
+
+        :param data: pandas.DataFrame, input data
+        :param method: str, reduction method ("PCA", "t-SNE", "LDA")
+        :param n_components: int, target dimension after reduction
+        :return: pandas.DataFrame, transformed data
+        """
+
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError("Input data must be a pandas DataFrame")
+
         if method == "PCA":
             reducer = PCA(n_components=n_components)
         elif method == "t-SNE":
@@ -117,60 +135,74 @@ class Engine:
         elif method == "LDA":
             reducer = LDA(n_components=n_components)
         else:
-            raise ValueError("invalid dimensional reduction")
-    
-        return reducer.fit_transform(data)
+            raise ValueError("Invalid dimensional reduction method. Choose from 'PCA', 't-SNE', or 'LDA'.")
 
-    def suggest_feature_dropping(dataset, correlation_threshold=0.95, variance_threshold=0.01):
-    #identify features suggest to be dropped：
-    #1. low variance（lower than `variance_threshold`）
-    #2. high correlation（higher than `correlation_threshold`）
-    
-    #:param dataset: pandas.DataFrame，input dataset
-    #:param correlation_threshold: float，
-    #:param variance_threshold: float，
-    #:return: List[str]，features to drop.
-        if isinstance(dataset, list):
-            dataset = pd.DataFrame(dataset)
+        reduced_data = reducer.fit_transform(data)
+
+        # back to pandas DataFrame
+        column_names = [f"Component_{i+1}" for i in range(n_components)]
+        return pd.DataFrame(reduced_data, columns=column_names)
+
+    def suggest_feature_dropping(dataset: pd.DataFrame, correlation_threshold=0.95, variance_threshold=0.01):
+        """
+        Identify features to be dropped based on:
+        1. Low variance (below `variance_threshold`).
+        2. High correlation (above `correlation_threshold`).
+
+        :param dataset: pandas.DataFrame, input dataset
+        :param correlation_threshold: float, threshold for high correlation (default: 0.95)
+        :param variance_threshold: float, threshold for low variance (default: 0.01)
+        :return: List[str], list of features to drop.
+        """
+
+        if not isinstance(dataset, pd.DataFrame):
+            raise TypeError("Input dataset must be a pandas DataFrame")
 
         features_to_drop = set()
 
-    # 1. low variance
+        # 1. low variance
         selector = VarianceThreshold(threshold=variance_threshold)
         selector.fit(dataset)
         low_variance_features = dataset.columns[~selector.get_support()].tolist()
         features_to_drop.update(low_variance_features)
 
-    # 2. high correlation
-        corr_matrix = dataset.corr().abs()
-        upper_triangle = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+        # 2. high correlation
+        corr_matrix = dataset.corr().abs() 
+        upper_triangle = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)) 
 
-        highly_correlated_features = [column for column in upper_triangle.columns if any(upper_triangle[column] > correlation_threshold)]
+        highly_correlated_features = [
+            column for column in upper_triangle.columns if any(upper_triangle[column] > correlation_threshold)
+        ]
         features_to_drop.update(highly_correlated_features)
 
         return list(features_to_drop)
+        
 
-    def suggest_feature_combining(dataset, correlation_threshold=0.9):
-    #suggest feature combining：
-    #1. high correlation（correlation > `correlation_threshold`）
-    
-    #:param dataset: pandas.DataFrame，
-    #:param correlation_threshold: float，
-    #:return: List[dict]，features to combine
-        if isinstance(dataset, list):
-            dataset = pd.DataFrame(dataset)
+    def suggest_feature_combining(dataset: pd.DataFrame, correlation_threshold=0.9):
+        """
+        Suggest feature combinations based on high correlation (correlation > `correlation_threshold`).
+
+        :param dataset: pandas.DataFrame, input dataset
+        :param correlation_threshold: float, threshold for high correlation (default: 0.9)
+        :return: List[dict], suggested feature pairs for combining.
+        """
+        if not isinstance(dataset, pd.DataFrame):
+            raise TypeError("Input dataset must be a pandas DataFrame")
 
         suggested_combinations = []
 
-    # calculate correlation
-        corr_matrix = dataset.corr()
-        feature_pairs = list(combinations(dataset.columns, 2))
+        # correlation matrix
+        corr_matrix = dataset.corr().abs()
+    
+        # all feature pairs
+        feature_pairs = combinations(dataset.columns, 2)
 
+        # chose high correlation pairs
         for feature1, feature2 in feature_pairs:
-            correlation = abs(corr_matrix.loc[feature1, feature2])
+            correlation = corr_matrix.loc[feature1, feature2]
             if correlation > correlation_threshold:
                 suggested_combinations.append({
                     "features": [feature1, feature2],
+                    "correlation": correlation 
                 })
-
         return suggested_combinations

@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from backend.server_handler.engine import Engine
 from backend.server_handler.log_manager import export_logs
 from django.http import JsonResponse
+from backend.api.models import UploadedFile
 import json
 import pandas as pd
 import sqlite3
@@ -108,8 +109,10 @@ class UploadView(APIView):
 
 
             if file.name.lower().endswith(".csv"):
+                file_instance = UploadedFile.objects.create(file = file, name = file.name, type = "csv")
                 df = pd.read_csv(file_path)
             elif file.name.lower().endswith(".xlsx"):
+                file_instance = UploadedFile.objects.create(file = file, name = file.name, type = "xlsx")
                 df = pd.read_excel(file_path, engine="openpyxl")
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
