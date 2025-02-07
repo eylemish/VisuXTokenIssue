@@ -7,6 +7,7 @@ from rest_framework.parsers import MultiPartParser
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from backend.server_handler.engine import Engine
+from backend.server_handler.log_manager import export_logs
 from django.http import JsonResponse
 import json
 import pandas as pd
@@ -108,6 +109,34 @@ class AddDataView(APIView):
             return Response({"message": "Data added successfully"})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+class ExportLogView(APIView):
+    def post(self, request):
+        export_logs
+"""
+Code for frontend
+
+const ExportLogsButton = () => {
+  const handleExport = () => {
+    //  GET for download CSV 
+    const url = '/export_logs/';
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'audit_logs.csv';  // download name
+    a.click();  // 
+  };
+
+  return (
+    <button onClick={handleExport}>
+      Export Logs
+    </button>
+  );
+};
+
+export default ExportLogsButton;
+"""
+
 
 class ApplyPcaView(APIView):
     def post(self,request):
