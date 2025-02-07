@@ -16,6 +16,48 @@ import sqlite3
 # Define BASE_DIR to point to the project root directory.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+@method_decorator(csrf_exempt, name='dispatch')
+class HandleUserActionView(APIView):
+    def post(self, request):
+        """
+        Handle user actions sent from the frontend and return a response.
+        """
+        try:
+            # 获取前端传递的 JSON 数据
+            body = json.loads(request.body)
+            action = body.get("action", None)
+            parameters = body.get("parameters", {})
+
+            if not action:
+                return JsonResponse({"error": "No action provided"}, status=400)
+
+            # 根据用户操作执行相应的逻辑
+            if action == "fetch_summary":
+                # 示例：返回一个简单的摘要信息
+                summary = {
+                    "message": "Summary fetched successfully",
+                    "details": parameters.get("details", "No details provided")
+                }
+                return JsonResponse(summary, status=200)
+            elif action == "process_data":
+                # 示例：处理数据逻辑
+                data = parameters.get("data", [])
+                if not data:
+                    return JsonResponse({"error": "No data provided for processing"}, status=400)
+
+                # 使用 Pandas 对数据进行简单处理
+                df = pd.DataFrame(data)
+                result = {
+                    "columns": df.columns.tolist(),
+                    "mean": df.mean().tolist(),
+                    "std": df.std().tolist()
+                }
+                return JsonResponse({"message": "Data processed successfully", "result": result}, status=200)
+            else:
+                return JsonResponse({"error": f"Unknown action: {action}"}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
 class DataVisualizationView(APIView):
     def post(self, request):
@@ -42,45 +84,57 @@ class DataVisualizationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, *args, **kwargs):
+        print("📌 Received a POST request to UploadView.")
+        print("📡 Request Headers:", request.headers)
+        print("📦 Request FILES:", request.FILES)
+
         file = request.FILES.get("file")
         if not file:
-            return Response({"Error": "Please upload a file."}, status=400)
+            print("🚨 No file received!")
+            return Response({"error": "No file received"}, status=400)
 
-        # Defining the upload directory using BASE_DIR
+        # ✅ **确保 `uploads/` 目录存在**
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
-        os.makedirs(UPLOAD_DIR, exist_ok=True)  # If the directory does not exist then create
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+        # ✅ **定义文件路径**
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # Saving files to the server
+            # ✅ **保存文件**
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # Check if the file was saved successfully
-            if not os.path.exists(file_path):
-                return Response({"error": "File was not saved correctly."}, status=500)
+            print(f"✅ File saved successfully at: {file_path}")
 
-            # Parsing the contents of a file
+            # ✅ **解析 CSV 或 Excel 文件**
             if file.name.lower().endswith(".csv"):
                 df = pd.read_csv(file_path)
             elif file.name.lower().endswith(".xlsx"):
                 df = pd.read_excel(file_path, engine="openpyxl")
             else:
-                return Response({"Error": "Only CSV and XLSX files are supported"}, status=400)
+                return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
 
-            # Return data preview (first 5 rows)
+            # ✅ **生成文件预览**
             data_preview = df.head().to_dict(orient="records")
-            return Response({
+
+            # ✅ **打印返回的数据**
+            return_data = {
                 "message": f"File '{file.name}' uploaded successfully.",
                 "file_path": file_path,
-                "data_preview": data_preview
-            })
+                "data_preview": data_preview  # ✅ 这里是前 5 行数据
+            }
+            print("📤 Response data:", return_data)  # ✅ **添加打印返回数据**
+
+            return Response(return_data)
+
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 

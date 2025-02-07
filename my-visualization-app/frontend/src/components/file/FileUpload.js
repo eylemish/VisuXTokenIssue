@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import Action from "../Action";
 
 // Get CSRF Token (Django will set it in a cookie)
 function getCookie(name) {
@@ -23,77 +24,99 @@ const csrfToken = getCookie("csrftoken");
 
 const FileUpload = ({ uiController }) => {
     const [file, setFile] = useState(null);
-    const [fileName, setFileName] = useState("No file selected"); // Display the file name
-    const [uploading, setUploading] = useState(false); // Whether the upload is in progress
-    const [filePreview, setFilePreview] = useState(null); // File data preview
+    const [fileName, setFileName] = useState("No file selected");
+    const [uploading, setUploading] = useState(false);
+    const [filePreview, setFilePreview] = useState(null);
 
     const uploadProps = {
         beforeUpload: (file) => {
-            setFile(file); // Save the file to state
-            setFileName(file.name); // Set the file name
+            const isSupportedFormat = ["csv", "xlsx"].includes(file.name.split(".").pop().toLowerCase());
+            if (!isSupportedFormat) {
+                message.error("Only CSV and XLSX files are supported.");
+                return false;
+            }
+            if (file.size === 0) {
+                message.error("File is empty.");
+                return false;
+            }
+            setFile(file);
+            setFileName(file.name);
+            console.log("File selected:", file.name);
             return false; // Block automatic uploads
         },
         onRemove: () => {
-            setFile(null); // Empty the file
-            setFileName("No file selected"); // Reset filename
-            setFilePreview(null); // Clear the preview data
+            setFile(null);
+            setFileName("No file selected");
+            setFilePreview(null);
+            console.log("File removed.");
         },
-        showUploadList: false, // Do not show the file list
+        showUploadList: false,
     };
 
     const handleUpload = async () => {
-        if (!file) {
-            message.error("Please select a file first.");
-            return;
+    console.log("📌 handleUpload called.");
+
+    if (!file) {
+        console.error("🚨 No file selected.");
+        message.error("Please select a file first.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        console.log("📡 Sending upload request...");
+        const response = await axios.post(
+            "http://127.0.0.1:8000/api/upload/",
+            formData,
+            {
+                headers: { "Content-Type": "multipart/form-data" },
+                withCredentials: true,
+            }
+        );
+
+        console.log("✅ Upload response received:", response.data);
+
+        // ✅ **检查 data_preview 是否有数据**
+        if (response.data && response.data.data_preview) {
+            console.log("📊 File preview data:", response.data.data_preview);
+            setFilePreview(response.data.data_preview);  // ✅ 更新 UI
+        } else {
+            console.warn("⚠️ No data preview returned from backend.");
         }
 
-        const formData = new FormData();
-        formData.append("file", file); // Add files
-        formData.append("db_path", "database.sqlite3"); // Optional, provide database path to backend
+        message.success(response.data.message || "Upload successful!");
+    } catch (error) {
+        console.error("❌ Upload failed:", error.response || error.message);
+        message.error("Upload failed.");
+    }
+};
 
-        setUploading(true);
-        try {
-            // Send CSRF Token + Allow Cookie Transfer
-            const response = await axios.post("http://127.0.0.1:8000/api/upload/", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    "X-CSRFToken": csrfToken, // Send CSRF Token
-                },
-                withCredentials: true, // allow Cookie
-            });
 
-            // Display success message and process response data
-            message.success(response.data.message || "Upload successful!");
-            setFilePreview(response.data.data_preview || []); // Setting the file preview data
-            setFile(null); // Empty the file
-            setFileName("No file selected");
-        } catch (error) {
-            // Display error messages
-            message.error("Upload failed: " + (error.response?.data.error || error.message));
-        } finally {
-            setUploading(false); // Restore upload status
-        }
-    };
 
     if (!uiController || !uiController.getModalController) {
         console.error("uiController is undefined in FileUpload!");
-        return null; // Avoid `undefined` access
+        return null;
     }
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                {/* 文件名，设置最小宽度，防止按钮挤压它 */}
-                <span style={{ minWidth: "150px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <span style={{
+                    minWidth: "250px",
+                    maxWidth: "400px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                }}>
                     {fileName}
                 </span>
-
-                {/* 选择文件按钮 */}
                 <Upload {...uploadProps} maxCount={1}>
-                    <Button type="primary" icon={<UploadOutlined />}>Select File</Button>
+                    <Button type="primary" icon={<UploadOutlined />}>
+                        Select File
+                    </Button>
                 </Upload>
-
-                {/* 上传按钮 */}
                 <Button
                     type="primary"
                     onClick={handleUpload}
@@ -103,12 +126,15 @@ const FileUpload = ({ uiController }) => {
                     {uploading ? "Uploading..." : "Upload"}
                 </Button>
             </div>
-
-            {/* 显示文件预览数据 */}
             {filePreview && filePreview.length > 0 && (
                 <div style={{ marginTop: "12px" }}>
                     <h4>Data Preview:</h4>
-                    <table border="1" style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <table border="1" style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        textAlign: "left",
+                        fontSize: "14px",
+                    }}>
                         <thead>
                             <tr>
                                 {Object.keys(filePreview[0]).map((key) => (
