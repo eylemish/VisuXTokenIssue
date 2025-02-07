@@ -88,6 +88,7 @@
 // export default DataWindow;
 
 import { useState, useEffect } from "react";
+import './DataWindow.css';
 
 const DataWindow = () => {
     const [data, setData] = useState(null); // empty at first
@@ -95,93 +96,82 @@ const DataWindow = () => {
     const features = ["id", "name", "age", "city", "salary"];
 
     useEffect(() => {
-      const exampleData = [
-          { "id": 1, "name": "Alice", "age": 25, "city": "New York", "salary": 50000 },
-          { "id": 2, "name": "Bob", "age": 30, "city": "Los Angeles", "salary": 60000 },
-          { "id": 3, "name": "Charlie", "age": 28, "city": "Chicago", "salary": 55000 },
-          { "id": 4, "name": "David", "age": 35, "city": "Houston", "salary": 70000 },
-          { "id": 5, "name": "Eve", "age": 27, "city": "San Francisco", "salary": 65000 },
-          { "id": 6, "name": "Frank", "age": 32, "city": "Seattle", "salary": 62000 },
-          { "id": 7, "name": "Grace", "age": 29, "city": "Boston", "salary": 58000 },
-          { "id": 8, "name": "Hank", "age": 33, "city": "Denver", "salary": 63000 }
-      ];
+        const exampleData = [
+            { "id": 1, "name": "Alice", "age": 25, "city": "New York", "salary": 50000 },
+            { "id": 2, "name": "Bob", "age": 30, "city": "Los Angeles", "salary": 60000 },
+            { "id": 3, "name": "Charlie", "age": 28, "city": "Chicago", "salary": 55000 },
+            { "id": 4, "name": "David", "age": 35, "city": "Houston", "salary": 70000 },
+            { "id": 5, "name": "Eve", "age": 27, "city": "San Francisco", "salary": 65000 },
+            { "id": 6, "name": "Frank", "age": 32, "city": "Seattle", "salary": 62000 },
+            { "id": 7, "name": "Grace", "age": 29, "city": "Boston", "salary": 58000 },
+            { "id": 8, "name": "Hank", "age": 33, "city": "Denver", "salary": 63000 }
+        ];
 
-      setData(exampleData);
-  }, []);
-
-
-    //// we need something here to fetch the data /import from frontend
+        setData(exampleData);
+    }, []);
 
     if (!data) return <p>Data Uploading...</p>; // Veri gelene kadar beklet
-    
-    /// we need something here to store which features got selected by the user
 
-    //const features = null;
-    //// we need something here to define features ( from backend or from other file in frontend or manuall here)
+    const handleFeatureClick = (index) => {
+        let updatedFeatures = [];
 
-    
+        // If the clicked feature is already selected, bring it to the front and reorder the others
+        if (selectedFeatures.includes(index)) {
+            updatedFeatures = [index, ...selectedFeatures.filter(f => f !== index)];
+        } else {
+            // If it's a new feature, bring it to the front and add the others in order
+            updatedFeatures = [index, ...selectedFeatures];
+        }
 
+        // Limit the selected features to a maximum of 2
+        if (updatedFeatures.length > 2) {
+            updatedFeatures = updatedFeatures.slice(0, 2);
+        }
 
-const handleFeatureClick = (index) => {
-    let updatedFeatures = [];
-  
-    // If the clicked feature is already selected, bring it to the front and reorder the others
-    if (selectedFeatures.includes(index)) {
-      updatedFeatures = [index, ...selectedFeatures.filter(f => f !== index)];
-    } else {
-      // If it's a new feature, bring it to the front and add the others in order
-      updatedFeatures = [index, ...selectedFeatures];
-    }
-  
-    // Limit the selected features to a maximum of 2
-    if (updatedFeatures.length > 2) {
-      updatedFeatures = updatedFeatures.slice(0, 2);
-    }
-  
-    setSelectedFeatures(updatedFeatures);
-  
-    // Update selected features globally too 
-    
-  };
+        setSelectedFeatures(updatedFeatures);
+        //we need logging somewhere to save feature change
+    };
 
-  const FeatureTable = ({ data, features, selectedFeatures, onFeatureClick }) => {
+    const FeatureTable = ({ data, features, selectedFeatures, onFeatureClick }) => {
+        return (
+            <div className="feature-table">
+                <h3>Feature List</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            {features.map((feature, index) => (
+                                <th key={index} onClick={() => onFeatureClick(index)}>
+                                    {feature}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.map((row, rowIndex) => (
+                            <tr key={rowIndex}>
+                                <td>Data {rowIndex + 1}</td>
+                                {features.map((feature, featureIndex) => (
+                                    <td key={featureIndex}>
+                                        {row[feature]}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
     return (
-      <div className="feature-table">
-        <h3>Feature List</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Feature Name</th>
-              {[...Array(8)].map((_, index) => (
-                <th key={index}>Data {index + 1}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {features.map((feature, featureIndex) => (
-              <tr
-                key={featureIndex}
-                className={selectedFeatures.includes(featureIndex) ? 'selected-feature' : ''}
-                onClick={() => onFeatureClick(featureIndex)}
-              >
-                <td>{feature}</td>
-                {data.slice(0, 8).map((row, dataIndex) => (
-                  <td key={dataIndex}>{row[feature]}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <FeatureTable
+            features={features}
+            data={data}
+            selectedFeatures={selectedFeatures}
+            onFeatureClick={handleFeatureClick}
+        />
     );
-  }; 
-  // we need a function to handle feature change
-  return (
-    <FeatureTable
-        features={features}
-        data={data}
-        selectedFeatures={selectedFeatures}
-        onFeatureClick={handleFeatureClick}
-    />
-);
-}; export default DataWindow;
+};
+
+export default DataWindow;
