@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DataVisualizationView,ExportLogView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, UploadView, AddDataView, ApplyPcaView
+from .views import DataVisualizationView,ExportLogView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, UploadView, AddDataView, ApplyPcaView, FileDownloadView
 
 urlpatterns = [
     path('visualize/', DataVisualizationView.as_view(), name='visualize'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path("suggest_feature_dropping/", SuggestFeatureDroppingView.as_view(), name = "suggest_feature_dropping"),
     path("suggest_feature_combining/", SuggestFeatureCombiningView.as_view(), name = "suggest_feature_combining"),
     path('export_log/', ExportLogView.as_view(), name='export_log'),
+    path('download/', FileDownloadView.as_view(), name='file_download')
 ]
