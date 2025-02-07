@@ -54,10 +54,8 @@ const FileUpload = ({ uiController }) => {
     };
 
     const handleUpload = async () => {
-    console.log("📌 handleUpload called.");
 
     if (!file) {
-        console.error("🚨 No file selected.");
         message.error("Please select a file first.");
         return;
     }
@@ -66,7 +64,6 @@ const FileUpload = ({ uiController }) => {
     formData.append("file", file);
 
     try {
-        console.log("📡 Sending upload request...");
         const response = await axios.post(
             "http://127.0.0.1:8000/api/upload/",
             formData,
@@ -76,14 +73,11 @@ const FileUpload = ({ uiController }) => {
             }
         );
 
-        console.log("✅ Upload response received:", response.data);
-
-        // ✅ **检查 data_preview 是否有数据**
+        // **检查 data_preview 是否有数据**
         if (response.data && response.data.data_preview) {
-            console.log("📊 File preview data:", response.data.data_preview);
-            setFilePreview(response.data.data_preview);  // ✅ 更新 UI
+            setFilePreview(response.data.data_preview);
         } else {
-            console.warn("⚠️ No data preview returned from backend.");
+            console.warn("No data preview returned from backend.");
         }
 
         message.success(response.data.message || "Upload successful!");

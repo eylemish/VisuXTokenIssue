@@ -91,31 +91,22 @@ class UploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, *args, **kwargs):
-        print("📌 Received a POST request to UploadView.")
-        print("📡 Request Headers:", request.headers)
-        print("📦 Request FILES:", request.FILES)
 
         file = request.FILES.get("file")
         if not file:
-            print("🚨 No file received!")
             return Response({"error": "No file received"}, status=400)
 
-        # ✅ **确保 `uploads/` 目录存在**
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-        # ✅ **定义文件路径**
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # ✅ **保存文件**
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            print(f"✅ File saved successfully at: {file_path}")
 
-            # ✅ **解析 CSV 或 Excel 文件**
             if file.name.lower().endswith(".csv"):
                 df = pd.read_csv(file_path)
             elif file.name.lower().endswith(".xlsx"):
@@ -123,16 +114,13 @@ class UploadView(APIView):
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
 
-            # ✅ **生成文件预览**
             data_preview = df.head().to_dict(orient="records")
 
-            # ✅ **打印返回的数据**
             return_data = {
                 "message": f"File '{file.name}' uploaded successfully.",
                 "file_path": file_path,
-                "data_preview": data_preview  # ✅ 这里是前 5 行数据
+                "data_preview": data_preview
             }
-            print("📤 Response data:", return_data)  # ✅ **添加打印返回数据**
 
             return Response(return_data)
 
