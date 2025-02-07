@@ -36,3 +36,11 @@ class AuditLog(models.Model):
     def revert(self):
         self.is_reverted = True
         self.save()
+
+class CSVFile(models.Model):
+    name = models.CharField(max_length=255) 
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+class CSVRow(models.Model):
+    file = models.ForeignKey(CSVFile, on_delete=models.CASCADE)
+    data = models.JSONField()
