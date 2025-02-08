@@ -9,8 +9,10 @@ from imblearn.over_sampling import SMOTE
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.feature_selection import VarianceThreshold
+from scipy.interpolate import interp1d, UnivariateSpline
 from itertools import combinations
 from backend.api.models import UploadedFile
+import umap.umap_ as umap
 
 class Engine:
     def __init__(self):
@@ -49,7 +51,7 @@ class Engine:
     def apply_umap(self, n_components):
         reducer = umap.UMAP(n_components=n_components)
         return reducer.fit_transform(self.data)
-
+    """
     # Do interpolate with given data, given kind of interpolation, the number of generated data and the given range.
     # The default generated kind is linear.
     # The default number of generated data is 100.
@@ -67,42 +69,187 @@ class Engine:
             return pd.DataFrame({'x': x_new, 'y': y_new})
         except Exception as e:
             raise ValueError(f"Error in interpolation: {e}")
-    def extrapolate(data, target_x, method="linear"):
-    #Do extrapolation
-    #param data: List[List[float]]，inputdata in format [[x1, y1], [x2, y2], ...]
-    #param target_x: List[float]，target x that need extrapolation
-    #param method: str，extrapolate methods ("linear", "polynomial", "spline")
-    #return: List[float]，y after extrapolation
-        data = np.array(data)
-        X = data[:, 0].reshape(-1, 1)  #  x 
-        y = data[:, 1]  #  y 
+    """
+
+    def interpolate(self, dataset: pd.DataFrame, x_feature: str, y_feature: str, kind: str = 'linear', num_points: int = 100, min_value=None, max_value=None, degree: int = 3) -> pd.DataFrame:
+        """
+        Perform interpolation (or extrapolation) on a given dataset.
+
+        :param dataset: pandas.DataFrame, the input dataset
+        :param x_feature: str, the column name for the independent variable (x-axis)
+        :param y_feature: str, the column name for the dependent variable (y-axis)
+        :param kind: str, type of interpolation ("linear", "polynomial", "spline")
+        :param num_points: int, number of generated data points (default: 100)
+        :param min_value: float, minimum x value for interpolation (default: min(dataset[x_feature]))
+        :param max_value: float, maximum x value for interpolation (default: max(dataset[x_feature]))
+        :param degree: int, degree of the polynomial (only used for "polynomial" and "spline")
+        :return: pandas.DataFrame containing interpolated 'x' and 'y' values
+        """
+
+        try:
+            # Ensure that x_feature and y_feature exist in the DataFrame
+            if x_feature not in dataset.columns or y_feature not in dataset.columns:
+                raise ValueError(f"Columns '{x_feature}' and/or '{y_feature}' not found in dataset")
+
+            # Extract x and y data
+            x = dataset[x_feature].values
+            y = dataset[y_feature].values
+
+            # Use min and max values from the dataset if not provided
+            if min_value is None:
+                min_value = np.min(x)
+            if max_value is None:
+                max_value = np.max(x)
+
+            # Generate new x values for interpolation
+            x_new = np.linspace(min_value, max_value, num_points)
+
+            # Linear interpolation
+            if kind == "linear":
+                interpolator = interp1d(x, y, kind="linear", fill_value="extrapolate")
+                y_new = interpolator(x_new)
+
+            # Polynomial interpolation
+            elif kind == "polynomial":
+                poly_coeffs = np.polyfit(x, y, degree)
+                poly_func = np.poly1d(poly_coeffs)
+                y_new = poly_func(x_new)
+
+            # Spline interpolation
+            elif kind == "spline":
+                spline = UnivariateSpline(x, y, k=min(degree, len(x) - 1), s=0)
+                y_new = spline(x_new)
+
+            # Exponential interpolation
+            elif kind == "exponential":
+                # Ensure all y values are positive (required for log transformation)
+                if np.any(y <= 0):
+                    raise ValueError("Exponential interpolation requires all y values to be positive.")
+
+                # Fit a linear model to log(y)
+                log_y = np.log(y)
+                coeffs = np.polyfit(x, log_y, 1)
+                exp_func = lambda x_val: np.exp(coeffs[1]) * np.exp(coeffs[0] * x_val)
+                y_new = exp_func(x_new)
+
+            else:
+                raise ValueError("Unsupported interpolation method. Choose from 'linear', 'polynomial', or 'spline'.")
+
+            # Return the interpolated DataFrame
+            return pd.DataFrame({'x': x_new, 'y': y_new})
+
+        except Exception as e:
+            raise ValueError(f"Error in interpolation: {e}")
+
+    def extrapolate(data: pd.DataFrame, x_feature: str, y_feature: str, target_x: list, method="linear", degree=2) -> pd.DataFrame:
+        """
+        Perform extrapolation using different methods.
+
+        :param data: pandas.DataFrame, input data with features
+        :param x_feature: str, name of the column used as x values
+        :param y_feature: str, name of the column used as y values
+        :param target_x: list, target x values for extrapolation
+        :param method: str, extrapolation method ("linear", "polynomial", "exponential", "spline")
+        :param degree: int, degree of polynomial fit (default: 2)
+        :return: pandas.DataFrame, extrapolated data with columns ['x', 'y']
+        """
+    
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError("Input data must be a pandas DataFrame")
+        if x_feature not in data.columns or y_feature not in data.columns:
+            raise ValueError(f"DataFrame must contain columns '{x_feature}' and '{y_feature}'")
+
+        X = data[x_feature].values.reshape(-1, 1)  # Extract x values
+        y = data[y_feature].values  # Extract y values
+        target_x = np.array(target_x)  # Convert to numpy array
 
         if method == "linear":
             model = LinearRegression()
             model.fit(X, y)
-            return model.predict(np.array(target_x).reshape(-1, 1)).tolist()
+            y_pred = model.predict(target_x.reshape(-1, 1))
 
         elif method == "polynomial":
-            degree = 2  # can adjust degree of polynom
             coeffs = np.polyfit(X.flatten(), y, degree)
             poly_func = np.poly1d(coeffs)
-            return poly_func(target_x).tolist()
+            y_pred = poly_func(target_x)
+
+        elif method == "exponential":
+            # Use log transformation for exponential regression
+            if np.any(y <= 0):
+                raise ValueError("Exponential extrapolation requires positive y values")
+            log_y = np.log(y)
+            model = LinearRegression()
+            model.fit(X, log_y)
+            log_y_pred = model.predict(target_x.reshape(-1, 1))
+            y_pred = np.exp(log_y_pred)  # Convert back to exponential form
 
         elif method == "spline":
             spline_func = interp1d(X.flatten(), y, kind="cubic", fill_value="extrapolate")
-            return spline_func(target_x).tolist()
+            y_pred = spline_func(target_x)
 
         else:
-            raise ValueError("Unsupported extrapolation method.")
+            raise ValueError("Unsupported extrapolation method. Choose from 'linear', 'polynomial', 'exponential', or 'spline'.")
 
-    # Do curve fitting with given data, target function and initial parameters.
-    def fit_curve(self, x: np.ndarray, y: np.ndarray, func, initial_params: list):
+        # Return extrapolated data as a pandas DataFrame
+        return pd.DataFrame({x_feature: target_x, y_feature: y_pred})
+
+    def fit_curve(self, dataset: pd.DataFrame, x_feature: str, y_feature: str, method: str = "linear", degree: int = 2, initial_params: list = None):
+        """
+        Perform curve fitting on the given dataset.
+
+        :param dataset: pandas.DataFrame, the input dataset
+        :param x_feature: str, the column name for the independent variable (x-axis)
+        :param y_feature: str, the column name for the dependent variable (y-axis)
+        :param method: str, the type of curve fitting ("linear", "polynomial", "exponential")
+        :param degree: int, the degree of the polynomial (only used for "polynomial" method)
+        :param initial_params: list, initial parameters for curve fitting (only used for "exponential" method)
+        :return: tuple (params, covariance, fitted_data)
+                 - params: the fitted parameters
+                 - covariance: covariance of the fitted parameters (None for polynomial fitting)
+                 - fitted_data: pandas.DataFrame with 'x' and 'y' values of the fitted curve
+        """
         try:
-            params, covariance = curve_fit(func, x, y, p0 = initial_params)
+            # make sure x_feature and y_feature are in DataFrame 
+            if x_feature not in dataset.columns or y_feature not in dataset.columns:
+                raise ValueError(f"Columns '{x_feature}' and/or '{y_feature}' not found in dataset")
+
+            x = dataset[x_feature].values
+            y = dataset[y_feature].values
+
+            # generate x
             x_fit = np.linspace(np.min(x), np.max(x), 100)
-            y_fit = func(x_fit, *params)
-            fitted_data = pd.DataFrame({'x': x_fit, 'y': y_fit})
+
+            if method == "linear":
+                def linear_func(x, a, b):
+                    return a * x + b
+
+                params, covariance = curve_fit(linear_func, x, y)
+                y_fit_curve = linear_func(x_fit, *params)
+
+            elif method == "polynomial":
+                poly_coeffs = np.polyfit(x, y, degree)
+                poly_func = np.poly1d(poly_coeffs)
+                y_fit_curve = poly_func(x_fit)
+                params, covariance = poly_coeffs, None  # no covariance for polynomial
+
+            elif method == "exponential":
+                def exp_func(x, a, b, c):
+                    return a * np.exp(b * x) + c
+
+                if initial_params is None:
+                    initial_params = [1.0, 0.1, 1.0]  # default params
+
+                params, covariance = curve_fit(exp_func, x, y, p0=initial_params)
+                y_fit_curve = exp_func(x_fit, *params)
+
+            else:
+                raise ValueError("Unsupported method. Choose from 'linear', 'polynomial', or 'exponential'.")
+
+            # create result DataFrame
+            fitted_data = pd.DataFrame({"x": x_fit, "y": y_fit_curve})
+
             return params, covariance, fitted_data
+
         except Exception as e:
             raise ValueError(f"Error in curve fitting: {e}")
 
@@ -134,6 +281,8 @@ class Engine:
             reducer = TSNE(n_components=n_components)
         elif method == "LDA":
             reducer = LDA(n_components=n_components)
+        elif method == "UMAP":
+            reducer = umap.UMAP(n_components=n_components)
         else:
             raise ValueError("Invalid dimensional reduction method. Choose from 'PCA', 't-SNE', or 'LDA'.")
 
