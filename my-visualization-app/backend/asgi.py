@@ -8,9 +8,13 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 """
 
 import os
+import sys
 
 from django.core.asgi import get_asgi_application
+from pathlib import Path
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+sys.path.append(str(Path(__file__).resolve().parent))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 
 application = get_asgi_application()

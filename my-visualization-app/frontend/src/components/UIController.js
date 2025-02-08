@@ -107,20 +107,59 @@ class UIController {
   }
 
 
-  //这个是前后端用post连接的地方，待完善，这个只负责传入传出这个动作,toolmamager里可改一部分url
-  async postRequest(url, data) {
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error(`API request failed: ${url}`, error);
-      throw error;
+  //这个是前后端用post连接的地方，这个只负责传入传出这个动作,toolmamager里可改一部分url
+  async postRequest(url, data, headers = {}) {
+  try {
+    console.log(`📡 Sending POST request to: ${url}`, data);
+
+    // 获取 CSRF Token（适用于 Django 后端）
+    const csrfToken = this.getCSRFToken();
+    if (csrfToken) {
+      headers["X-CSRFToken"] = csrfToken;
     }
+
+    // 发送请求
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...headers, // 允许自定义 headers
+      },
+      body: JSON.stringify(data),
+      credentials: "include", // 允许携带 Cookie（跨域需要）
+    });
+
+    // 检查 HTTP 响应状态码
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error(`❌ API request failed: ${url} (${response.status})`, errorMessage);
+      throw new Error(`Request failed: ${response.status} - ${errorMessage}`);
+    }
+
+    // 解析 JSON 响应
+    const responseData = await response.json();
+    console.log(`✅ Response received from ${url}:`, responseData);
+    return responseData;
+  } catch (error) {
+    console.error(`🚨 Network/API error for ${url}:`, error);
+    throw error;
   }
+}
+
+// 获取 CSRF Token（适用于 Django）
+getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie) {
+    document.cookie.split(";").forEach((cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "csrftoken") {
+        cookieValue = decodeURIComponent(value);
+      }
+    });
+  }
+  return cookieValue;
+}
+
 
   setModalController(modalController) {
     this.modalController = modalController;

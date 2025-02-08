@@ -5,11 +5,12 @@ import { DownloadOutlined } from "@ant-design/icons";
 const FileDownload = ({ uiController }) => {
   const [downloadFormat, setDownloadFormat] = useState("csv");
 
-  useEffect(() => {
-    uiController.downloadFile = (format) => {
-      window.location.href = `/api/download/?format=${format}`;
-    };
-  }, [uiController]);
+        // This part causes bug in frontend... Please dont push error code
+        // useEffect(() => {
+        //     uiController.downloadFile = (format) => {
+        //         window.location.href = `/api/download/?format=${format}`;
+        //     };
+        // }, [uiController]);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
