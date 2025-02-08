@@ -2,7 +2,7 @@ from django.urls import path
 #from .views import DataVisualizationView,ExportLogView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, UploadView, AddDataView, ApplyPcaView, FileDownloadView
 from .views import DataVisualizationView, OversampleDataView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, UploadView, \
     AddDataView, ApplyPcaView, HandleUserActionView, ExportLogView, ExtrapolateView, FitCurveView, InterpolateView, \
-    CorrelationView, DimensionalReductionView
+    CorrelationView, DimensionalReductionView, GetCsrfTokenView
 
 urlpatterns = [
     path('visualize/', DataVisualizationView.as_view(), name='visualize'),
@@ -19,5 +19,6 @@ urlpatterns = [
     path('correlation/', CorrelationView.as_view(), name='correlation'),
     path('dimensional_reduction/', DimensionalReductionView.as_view(), name='dimensional_reduction'),
     path('oversample_data/', OversampleDataView.as_view(), name='oversample_data'),
+    path("get_csrf_token/", GetCsrfTokenView.as_view(), name="get_csrf_token"),
     #path('download/', FileDownloadView.as_view(), name='file_download')
 ]

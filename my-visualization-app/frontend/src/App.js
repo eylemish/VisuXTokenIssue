@@ -46,7 +46,6 @@ const App = () => {
                              showGraph={showGraph}
                              showData={showData}
                              showLog={showLog} />
-              <Desktop1UI />
           </Content>
         </Layout>
       </Layout>

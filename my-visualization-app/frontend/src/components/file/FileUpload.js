@@ -70,7 +70,7 @@ const FileUpload = ({ uiController }) => {
         setUploading(true);
 
         try {
-          const response = await fetch("http://127.0.0.1:8000/api/upload/", {
+          const response = await fetch("http://127.0.0.1:8000/upload/", {
             method: "POST",
             headers: { "X-CSRFToken": getCSRFToken() }, // 发送 CSRF Token
             body: formData,

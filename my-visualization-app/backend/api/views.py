@@ -10,6 +10,8 @@ from backend.server_handler.engine import Engine
 from backend.server_handler.log_manager import export_logs
 from django.http import JsonResponse
 from backend.api.models import UploadedFile
+from django.middleware.csrf import get_token
+from rest_framework.views import APIView
 import json
 import pandas as pd
 import sqlite3
@@ -17,6 +19,15 @@ import sqlite3
 
 # Define BASE_DIR to point to the project root directory.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+class GetCsrfTokenView(APIView):
+    """
+    提供 CSRF Token 给前端
+    """
+    def get(self, request):
+        csrf_token = get_token(request)  # 获取 CSRF Token
+        return JsonResponse({"csrfToken": csrf_token})
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class HandleUserActionView(APIView):
