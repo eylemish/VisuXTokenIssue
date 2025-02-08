@@ -183,6 +183,220 @@ const ExportLogsButton = () => {
 export default ExportLogsButton;
 """
 
+class FitCurveView(APIView):
+    def post(self, request):
+        try:
+            body = json.loads(request.body)
+            dataset_id = body.get("dataset_id")
+            x_feature = body.get("x_feature")
+            y_feature = body.get("y_feature")
+            method = body.get("method", "linear")  # 默认为线性拟合
+            degree = body.get("degree", 2)  # 默认为二次多项式拟合
+            initial_params = body.get("initial_params", None)  # 初始参数（如果是指数拟合）
+
+            # 确保 dataset_id 存在
+            if not dataset_id:
+                return JsonResponse({"error": "File ID is required"}, status=400)
+
+            # get file
+            try:
+                data_file = UploadedFile.objects.get(id=dataset_id)
+            except UploadedFile.DoesNotExist:
+                return JsonResponse({"error": "Dataset not found"}, status=404)
+
+            # read file
+            dataset_df = Engine.data_to_panda(data_file)
+
+            # 调用 utility 中的拟合函数
+            params, covariance, fitted_data = Engine.fit_curve(
+                dataset_df, 
+                x_feature, 
+                y_feature, 
+                method=method, 
+                degree=degree, 
+                initial_params=initial_params
+            )
+
+            # 返回拟合参数和拟合数据
+            return JsonResponse({
+                "params": params.tolist(),
+                "covariance": covariance.tolist() if covariance is not None else None,
+                "fitted_data": fitted_data.to_dict(orient='records')
+            })
+
+        except UploadedFile.DoesNotExist:
+            return JsonResponse({"error": "File not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+class InterpolateView(APIView):
+    def post(self, request):
+        try:
+            # Parse the request body
+            body = json.loads(request.body)
+            dataset_id = body.get("dataset_id")  # Get the ID of the uploaded file
+            x_feature = body.get("x_feature")  # The column name for the x-axis
+            y_feature = body.get("y_feature")  # The column name for the y-axis
+            kind = body.get("kind", "linear")  # The type of interpolation (linear, polynomial, spline, exponential)
+            num_points = body.get("num_points", 100)  # Number of data points to generate
+            min_value = body.get("min_value", None)  # Minimum x value for interpolation (optional)
+            max_value = body.get("max_value", None)  # Maximum x value for interpolation (optional)
+
+            # Fetch the uploaded file by its ID
+            dataset = UploadedFile.objects.get(id=dataset_id)
+            
+            # Convert the file to pandas DataFrame
+            dataset_df = Engine.data_to_panda(dataset)
+            
+            # Perform interpolation
+            interpolated_data = Engine.interpolate(
+                dataset_df, 
+                x_feature=x_feature, 
+                y_feature=y_feature, 
+                kind=kind, 
+                num_points=num_points, 
+                min_value=min_value, 
+                max_value=max_value
+            )
+            
+            # Return the interpolated data in JSON format
+            return JsonResponse({"interpolated_data": interpolated_data.to_dict(orient='records')})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+class ExtrapolateView(APIView):
+    def post(self, request):
+        try:
+            # Parse the request body
+            body = json.loads(request.body)
+            dataset_id = body.get("dataset_id")  # Get the ID of the uploaded file
+            x_feature = body.get("x_feature")  # The column name for the x-axis
+            y_feature = body.get("y_feature")  # The column name for the y-axis
+            target_x = body.get("target_x")  # List of x values for extrapolation
+            method = body.get("method", "linear")  # The type of extrapolation (linear, polynomial, exponential, spline)
+            degree = body.get("degree", 2)  # Degree of polynomial for polynomial method
+
+            # Fetch the uploaded file by its ID
+            dataset = UploadedFile.objects.get(id=dataset_id)
+            
+            # Convert the file to pandas DataFrame
+            dataset_df = Engine.data_to_panda(dataset)
+            
+            # Perform extrapolation
+            extrapolated_data = Engine.extrapolate(
+                dataset_df, 
+                x_feature=x_feature, 
+                y_feature=y_feature, 
+                target_x=target_x, 
+                method=method, 
+                degree=degree
+            )
+            
+            # Return the extrapolated data in JSON format
+            return JsonResponse({"extrapolated_data": extrapolated_data.to_dict(orient='records')})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+class CorrelationView(APIView):
+    def post(self, request):
+        try:
+            # Parse the request body
+            body = json.loads(request.body)
+            dataset_id = body.get("dataset_id")  # Get the ID of the uploaded file
+            feature_1 = body.get("feature_1")  # The first feature/column to compare
+            feature_2 = body.get("feature_2")  # The second feature/column to compare
+            method = body.get("method", "pearson")  # The type of correlation ("pearson", "spearman", "kendall")
+
+            # Fetch the uploaded file by its ID
+            dataset = UploadedFile.objects.get(id=dataset_id)
+            
+            # Convert the file to pandas DataFrame
+            dataset_df = Engine.data_to_panda(dataset)
+            
+            # Compute correlation
+            correlation_value = Engine.compute_correlation(
+                dataset_df, 
+                feature_1=feature_1, 
+                feature_2=feature_2, 
+                method=method
+            )
+            
+            # Return the correlation result as JSON
+            return JsonResponse({"correlation": correlation_value})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+class DimensionalReductionView(APIView):
+    def post(self, request):
+        try:
+            # Parse the request body
+            body = json.loads(request.body)
+            dataset_id = body.get("dataset_id")  # The ID of the uploaded file
+            method = body.get("method", "PCA")  # The method for dimensional reduction ("PCA", "t-SNE", "LDA")
+            n_components = body.get("n_components", 2)  # The number of components to reduce to
+
+            # Fetch the uploaded file by its ID
+            dataset = UploadedFile.objects.get(id=dataset_id)
+            
+            # Convert the file to pandas DataFrame
+            dataset_df = Engine.data_to_panda(dataset)
+            
+            # Perform dimensional reduction
+            reduced_data = Engine.dimensional_reduction(
+                dataset_df, 
+                method=method, 
+                n_components=n_components
+            )
+            
+            # Return the reduced data as a JSON response
+            reduced_data_json = reduced_data.to_dict(orient="records")
+            return JsonResponse({"reduced_data": reduced_data_json})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+class OversampleDataView(APIView):
+    def post(self, request):
+        try:
+            # Parse the incoming JSON body
+            body = json.loads(request.body)
+            
+            # Extract the relevant fields from the request
+            dataset_id = body.get("dataset_id")  # Dataset ID to locate the file in the database
+            x_feature = body.get("x_feature")  # Independent feature (column name)
+            y_feature = body.get("y_feature")  # Dependent feature (column name)
+            method = body.get("method", "linear")  # Interpolation method (default: linear)
+            num_samples = body.get("num_samples", 100)  # Number of samples to generate (default: 100)
+            degree = body.get("degree", 3)  # Polynomial degree (default: 3, used only for polynomial interpolation)
+
+            # Fetch the uploaded file from the database
+            dataset = UploadedFile.objects.get(id=dataset_id)
+            
+            # Convert the uploaded file to a pandas DataFrame using the existing method
+            dataset_df = Engine.data_to_panda(dataset)
+            
+            # Perform oversampling (data interpolation)
+            oversampled_data = Engine.oversample_data(
+                dataset_df, 
+                x_feature=x_feature, 
+                y_feature=y_feature, 
+                method=method, 
+                num_samples=num_samples, 
+                degree=degree
+            )
+            
+            # Convert the oversampled data to a dictionary for easy JSON response
+            oversampled_data_json = oversampled_data.to_dict(orient="records")
+            
+            # Return the oversampled data as a JSON response
+            return JsonResponse({"oversampled_data": oversampled_data_json})
+
+        except Exception as e:
+            # If any error occurs, return an error response with the exception message
+            return JsonResponse({"error": str(e)}, status=400)
 
 class ApplyPcaView(APIView):
     def post(self,request):
