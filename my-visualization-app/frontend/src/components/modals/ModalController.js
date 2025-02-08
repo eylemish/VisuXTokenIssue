@@ -5,7 +5,7 @@ import TestModal from "./TestModal";
 //Will add more Modal later
 
 const ModalController = ({ activeTool , onClose, onCreate }) => {
-    console.log("ModalController Rendered - Active Tool:", activeTool);
+    //console.log("ModalController Rendered - Active Tool:", activeTool);
 
   switch (activeTool) {
     case "Create Graph":
@@ -15,7 +15,7 @@ const ModalController = ({ activeTool , onClose, onCreate }) => {
     case "Test Modal":
         return <TestModal onClose={onClose} />;
     default:
-        console.log("No active modal");
+        //console.log("No active modal");
       return null;
   }
 };

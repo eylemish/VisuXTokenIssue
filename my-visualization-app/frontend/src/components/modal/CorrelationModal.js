@@ -1,74 +1,95 @@
-import React, { useState } from "react";
-import axios from "axios";
-import Plot from "react-plotly.js";
+import React, {useEffect, useState} from "react";
 import { Modal, Button, Select, message } from "antd";
+import Action from "../Action";
 
-const CorrelationModal = ({ visible, onCancel }) => {
-  const [method, setMethod] = useState("pearson");  // 相关性计算方法
-  const [xData, setXData] = useState([]);  // 变量 A 数据
-  const [yData, setYData] = useState([]);  // 变量 B 数据
-  const [result, setResult] = useState(null);  // 相关性结果
+const CorrelationModal = ({ visible, onCancel, uiController }) => {
+  const [method, setMethod] = useState("pearson");
+  const [datasetId, setDatasetId] = useState(null);
+  const [xColumn, setXColumn] = useState(null);
+  const [yColumn, setYColumn] = useState(null);
 
-  // 运行相关性计算
-  const handleCorrelate = async () => {
-    if (xData.length === 0 || yData.length === 0) {
-      message.error("请提供数据！");
+  const [columns, setColumns] = useState([]); // 存储列名
+
+  const datasetManager = uiController.getDatasetManager();
+  const availableDatasets = datasetManager.getAllDatasetsId();
+
+  // **当用户选择数据集时，获取列名**
+  useEffect(() => {
+    if (!datasetId) {
+      setColumns([]);
       return;
     }
 
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/api/correlate/", {
-        correlation_method: method,
-        data_x: xData,
-        data_y: yData,
-      });
-      setResult(response.data);
-    } catch (error) {
-      message.error("计算失败，请检查数据！");
+    const fetchColumns = async () => {
+      const cols = await datasetManager.getDatasetColumns(datasetId);
+      setColumns(cols);
+    };
+
+    fetchColumns();
+  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+
+  const handleCorrelate = () => {
+    if (!datasetId || !xColumn || !yColumn) {
+      message.error("Please select a dataset and two columns!");
+      return;
     }
+
+    const action = new Action("EXECUTE_TOOL", "user", {
+      toolName: "Correlation",
+      datasetId,
+      xColumn,
+      yColumn,
+      method
+    });
+
+    uiController.handleUserAction(action);
+    message.success("Correlation started!");
+    onCancel();
   };
 
   return (
-    <Modal title="Correlate Data" open={visible} onCancel={onCancel} footer={null}>
-      {/* 选择相关性计算方法 */}
-      <Select defaultValue="pearson" onChange={(value) => setMethod(value)}>
-        <Select.Option value="pearson">Pearson Correlation</Select.Option>
-        <Select.Option value="spearman">Spearman Correlation</Select.Option>
-        <Select.Option value="kendall">Kendall Correlation</Select.Option>
+    <Modal title="Correlation" open={visible} onCancel={onCancel} footer={null}>
+      <Select
+        style={{ width: "100%" }}
+        placeholder="Choose a dataset"
+        onChange={setDatasetId}
+      >
+        {availableDatasets.map((id) => (
+          <Select.Option key={id} value={id}>{id}</Select.Option>
+        ))}
       </Select>
 
-      {/* 运行相关性计算按钮 */}
-      <Button type="primary" onClick={handleCorrelate} style={{ marginTop: "10px" }}>
+      <Select
+        style={{ width: "100%", marginTop: "10px" }}
+        placeholder="Select X Column"
+        disabled={!datasetId}
+        onChange={setXColumn}
+      >
+        {columns.map((col) => (
+          <Select.Option key={col} value={col}>{col}</Select.Option>
+        ))}
+      </Select>
+
+      <Select
+        style={{ width: "100%", marginTop: "10px" }}
+        placeholder="Select Y Column"
+        disabled={!datasetId}
+        onChange={setYColumn}
+      >
+        {columns.map((col) => (
+          <Select.Option key={col} value={col}>{col}</Select.Option>
+        ))}
+      </Select>
+
+      <Select defaultValue="pearson" onChange={setMethod} style={{ width: "100%", marginTop: "10px" }}>
+        <Select.Option value="pearson">Pearson</Select.Option>
+        <Select.Option value="spearman">Spearman</Select.Option>
+        <Select.Option value="kendall">Kendall</Select.Option>
+      </Select>
+
+      <Button type="primary" onClick={handleCorrelate} block style={{ marginTop: "10px" }}>
         Run Correlation
       </Button>
-
-      {/* 显示相关性结果 */}
-      {result && (
-        <div style={{ marginTop: "20px" }}>
-          <p><strong>Correlation Coefficient (r):</strong> {result.correlation.toFixed(4)}</p>
-          <p><strong>p-value:</strong> {result.p_value.toFixed(4)}</p>
-
-          {/* 显示散点图和拟合线 */}
-          <Plot
-            data={[
-              {
-                x: result.data_x,
-                y: result.data_y,
-                mode: "markers",
-                type: "scatter",
-                name: "Original Data",
-              },
-              {
-                x: result.data_x,
-                y: result.regression_line,
-                mode: "lines",
-                name: "Regression Line",
-              }
-            ]}
-            layout={{ title: "Correlation Scatter Plot" }}
-          />
-        </div>
-      )}
     </Modal>
   );
 };

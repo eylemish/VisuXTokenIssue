@@ -1,68 +1,95 @@
-import React, { useState } from "react";
-import axios from "axios";
-import Plot from "react-plotly.js";
-import { Modal, Button, Input, Select } from "antd";
+import React, {useEffect, useState} from "react";
+import { Modal, Button, Select, message } from "antd";
+import Action from "../Action";
 
-const InterpolationModal = ({ visible, onCancel }) => {
-  const [method, setMethod] = useState("linear");  // 选择插值方法
-  const [xData, setXData] = useState([]);  // 用户提供的 X 数据
-  const [yData, setYData] = useState([]);  // 用户提供的 Y 数据
-  const [interpX, setInterpX] = useState("");  // 用户输入的 X 值
-  const [data, setData] = useState(null);  // 后端返回的插值结果
+const InterpolationModal = ({ visible, onCancel, uiController }) => {
+  const [method, setMethod] = useState("linear");
+  const [datasetId, setDatasetId] = useState(null);
+  const [xColumn, setXColumn] = useState(null);
+  const [yColumn, setYColumn] = useState(null);
 
-  // 运行插值计算
-  const handleInterpolate = async () => {
-    const response = await axios.post("http://127.0.0.1:8000/api/interpolate/", {
-      method: method,
-      x_data: xData,
-      y_data: yData,
-      interp_x: interpX.split(",").map(val => parseFloat(val.trim())),  // 解析输入的插值点
+  const [columns, setColumns] = useState([]); // 存储列名
+
+  const datasetManager = uiController.getDatasetManager();
+  const availableDatasets = datasetManager.getAllDatasetsId();
+
+  // **当用户选择数据集时，获取列名**
+  useEffect(() => {
+    if (!datasetId) {
+      setColumns([]);
+      return;
+    }
+
+    const fetchColumns = async () => {
+      const cols = await datasetManager.getDatasetColumns(datasetId);
+      setColumns(cols);
+    };
+
+    fetchColumns();
+  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+
+  const handleInterpolate = () => {
+    if (!datasetId || !xColumn || !yColumn) {
+      message.error("Please select a dataset and two columns!");
+      return;
+    }
+
+    const action = new Action("EXECUTE_TOOL", "user", {
+      toolName: "Interpolation",
+      datasetId,
+      xColumn,
+      yColumn,
+      method,
     });
-    setData(response.data);
+
+    uiController.handleUserAction(action);
+    message.success("Interpolation started!");
+    onCancel();
   };
 
   return (
-    <Modal title="Interpolate Data" open={visible} onCancel={onCancel} footer={null}>
-      {/* 选择插值方法 */}
-      <Select defaultValue="linear" onChange={(value) => setMethod(value)}>
-        <Select.Option value="linear">Linear Interpolation</Select.Option>
-        <Select.Option value="polynomial">Polynomial Interpolation</Select.Option>
-        <Select.Option value="spline">Spline Interpolation</Select.Option>
+    <Modal title="Interpolation" open={visible} onCancel={onCancel} footer={null}>
+      <Select
+        style={{ width: "100%" }}
+        placeholder="Choose a dataset"
+        onChange={(value) => setDatasetId(value)}
+      >
+        {availableDatasets.map((id) => (
+          <Select.Option key={id} value={id}>{id}</Select.Option>
+        ))}
       </Select>
 
-      {/* 让用户输入要计算插值的X值 */}
-      <Input
-        type="text"
-        placeholder="Enter X values (comma-separated)"
-        value={interpX}
-        onChange={(e) => setInterpX(e.target.value)}
-      />
+      <Select
+        style={{ width: "100%", marginTop: "10px" }}
+        placeholder="Select X Column"
+        disabled={!datasetId}
+        onChange={setXColumn}
+      >
+        {columns.map((col) => (
+          <Select.Option key={col} value={col}>{col}</Select.Option>
+        ))}
+      </Select>
 
-      {/* 运行插值按钮 */}
-      <Button type="primary" onClick={handleInterpolate}>Run Interpolation</Button>
+      <Select
+        style={{ width: "100%", marginTop: "10px" }}
+        placeholder="Select Y Column"
+        disabled={!datasetId}
+        onChange={setYColumn}
+      >
+        {columns.map((col) => (
+          <Select.Option key={col} value={col}>{col}</Select.Option>
+        ))}
+      </Select>
 
-      {/* 显示插值结果 */}
-      {data && (
-        <Plot
-          data={[
-            {
-              x: data.x,
-              y: data.y,
-              mode: "markers",
-              type: "scatter",
-              name: "Original Data",
-            },
-            {
-              x: data.x_interp,
-              y: data.y_interp,
-              mode: "markers",
-              marker: { color: "red", size: 8 },
-              name: "Interpolated Points",
-            }
-          ]}
-          layout={{ title: "Interpolation Result" }}
-        />
-      )}
+      <Select defaultValue="linear" onChange={setMethod} style={{ width: "100%", marginTop: "10px" }}>
+        <Select.Option value="linear">Linear</Select.Option>
+        <Select.Option value="polynomial">Polynomial</Select.Option>
+        <Select.Option value="spline">Spline</Select.Option>
+      </Select>
+
+      <Button type="primary" onClick={handleInterpolate} block style={{ marginTop: "10px" }}>
+        Run Interpolation
+      </Button>
     </Modal>
   );
 };

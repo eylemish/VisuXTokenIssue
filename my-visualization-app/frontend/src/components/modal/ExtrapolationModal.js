@@ -1,70 +1,107 @@
-import React, { useState } from "react";
-import axios from "axios";
-import Plot from "react-plotly.js";
-import { Modal, Button, Input, Select } from "antd";
+import React, {useEffect, useState} from "react";
+import { Modal, Button, Input, Select, message } from "antd";
+import Action from "../Action";
 
-const Extrapolation = ({ visible, onCancel }) => {
-  const [method, setMethod] = useState("linear");  // 选择外推方法
-  const [xData, setXData] = useState([]);  // 原始 X 数据
-  const [yData, setYData] = useState([]);  // 原始 Y 数据
-  const [extrapolateRange, setExtrapolateRange] = useState("");  // 外推范围
-  const [data, setData] = useState(null);  // 存储后端返回的外推结果
+const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
+  const [method, setMethod] = useState("linear");
+  const [datasetId, setDatasetId] = useState(null);
+  const [xColumn, setXColumn] = useState(null);
+  const [yColumn, setYColumn] = useState(null);
+  const [extrapolateRange, setExtrapolateRange] = useState("");
 
-  // 运行外推计算
-  const handleExtrapolate = async () => {
-    const response = await axios.post("http://127.0.0.1:8000/api/extrapolate/", {
-      method: method,
-      x_data: xData,
-      y_data: yData,
-      extrapolate_range: extrapolateRange.split(",").map(val => parseFloat(val.trim())),
+  const [columns, setColumns] = useState([]); // 存储列名
+
+  const datasetManager = uiController.getDatasetManager();
+  const availableDatasets = datasetManager.getAllDatasetsId();
+
+  // **当用户选择数据集时，获取列名**
+  useEffect(() => {
+    if (!datasetId) {
+      setColumns([]);
+      return;
+    }
+
+    const fetchColumns = async () => {
+      const cols = await datasetManager.getDatasetColumns(datasetId);
+      setColumns(cols);
+    };
+
+    fetchColumns();
+  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+
+  const handleExtrapolate = () => {
+    if (!datasetId || !xColumn || !yColumn || !extrapolateRange) {
+      message.error("Please select a dataset, two columns, and enter extrapolation range!");
+      return;
+    }
+
+    const action = new Action("EXECUTE_TOOL", "user", {
+      toolName: "Extrapolation",
+      datasetId,
+      xColumn,
+      yColumn,
+      method,
+      params: { extrapolateRange: extrapolateRange.split(",").map(val => parseFloat(val.trim())) }
     });
-    setData(response.data);
+
+    uiController.handleUserAction(action);
+    message.success("Extrapolation started!");
+    onCancel();
   };
 
   return (
-    <Modal title="Extrapolate Data" open={visible} onCancel={onCancel} footer={null}>
-      {/* 选择外推方法 */}
-      <Select defaultValue="linear" onChange={(value) => setMethod(value)}>
-        <Select.Option value="linear">Linear Extrapolation</Select.Option>
-        <Select.Option value="polynomial">Polynomial Extrapolation</Select.Option>
-        <Select.Option value="exponential">Exponential Extrapolation</Select.Option>
+    <Modal title="Extrapolation" open={visible} onCancel={onCancel} footer={null}>
+      <Select
+        style={{ width: "100%" }}
+        placeholder="Choose a dataset"
+        onChange={setDatasetId}
+      >
+        {availableDatasets.map((id) => (
+          <Select.Option key={id} value={id}>{id}</Select.Option>
+        ))}
       </Select>
 
-      {/* 输入外推范围 */}
+      <Select
+        style={{ width: "100%", marginTop: "10px" }}
+        placeholder="Select X Column"
+        disabled={!datasetId}
+        onChange={setXColumn}
+      >
+        {columns.map((col) => (
+          <Select.Option key={col} value={col}>{col}</Select.Option>
+        ))}
+      </Select>
+
+      <Select
+        style={{ width: "100%", marginTop: "10px" }}
+        placeholder="Select Y Column"
+        disabled={!datasetId}
+        onChange={setYColumn}
+      >
+        {columns.map((col) => (
+          <Select.Option key={col} value={col}>{col}</Select.Option>
+        ))}
+      </Select>
+
+      <Select defaultValue="linear" onChange={setMethod} style={{ width: "100%", marginTop: "10px" }}>
+        <Select.Option value="linear">Linear</Select.Option>
+        <Select.Option value="polynomial">Polynomial</Select.Option>
+        <Select.Option value="exponential">Exponential</Select.Option>
+      </Select>
+
       <Input
         type="text"
         placeholder="Enter X values for extrapolation (comma-separated)"
         value={extrapolateRange}
         onChange={(e) => setExtrapolateRange(e.target.value)}
+        style={{ marginTop: "10px" }}
       />
 
-      {/* 运行外推按钮 */}
-      <Button type="primary" onClick={handleExtrapolate}>Run Extrapolation</Button>
-
-      {/* 显示外推结果 */}
-      {data && (
-        <Plot
-          data={[
-            {
-              x: data.x,
-              y: data.y,
-              mode: "markers",
-              type: "scatter",
-              name: "Original Data",
-            },
-            {
-              x: data.x_extrapolated,
-              y: data.y_extrapolated,
-              mode: "lines",
-              line: { dash: "dash", color: "red" },
-              name: "Extrapolated Curve",
-            }
-          ]}
-          layout={{ title: "Extrapolation Result" }}
-        />
-      )}
+      <Button type="primary" onClick={handleExtrapolate} block style={{ marginTop: "10px" }}>
+        Run Extrapolation
+      </Button>
     </Modal>
   );
 };
 
-export default Extrapolation;
+export default ExtrapolationModal;

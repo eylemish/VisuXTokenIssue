@@ -2,17 +2,19 @@ import ModalController from './modal/ModalController';
 import GraphManager from './graph/GraphManager';
 import GraphWindowController from './graph/GraphWindowController';
 import ToolManager from './tool/ToolManager';
-import Tool from "./tool/Tool";
 import LogManager from "./log/LogManager";
+import DatasetManager from "./file/DatasetManager";
+import TableManager from "./table/TableManager";
 
 class UIController {
   constructor() {
+    this.datasetManager = new DatasetManager();
     this.modalController = new ModalController(); // Manages modal windows
     this.graphManager = new GraphManager(); // Manages graph creation and modification
     this.graphWindowController = new GraphWindowController(this.graphManager); // Manages graph windows
-    this.toolManager = new ToolManager(); // Manages UI tools
+    this.toolManager = new ToolManager(this); // Manages UI tools //change toolManager add uiController in its param
     this.logManager = new LogManager(); // 确保 logManager 全局可用
-    this.initTools(); // 预先注册工具 需要吗？？？
+    this.tableManager = new TableManager(this);
     this.currentDatasetId = null; // 追踪当前数据集
   }
 
@@ -66,20 +68,6 @@ class UIController {
     }
   }
 
-  // 初始化工具 这个主要用于会打开弹窗的那些 这项暂时不用 看情况需不需要保留
-  initTools() {
-    const dataWindow = new Tool("DataWindow");
-    const logWindow = new Tool("LogWindow");
-    const graphWindow = new Tool("GraphWindow");
-
-    this.toolManager.registerTool("DataWindow", dataWindow);
-    this.toolManager.registerTool("LogWindow", logWindow);
-    this.toolManager.registerTool("GraphWindow", graphWindow);
-  }
-
-  getToolManager() {
-    return this.toolManager;
-  }
 
   handleUserAction(action) {
     switch (action.type) {
@@ -107,8 +95,30 @@ class UIController {
         this.graphManager.createGraph(action.type);
         this.graphWindowController.openGraphWindow();
         break;
+
+        {/*来自各个tool的Action，注意这里的参数还没写完*/}
+      case 'EXECUTE_TOOL':
+        this.toolManager.executeTool(action.data.toolName, action.data.datasetId, action.data.params);
+        break;
+
       default:
         console.warn('Unhandled action:', action);
+    }
+  }
+
+
+  //这个是前后端用post连接的地方，待完善，这个只负责传入传出这个动作,toolmamager里可改一部分url
+  async postRequest(url, data) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error(`API request failed: ${url}`, error);
+      throw error;
     }
   }
 
@@ -167,6 +177,14 @@ class UIController {
 
   getLogManager() {
     return this.logManager;
+  }
+
+  getDatasetManager() {
+    return this.datasetManager;
+  }
+
+  getTableManager() {
+    return this.tableManager;
   }
 
 }
