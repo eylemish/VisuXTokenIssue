@@ -355,3 +355,30 @@ class Engine:
                     "correlation": correlation 
                 })
         return suggested_combinations
+
+    def compute_correlation(data: pd.DataFrame, feature_1: str, feature_2: str, method="pearson") -> float:
+        """
+        Compute the correlation between two specified features in a pandas DataFrame.
+
+        :param data: pandas.DataFrame, the input data containing numeric features
+        :param feature_1: str, the name of the first feature (column) to compare
+        :param feature_2: str, the name of the second feature (column) to compare
+        :param method: str, the correlation method to use ("pearson", "spearman", "kendall")
+        :return: float, correlation coefficient between the two features
+        """
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError("Input data must be a pandas DataFrame")
+
+        if feature_1 not in data.columns or feature_2 not in data.columns:
+            raise ValueError(f"Features '{feature_1}' and/or '{feature_2}' not found in the dataset")
+
+        if method == "pearson":
+            correlation = data[feature_1].corr(data[feature_2], method="pearson")
+        elif method == "spearman":
+            correlation = data[feature_1].corr(data[feature_2], method="spearman")
+        elif method == "kendall":
+            correlation = data[feature_1].corr(data[feature_2], method="kendall")
+        else:
+            raise ValueError("Invalid correlation method. Choose from 'pearson', 'spearman', or 'kendall'.")
+
+        return correlation
