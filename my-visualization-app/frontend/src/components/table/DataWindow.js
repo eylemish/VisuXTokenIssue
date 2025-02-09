@@ -92,8 +92,9 @@ import "./DataWindow.css";
 
 const DataWindow = () => {
     const [data, setData] = useState(null);
-    const [selectedFeatures, setSelectedFeatures] = useState([0, 1]); // Seçili sütunlar
+    const [selectedFeatures, setSelectedFeatures] = useState([0, 1]); //Selected columns
 
+    //we need something to use the right features and data
     const features = ["id", "name", "age", "city", "salary"];
 
     useEffect(() => {

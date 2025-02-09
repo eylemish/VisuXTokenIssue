@@ -5,6 +5,7 @@ import { Card, Button } from "antd";
 import GraphComponent from "./GraphComponent";
 
 const GraphWindow = ({ graph, onClose }) => {
+  
     if (!graph) {
     console.error("GraphWindow received undefined graphData");
     return <p style={{ color: "red" }}>Error: No Graph Data</p>;
