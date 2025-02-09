@@ -86,13 +86,14 @@
 // };
 
 // export default DataWindow;
-
 import { useState, useEffect } from "react";
-import './DataWindow.css';
+import { Card } from "antd";
+import "./DataWindow.css";
 
 const DataWindow = () => {
-    const [data, setData] = useState(null); // empty at first
-    const [selectedFeatures, setSelectedFeatures] = useState([0, 1]);
+    const [data, setData] = useState(null);
+    const [selectedFeatures, setSelectedFeatures] = useState([0, 1]); // Seçili sütunlar
+
     const features = ["id", "name", "age", "city", "salary"];
 
     useEffect(() => {
@@ -106,42 +107,43 @@ const DataWindow = () => {
             { "id": 7, "name": "Grace", "age": 29, "city": "Boston", "salary": 58000 },
             { "id": 8, "name": "Hank", "age": 33, "city": "Denver", "salary": 63000 }
         ];
-
         setData(exampleData);
     }, []);
 
-    if (!data) return <p>Data Uploading...</p>; // Veri gelene kadar beklet
+    if (!data) return <p>Data Uploading...</p>;
 
+    // Clicking feature strings
     const handleFeatureClick = (index) => {
         let updatedFeatures = [];
 
-        // If the clicked feature is already selected, bring it to the front and reorder the others
         if (selectedFeatures.includes(index)) {
-            updatedFeatures = [index, ...selectedFeatures.filter(f => f !== index)];
+            updatedFeatures = selectedFeatures.filter(f => f !== index);
         } else {
-            // If it's a new feature, bring it to the front and add the others in order
             updatedFeatures = [index, ...selectedFeatures];
         }
 
-        // Limit the selected features to a maximum of 2
         if (updatedFeatures.length > 2) {
             updatedFeatures = updatedFeatures.slice(0, 2);
         }
 
         setSelectedFeatures(updatedFeatures);
-        //we need logging somewhere to save feature change
     };
 
     const FeatureTable = ({ data, features, selectedFeatures, onFeatureClick }) => {
         return (
             <div className="feature-table">
-                <h3>Feature List</h3>
+                <h3>Feature List:</h3>
+                <h4>Click feature name to change selected features.</h4>
                 <table>
                     <thead>
                         <tr>
                             <th>Data</th>
                             {features.map((feature, index) => (
-                                <th key={index} onClick={() => onFeatureClick(index)}>
+                                <th 
+                                    key={index} 
+                                    className={selectedFeatures.includes(index) ? "selected-feature" : ""}
+                                    onClick={() => onFeatureClick(index)}
+                                >
                                     {feature}
                                 </th>
                             ))}
@@ -152,7 +154,10 @@ const DataWindow = () => {
                             <tr key={rowIndex}>
                                 <td>Data {rowIndex + 1}</td>
                                 {features.map((feature, featureIndex) => (
-                                    <td key={featureIndex}>
+                                    <td 
+                                        key={featureIndex} 
+                                        className={selectedFeatures.includes(featureIndex) ? "selected-column" : ""}
+                                    >
                                         {row[feature]}
                                     </td>
                                 ))}
@@ -165,12 +170,14 @@ const DataWindow = () => {
     };
 
     return (
-        <FeatureTable
-            features={features}
-            data={data}
-            selectedFeatures={selectedFeatures}
-            onFeatureClick={handleFeatureClick}
-        />
+        <Card title="Data Table" style={{ width: "100%", minWidth: "450px", minHeight: "360px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <FeatureTable
+                features={features}
+                data={data}
+                selectedFeatures={selectedFeatures}
+                onFeatureClick={handleFeatureClick}
+            />
+        </Card>
     );
 };
 
