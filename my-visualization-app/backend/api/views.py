@@ -103,44 +103,40 @@ class UploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, *args, **kwargs):
-
         file = request.FILES.get("file")
         if not file:
             return Response({"error": "No file received"}, status=400)
 
+        # 确保上传目录存在
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
+            # 将文件保存到后端
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-
+            # 根据文件类型处理
             if file.name.lower().endswith(".csv"):
-                file_instance = UploadedFile.objects.create(file = file, name = file.name, type = "csv")
-                df = pd.read_csv(file_path)
+                file_instance = UploadedFile.objects.create(file=file, name=file.name, type="csv")
             elif file.name.lower().endswith(".xlsx"):
-                file_instance = UploadedFile.objects.create(file = file, name = file.name, type = "xlsx")
-                df = pd.read_excel(file_path, engine="openpyxl")
+                file_instance = UploadedFile.objects.create(file=file, name=file.name, type="xlsx")
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
 
-            data_preview = df.head().to_dict(orient="records")
-
+            # 返回 dataset_id
             return_data = {
                 "message": f"File '{file.name}' uploaded successfully.",
-                "dataset_id": file_instance.id,
-                "file_path": file_path, #要改成传输dataset_id的形式
-                "data_preview": data_preview
+                "dataset_id": file_instance.id  # 返回唯一的 dataset_id
             }
-
-            return Response(return_data)
+            return Response(return_data, status=201)
 
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
 
 
 class AddDataView(APIView):

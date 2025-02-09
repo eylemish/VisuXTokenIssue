@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Radio, InputNumber, Button, message } from "antd";
 import axios from "axios";
 
-const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction }) => {
+const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datasetId }) => {
   const [method, setMethod] = useState("pca"); // 默认选择 PCA
   const [nComponents, setNComponents] = useState(2); // 目标维度
   const [isProcessing, setIsProcessing] = useState(false); // 处理状态
@@ -13,18 +13,24 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction }) => 
       return;
     }
 
+    if (!datasetId) {
+      message.error("Dataset ID is required for dimensionality reduction.");
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/dimensionality_reduction/", {
+        dataset_id: datasetId, // 传递数据集 ID
         method,
         n_components: nComponents,
       });
 
       // 更新数据集
-      onUpdateDataset(response.data.dataset);
+      onUpdateDataset(response.data.reduced_data);
 
       // 记录日志
-      logAction(`Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions.`);
+      logAction(`Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions on dataset ID ${datasetId}.`);
 
       message.success("Dimensionality reduction successful!");
       onClose(); // 关闭弹窗
