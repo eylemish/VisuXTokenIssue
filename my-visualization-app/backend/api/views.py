@@ -22,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class GetCsrfTokenView(APIView):
     """
-    提供 CSRF Token 给前端
+    Provide CSRF token
     """
     def get(self, request):
-        csrf_token = get_token(request)  # 获取 CSRF Token
+        csrf_token = get_token(request)  # Get CSRF Token
         return JsonResponse({"csrfToken": csrf_token})
 
 
@@ -55,7 +55,7 @@ class HandleUserActionView(APIView):
                 if not data:
                     return JsonResponse({"error": "No data provided for processing"}, status=400)
 
-                # 使用 Pandas 对数据进行简单处理
+                # Use pandas to process data
                 df = pd.DataFrame(data)
                 result = {
                     "columns": df.columns.tolist(),
