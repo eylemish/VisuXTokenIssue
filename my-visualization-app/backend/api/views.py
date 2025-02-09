@@ -36,24 +36,21 @@ class HandleUserActionView(APIView):
         Handle user actions sent from the frontend and return a response.
         """
         try:
-            # 获取前端传递的 JSON 数据
+            # Get JSON data from frontend
             body = json.loads(request.body)
             action = body.get("action", None)
             parameters = body.get("parameters", {})
 
             if not action:
                 return JsonResponse({"error": "No action provided"}, status=400)
-
-            # 根据用户操作执行相应的逻辑
+                
             if action == "fetch_summary":
-                # 示例：返回一个简单的摘要信息
                 summary = {
                     "message": "Summary fetched successfully",
                     "details": parameters.get("details", "No details provided")
                 }
                 return JsonResponse(summary, status=200)
             elif action == "process_data":
-                # 示例：处理数据逻辑
                 data = parameters.get("data", [])
                 if not data:
                     return JsonResponse({"error": "No data provided for processing"}, status=400)
@@ -201,11 +198,11 @@ class FitCurveView(APIView):
             dataset_id = body.get("dataset_id")
             x_feature = body.get("x_feature")
             y_feature = body.get("y_feature")
-            method = body.get("method", "linear")  # 默认为线性拟合
-            degree = body.get("degree", 2)  # 默认为二次多项式拟合
-            initial_params = body.get("initial_params", None)  # 初始参数（如果是指数拟合）
+            method = body.get("method", "linear")  # Default is linear
+            degree = body.get("degree", 2)  # Default degree is 2
+            initial_params = body.get("initial_params", None) 
 
-            # 确保 dataset_id 存在
+            # Make sure that dataset_id exist
             if not dataset_id:
                 return JsonResponse({"error": "File ID is required"}, status=400)
 
@@ -218,7 +215,6 @@ class FitCurveView(APIView):
             # read file
             dataset_df = Engine.data_to_panda(data_file)
 
-            # 调用 utility 中的拟合函数
             params, covariance, fitted_data = Engine.fit_curve(
                 dataset_df, 
                 x_feature, 
@@ -228,7 +224,6 @@ class FitCurveView(APIView):
                 initial_params=initial_params
             )
 
-            # 返回拟合参数和拟合数据
             return JsonResponse({
                 "params": params.tolist(),
                 "covariance": covariance.tolist() if covariance is not None else None,
