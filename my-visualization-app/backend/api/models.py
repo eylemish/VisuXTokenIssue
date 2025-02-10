@@ -13,7 +13,7 @@ class UploadedFile(models.Model):
     @property
     def df(self):
         # 将 records 转换为 pandas DataFrame
-        return panda.DataFrame(self.records)
+        return pd.DataFrame(self.records)
 
     def __str__(self):
         return self.name
