@@ -170,11 +170,11 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
     // Only trigger the action with the selected graph type and features
     const action = {
       type: "CREATE_GRAPH",
-      graphInformation: {
+      graphInfo: {
+        graphName: "My New Graph", // selected graph name by user (will code it later)
         graphData: data,
         graphType: selectedGraphType,  // graph type
         features: selectedFeatures, // selected features
-        graphTitle: "My New Graph", // selected graph name by user (will code it later)
         // xAxisLabel: "X-Axis",  maybe not now
         // yAxisLabel: "Y-Axis", 
         // colorScheme: "blue-red", 
@@ -182,6 +182,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
   };
 
     uiController.handleUserAction(action);
+
     onCancel(); // 关闭 Modal //please comment in english
   };
 

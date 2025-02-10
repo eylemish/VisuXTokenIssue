@@ -60,9 +60,9 @@ class UIController {
         console.log('Dispatching request to backend:', action);
         break;
 
-      {/*来自NewGraphModal的Action，注意这里的参数还没写完*/}
+      {/*来自NewGraphModal的Action，注意这里的参数还没写完*/} //please in english
       case 'CREATE_GRAPH':
-        this.graphManager.createGraph(action.type);
+        this.graphManager.createGraph(action.graphInfo);
         this.graphWindowController.openGraphWindow();
         break;
 

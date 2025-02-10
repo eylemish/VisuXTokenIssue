@@ -1,5 +1,6 @@
 import { enableMock, mockGraphs } from "./mockData";
 import VisualizationManager from "./VisualizationManager";
+import Graph from "./Graph";
 
 class GraphManager {
   constructor() {
@@ -25,14 +26,45 @@ class GraphManager {
     }
   }
 
-  createGraph(name, type, dataset, style) {
+  // createGraph(name, type, dataset, style) {
+  //   const graphId = `graph_${Date.now()}`;
+  //   const newGraph = { id: graphId, name, type, dataset, style };
+  //   this.graphs.set(graphId, newGraph);
+  //   this.currentGraph = newGraph;
+  //   console.log(`Created Graph: ${name} (ID: ${graphId})`);
+  //   return newGraph;
+  // }
+
+  createGraph(graphInfo) {
     const graphId = `graph_${Date.now()}`;
-    const newGraph = { id: graphId, name, type, dataset, style };
-    this.graphs.set(graphId, newGraph);
-    this.currentGraph = newGraph;
-    console.log(`Created Graph: ${name} (ID: ${graphId})`);
-    return newGraph;
+    const newGraph = new Graph(
+      graphId,
+      graphInfo.graphName,
+      graphInfo.graphData,
+      graphInfo.graphType,
+      graphInfo.selectedFeatures,
+      {}
+    )
+    
+    this.addGraphToMap(newGraph);
   }
+
+  addGraphToMap(graph) {
+    if (!(graph instanceof Graph)) {
+      console.error("Invalid Graph object.");
+      return false;
+    }
+
+    if (this.graphs.has(graph.id)) {
+      console.warn(`Graph with ID ${graph.id} already exists in the map.`);
+      return false;
+    }
+
+    this.graphs.set(graph.id, graph);
+    console.log(`Graph (ID: ${graph.id}) added to map.`);
+    return true;
+  }
+
 
   deleteGraph(graphId) {
     if (this.graphs.has(graphId)) {
