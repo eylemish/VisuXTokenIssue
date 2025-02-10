@@ -6,10 +6,31 @@ import Sidebar from './components/homepage/Sidebar';
 import HeaderNav from './components/homepage/Header';
 import LayoutContainer from './components/homepage/Layout';
 import ModalCollection from "./components/modal/ModalCollection";
+import { useEffect } from "react";
 
 const { Header, Sider, Content } = Layout;
 
+const fetchCsrfToken = async () => {
+  try {
+    const response = await fetch("http://localhost:8000/api/get_csrf_token/", {
+      credentials: "include", // 确保 Django 发送 cookies
+    });
+    const data = await response.json();
+    // 存储到 localStorage 以便后续请求使用
+    document.cookie = `csrftoken=${data.csrfToken}; path=/;`;
+    localStorage.setItem("csrfToken", data.csrfToken);
+
+    // 在浏览器弹出 CSRF 令牌（仅用于调试）
+
+  } catch (error) {
+    console.error("Error fetching CSRF token:", error);
+  }
+};
+
 const App = () => {
+  useEffect(() => {
+    fetchCsrfToken();
+  }, []);
   const [uiController] = useState(new UIController());
 
   //这些是管理graph data log 三类界面的开闭，其中graph应该能管理所有graph窗口的开关 之后改

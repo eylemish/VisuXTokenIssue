@@ -8,7 +8,7 @@ class UploadedFile(models.Model):
     name = models.CharField(max_length=255)  # file name
     upload_time = models.DateTimeField(auto_now_add=True)  # upload time
     file_path = models.FileField(upload_to='uploads/')  # file path
-    file_type = models.CharField(max_length=10) # file type
+    file_type = models.CharField(max_length=10, default="csv") # file type
 
 class AnalysisResult(models.Model):
     # Save analysis consequense
@@ -42,19 +42,21 @@ class AuditLog(models.Model):
         ('DATA_OVERSAMPLE', 'Data Oversample')
     ]
 
-    tool_type = models.CharField(max_length=50, choices=TOOL_TYPES)
+    tool_type = models.CharField(max_length=50, choices=TOOL_TYPES, default="")
     timestamp = models.DateTimeField(default=now)
-    params = models.CharField(max_length=50)
+    params = models.CharField(max_length=50, default= "")
     is_reverted = models.BooleanField(default=False)
 
     def revert(self):
         self.is_reverted = True
         self.save()
 
+"""
 class CSVFile(models.Model):
-    name = models.CharField(max_length=255) 
+    name = models.CharField(max_length=255, default="") 
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 class CSVRow(models.Model):
     file = models.ForeignKey(CSVFile, on_delete=models.CASCADE)
     data = models.JSONField()
+"""

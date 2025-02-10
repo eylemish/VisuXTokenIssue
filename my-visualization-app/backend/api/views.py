@@ -26,6 +26,7 @@ class GetCsrfTokenView(APIView):
     """
     def get(self, request):
         csrf_token = get_token(request)  # Get CSRF Token
+        print(f"Returning CSRF Token: {csrf_token}")
         return JsonResponse({"csrfToken": csrf_token})
 
 
@@ -94,7 +95,6 @@ class DataVisualizationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadView(APIView):
     parser_classes = [MultiPartParser]
@@ -118,9 +118,9 @@ class UploadView(APIView):
 
             # 根据文件类型处理
             if file.name.lower().endswith(".csv"):
-                file_instance = UploadedFile.objects.create(file=file, name=file.name, type="csv")
+                file_instance = UploadedFile.objects.create(file_path=file, name=file.name, file_type="csv")
             elif file.name.lower().endswith(".xlsx"):
-                file_instance = UploadedFile.objects.create(file=file, name=file.name, type="xlsx")
+                file_instance = UploadedFile.objects.create(file_path=file, name=file.name, file_type="xlsx")
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
 
@@ -132,6 +132,7 @@ class UploadView(APIView):
             return Response(return_data, status=201)
 
         except Exception as e:
+            print("❌ 发生错误:", str(e))
             return Response({"error": str(e)}, status=500)
 
 
