@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+import pandas as panda
 
 # Create your models here.
 class UploadedFile(models.Model):
@@ -55,6 +56,12 @@ class Dataset(models.Model):
     name = models.CharField(max_length=255)  # Name of data set
     features = models.JSONField(default=list)  # Store column names, e.g. [‘age’, ‘salary’, ‘city’].
     records = models.JSONField(default=list)  # Store data, e.g. [{‘age’: 25, ‘salary’: 50000}]
+    df = pd.DataFrame(dataset.records)
+    df = df[dataset.features]
+    last_dataset = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="next")
+    next_dataset = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="prev")
+    dataset_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    
 
     def __str__(self):
         return self.name
