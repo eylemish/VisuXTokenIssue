@@ -43,8 +43,8 @@ class AuditLog(models.Model):
     ]
 
     tool_type = models.CharField(max_length=50, choices=TOOL_TYPES, default="")
-    timestamp = models.DateTimeField(default=now)
-    params = models.CharField(max_length=50, default= "")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    params = models.JSONField(default=dict)
     is_reverted = models.BooleanField(default=False)
 
     def revert(self):
