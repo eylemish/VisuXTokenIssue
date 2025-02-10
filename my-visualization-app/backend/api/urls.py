@@ -1,8 +1,9 @@
 from django.urls import path
-#from .views import DataVisualizationView,ExportLogView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, UploadView, AddDataView, ApplyPcaView, FileDownloadView
-from .views import DataVisualizationView, OversampleDataView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, UploadView, \
+from .views import DataVisualizationView, OversampleDataView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, \
+    UploadView, \
     AddDataView, ApplyPcaView, HandleUserActionView, ExportLogView, ExtrapolateView, FitCurveView, InterpolateView, \
-    CorrelationView, DimensionalReductionView, GetCsrfTokenView
+    CorrelationView, DimensionalReductionView, GetCsrfTokenView, DatasetDetailView, DatasetColumnsView, \
+    UploadDatasetView
 
 urlpatterns = [
     path('visualize/', DataVisualizationView.as_view(), name='visualize'),
@@ -20,5 +21,7 @@ urlpatterns = [
     path('dimensional_reduction/', DimensionalReductionView.as_view(), name='dimensional_reduction'),
     path('oversample_data/', OversampleDataView.as_view(), name='oversample_data'),
     path("get_csrf_token/", GetCsrfTokenView.as_view(), name="get_csrf_token"),
-    #path('download/', FileDownloadView.as_view(), name='file_download')
+    path('datasets/<int:dataset_id>/', DatasetDetailView.as_view(), name='dataset-detail'),
+    path('dataset/<int:dataset_id>/columns/', DatasetColumnsView.as_view(), name='dataset-columns'),
+    path('datasets/', UploadDatasetView.as_view(), name='upload-dataset'),
 ]

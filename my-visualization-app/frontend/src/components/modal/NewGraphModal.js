@@ -93,7 +93,7 @@
 
 
 import { useState, useEffect } from "react";
-import { Modal, Tabs, Card, Row, Col, Button, Checkbox } from "antd";
+import { Modal, Tabs, Card, Row, Col, Button, Checkbox, message } from "antd";
 import {
   BarChartOutlined,
   LineChartOutlined,
@@ -104,10 +104,11 @@ import {
   PictureOutlined,
   DotChartOutlined,
 } from "@ant-design/icons";
+import datasetManager from "../file/DatasetManager";
 
 const { TabPane } = Tabs;
 
-// 定义图表选项 后期添加更多种类图表 // please comment in english
+// Define chart options (more can be added later)
 const chartCategories = {
   "Basic Charts": [
     { type: "scatter", name: "Scatter Plot", icon: <PictureOutlined />, requiredFeatures: 2 },
@@ -124,73 +125,81 @@ const chartCategories = {
 };
 
 const GraphModal = ({ visible, onCancel, uiController }) => {
-  const [data, setData] = useState(null);
-  //const [features, setFeatures] = useState([]);
+  const [features, setFeatures] = useState([]); // Features from backend
   const [selectedGraphType, setSelectedGraphType] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [numFeatures, setNumFeatures] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // we need something to get actual data and features
-
-  const features = ["id", "name", "age", "city", "salary"];
-
-   useEffect(() => {
-      const exampleData = [
-            { "id": 1, "name": "Alice", "age": 25, "city": "New York", "salary": 50000 },
-            { "id": 2, "name": "Bob", "age": 30, "city": "Los Angeles", "salary": 60000 },
-            { "id": 3, "name": "Charlie", "age": 28, "city": "Chicago", "salary": 55000 },
-            { "id": 4, "name": "David", "age": 35, "city": "Houston", "salary": 70000 },
-            { "id": 5, "name": "Eve", "age": 27, "city": "San Francisco", "salary": 65000 },
-            { "id": 6, "name": "Frank", "age": 32, "city": "Seattle", "salary": 62000 },
-            { "id": 7, "name": "Grace", "age": 29, "city": "Boston", "salary": 58000 },
-            { "id": 8, "name": "Hank", "age": 33, "city": "Denver", "salary": 63000 }
-        ];
-        setData(exampleData);
-    }, []);
-
-    const getRequiredFeatures = (graphType) => {
-      for (let category in chartCategories) {
-        const chart = chartCategories[category].find((chart) => chart.type === graphType);
-        if (chart) return chart.requiredFeatures;
+  // Fetch dataset features from backend
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      const datasetId = datasetManager.getCurrentDatasetId(); // Get the latest dataset ID
+      if (!datasetId) {
+        message.warning("No dataset ID found. Please upload a dataset.");
+        return;
       }
-      return 0; // Default to 0 if no chart type matches
+
+      setLoading(true);
+      try {
+        const columns = await datasetManager.getDatasetColumns(datasetId); // Fetch columns
+        setFeatures(columns);
+      } catch (error) {
+        message.error("Failed to load dataset features.");
+      } finally {
+        setLoading(false);
+      }
     };
-  
-    // Update numFeatures whenever the selectedGraphType changes
-    useEffect(() => {
-      if (selectedGraphType) {
-        const required = getRequiredFeatures(selectedGraphType);
-        setNumFeatures(required);
-      }
-    }, [selectedGraphType]);
+
+    if (visible) {
+      fetchFeatures(); // Only fetch when modal is visible
+    }
+  }, [visible]);
+
+  const getRequiredFeatures = (graphType) => {
+    for (let category in chartCategories) {
+      const chart = chartCategories[category].find((chart) => chart.type === graphType);
+      if (chart) return chart.requiredFeatures;
+    }
+    return 0; // Default if no match
+  };
+
+  useEffect(() => {
+    if (selectedGraphType) {
+      const required = getRequiredFeatures(selectedGraphType);
+      setNumFeatures(required);
+    }
+  }, [selectedGraphType]);
 
   const handleConfirm = () => {
-    if (!data || selectedFeatures.length !== numFeatures) return;
+    if (selectedFeatures.length !== numFeatures) {
+      message.warning(`Please select exactly ${numFeatures} features.`);
+      return;
+    }
 
-    // Only trigger the action with the selected graph type and features
+    const datasetId = datasetManager.getCurrentDatasetId();
+    if (!datasetId) {
+      message.error("No dataset available.");
+      return;
+    }
+
     const action = {
       type: "CREATE_GRAPH",
       graphInfo: {
-        graphName: "My New Graph", // selected graph name by user (will code it later)
-        graphData: data,
-        graphType: selectedGraphType,  // graph type
-        features: selectedFeatures, // selected features
-        // xAxisLabel: "X-Axis",  maybe not now
-        // yAxisLabel: "Y-Axis", 
-        // colorScheme: "blue-red", 
-    },
-  };
+        graphName: "My New Graph",
+        datasetId, // Include dataset ID
+        graphType: selectedGraphType,
+        features: selectedFeatures,
+      },
+    };
 
     uiController.handleUserAction(action);
-
-    onCancel(); // 关闭 Modal //please comment in english
+    onCancel(); // Close Modal
   };
 
   const handleFeatureSelect = (checkedValues) => {
-    setSelectedFeatures(checkedValues);  // Updating the selected features
-  };  
-
-
+    setSelectedFeatures(checkedValues);
+  };
 
   return (
     <Modal
@@ -206,40 +215,46 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
         </Button>,
       ]}
     >
-      <Tabs defaultActiveKey="1">
-        {Object.entries(chartCategories).map(([category, charts]) => (
-          <TabPane tab={category} key={category}>
-            <Row gutter={[16, 16]}>
-              {charts.map((chart) => (
-                <Col span={6} key={chart.type}>
-                  <Card
-                    hoverable
-                    style={{
-                      textAlign: "center",
-                      border: selectedGraphType === chart.type ? "2px solid #1890ff" : "1px solid #ccc",
-                    }}
-                    onClick={() => setSelectedGraphType(chart.type)}
-                  >
-                    <div style={{ fontSize: "24px", marginBottom: "8px" }}>{chart.icon}</div>
-                    <p>{chart.name}</p>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </TabPane>
-        ))}
-      </Tabs>
+      {loading ? (
+        <p>Loading dataset features...</p>
+      ) : (
+        <>
+          <Tabs defaultActiveKey="1">
+            {Object.entries(chartCategories).map(([category, charts]) => (
+              <TabPane tab={category} key={category}>
+                <Row gutter={[16, 16]}>
+                  {charts.map((chart) => (
+                    <Col span={6} key={chart.type}>
+                      <Card
+                        hoverable
+                        style={{
+                          textAlign: "center",
+                          border: selectedGraphType === chart.type ? "2px solid #1890ff" : "1px solid #ccc",
+                        }}
+                        onClick={() => setSelectedGraphType(chart.type)}
+                      >
+                        <div style={{ fontSize: "24px", marginBottom: "8px" }}>{chart.icon}</div>
+                        <p>{chart.name}</p>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </TabPane>
+            ))}
+          </Tabs>
 
-      {/* Display Feature Selection */}
-      {selectedGraphType && (
-        <div>
-          <h3>Required Features ({numFeatures}):</h3>
-          <Checkbox.Group
-            options={features.map((feature) => ({ label: feature, value: feature }))}
-            value={selectedFeatures}
-            onChange={handleFeatureSelect}
-          />
-        </div>
+          {/* Display Feature Selection */}
+          {selectedGraphType && (
+            <div>
+              <h3>Required Features ({numFeatures}):</h3>
+              <Checkbox.Group
+                options={features.map((feature) => ({ label: feature, value: feature }))}
+                value={selectedFeatures}
+                onChange={handleFeatureSelect}
+              />
+            </div>
+          )}
+        </>
       )}
     </Modal>
   );

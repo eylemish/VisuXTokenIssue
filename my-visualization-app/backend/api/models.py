@@ -51,6 +51,14 @@ class AuditLog(models.Model):
         self.is_reverted = True
         self.save()
 
+class Dataset(models.Model):
+    name = models.CharField(max_length=255)  # Name of data set
+    features = models.JSONField(default=list)  # Store column names, e.g. [‘age’, ‘salary’, ‘city’].
+    records = models.JSONField(default=list)  # Store data, e.g. [{‘age’: 25, ‘salary’: 50000}]
+
+    def __str__(self):
+        return self.name
+
 """
 class CSVFile(models.Model):
     name = models.CharField(max_length=255, default="") 

@@ -1,13 +1,17 @@
 import os
 from pathlib import Path
+
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+
+from backend.api.serializers import DatasetSerializer
 from backend.server_handler.engine import Engine
 from backend.server_handler.log_manager import export_logs
 from django.http import JsonResponse
-from backend.api.models import UploadedFile
+from backend.api.models import UploadedFile, Dataset
 from django.middleware.csrf import get_token
 from rest_framework.views import APIView
 import json
@@ -102,19 +106,19 @@ class UploadView(APIView):
         if not file:
             return Response({"error": "No file received"}, status=400)
 
-        # 确保上传目录存在
+        # Ensure that the upload directory exists
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # 将文件保存到后端
+            # Save files to the back-end
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # 根据文件类型处理
+            # Processed according to document type
             if file.name.lower().endswith(".csv"):
                 file_instance = UploadedFile.objects.create(file_path=file, name=file.name, file_type="csv")
             elif file.name.lower().endswith(".xlsx"):
@@ -122,18 +126,58 @@ class UploadView(APIView):
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
 
-            # 返回 dataset_id
+            # Return dataset_id
             return_data = {
                 "message": f"File '{file.name}' uploaded successfully.",
-                "dataset_id": file_instance.id  # 返回唯一的 dataset_id
+                "dataset_id": file_instance.id
             }
             return Response(return_data, status=201)
 
         except Exception as e:
-            print("❌ 发生错误:", str(e))
+            print("error:", str(e))
             return Response({"error": str(e)}, status=500)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class DatasetDetailView(APIView):
+    """
+    Get full dataset (data + column names)
+    """
+    def get(self, request, dataset_id):
+        try:
+            dataset = Dataset.objects.get(id=dataset_id)
+            serializer = DatasetSerializer(dataset)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Dataset.DoesNotExist:
+            return Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class DatasetColumnsView(APIView):
+    """
+    Get only the column names of the dataset
+    """
+    def get(self, request, dataset_id):
+        try:
+            dataset = Dataset.objects.get(id=dataset_id)
+            return Response({"columns": dataset.features}, status=status.HTTP_200_OK)
+        except Dataset.DoesNotExist:
+            return Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UploadDatasetView(APIView):
+    """
+    Uploading data sets and storing them in the database
+    """
+    def post(self, request):
+        serializer = DatasetSerializer(data=request.data)
+
+        if serializer.is_valid():
+            dataset = serializer.save()  # save dataset
+            return Response(
+                {"message": "Dataset uploaded successfully!", "dataset_id": dataset.id},
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AddDataView(APIView):
     def post(self, request):
@@ -330,22 +374,22 @@ class CorrelationView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-@method_decorator(csrf_exempt, name="dispatch")  # ✅ 允许无 CSRF 保护请求（仅用于测试）
+@method_decorator(csrf_exempt, name="dispatch")
 class DimensionalReductionView(APIView):
     def post(self, request):
         try:
-            # 解析请求体
+            # Parsing the request body
             body = json.loads(request.body)
             dataset_id = body.get("dataset_id")
-            method = body.get("method", "pca").lower()  # ✅ 统一小写，防止大小写不匹配
+            method = body.get("method", "pca").lower()  # Unified lowercase to prevent case mismatch
             n_components = body.get("n_components", 2)
 
-            # ✅ 仅允许支持的方法
+            # Allow only supported methods
             valid_methods = ["pca", "tsne", "umap"]
             if method not in valid_methods:
                 return JsonResponse({"error": f"Invalid dimensional reduction method. Choose from {valid_methods}."}, status=400)
 
-            # ✅ 确保 dataset_id 存在
+            # Ensure dataset_id exists
             if not dataset_id:
                 return JsonResponse({"error": "Missing dataset_id."}, status=400)
 
@@ -354,17 +398,17 @@ class DimensionalReductionView(APIView):
             except UploadedFile.DoesNotExist:
                 return JsonResponse({"error": f"Dataset with ID {dataset_id} not found."}, status=404)
 
-            # ✅ 转换数据
+            # Converting data
             dataset_df = Engine.data_to_panda(dataset_id)
 
-            # ✅ 执行降维
+            # Perform dim reduction
             reduced_data = Engine.dimensional_reduction(
                 dataset_df,
                 method=method,
                 n_components=n_components
             )
 
-            # ✅ 返回结果
+            # return
             reduced_data_json = reduced_data.to_dict(orient="records")
             return JsonResponse({"reduced_data": reduced_data_json}, status=200)
 
