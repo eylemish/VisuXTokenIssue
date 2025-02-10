@@ -51,11 +51,6 @@ class Engine:
             pca = PCA(n_components=n_components)
             transformed_data = pca.fit_transform(data)
             columns = [f'PC{i + 1}' for i in range(n_components)]
-            AuditLog.objects.create(
-                tool_type="PCA",
-                timestamp=now(),
-                params="{'n_components': 2}",  # 这里可以存 JSON 或字符串
-                is_reverted=False )
             return pd.DataFrame(transformed_data, columns=columns)
         except Exception as e:
             raise ValueError(f"Error in PCA processing: {e}")
