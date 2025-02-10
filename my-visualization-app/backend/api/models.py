@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
-import pandas as panda
+import pandas as pd
 
 # Create your models here.
 class UploadedFile(models.Model):
