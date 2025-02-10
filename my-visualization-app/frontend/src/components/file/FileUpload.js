@@ -3,7 +3,7 @@ import { Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import Action from "../Action";
 
-// 获取 CSRF Token（适用于 Django）
+// Get CSRF Token（fit Django）
 function getCSRFToken() {
   let cookieValue = null;
   if (document.cookie) {
@@ -22,7 +22,7 @@ const FileUpload = ({ datasetManager }) => {
   const [fileName, setFileName] = useState("No file selected");
   const [uploading, setUploading] = useState(false);
 
-  // 处理文件选择
+  // Deal with file select
   const uploadProps = {
     beforeUpload: (file) => {
       const isSupportedFormat = ["csv", "xlsx"].includes(file.name.split(".").pop().toLowerCase());
@@ -37,7 +37,7 @@ const FileUpload = ({ datasetManager }) => {
       setFile(file);
       setFileName(file.name);
       console.log("📁 File selected:", file.name);
-      return false; // 阻止自动上传
+      return false; // block automatic upload
     },
     onRemove: () => {
       setFile(null);
@@ -47,7 +47,7 @@ const FileUpload = ({ datasetManager }) => {
     showUploadList: false,
   };
 
-  // 处理上传
+  // Deal with upload
   const handleUpload = async () => {
     if (!file) {
       message.error("Please select a file first.");
@@ -61,9 +61,9 @@ const FileUpload = ({ datasetManager }) => {
     try {
       const response = await fetch("http://127.0.0.1:8000/api/upload/", {
         method: "POST",
-        headers: { "X-CSRFToken": getCSRFToken() }, // 发送 CSRF Token
+        headers: { "X-CSRFToken": getCSRFToken() }, // send CSRF Token
         body: formData,
-        credentials: "include", // 允许携带 Cookie
+        credentials: "include", // allow to include Cookie
       });
 
       if (!response.ok) {
@@ -74,7 +74,7 @@ const FileUpload = ({ datasetManager }) => {
       console.log("✅ Upload response:", data);
 
       if (data.dataset_id) {
-        // 将 dataset_id 添加到 DatasetManager
+        // add dataset_id to DatasetManager
         datasetManager.addDatasetId(data.dataset_id);
         message.success(`File uploaded successfully. Dataset ID: ${data.dataset_id}`);
       } else {
