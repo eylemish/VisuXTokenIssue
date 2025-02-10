@@ -1,9 +1,7 @@
 import React from "react";
 import FileUpload from "./FileUpload";
 import FileDownload from "./FileDownload";
-import DatasetManager from "./DatasetManager";
-
-const datasetManager = new DatasetManager();
+import datasetManager from "./DatasetManager";
 
 const FileComponent = ({ uiController }) => {
     if (!uiController) {

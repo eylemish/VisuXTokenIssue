@@ -3,48 +3,18 @@ import GraphManager from './graph/GraphManager';
 import GraphWindowController from './graph/GraphWindowController';
 import ToolManager from './tool/ToolManager';
 import LogManager from "./log/LogManager";
-import DatasetManager from "./file/DatasetManager";
 import TableManager from "./table/TableManager";
+import datasetManager from "./file/DatasetManager";
 
 class UIController {
   constructor() {
-    this.datasetManager = new DatasetManager();
     this.modalController = new ModalController(); // Manages modal windows
     this.graphManager = new GraphManager(); // Manages graph creation and modification
     this.graphWindowController = new GraphWindowController(this.graphManager); // Manages graph windows
     this.toolManager = new ToolManager(this); // Manages UI tools //change toolManager add uiController in its param
     this.logManager = new LogManager(); // 确保 logManager 全局可用
     this.tableManager = new TableManager(this);
-    this.currentDatasetId = null; // 追踪当前数据集
-  }
-
-  // 上传文件并更新当前数据集
-  async uploadFile(file, onFileUploaded) {
-    if (!file) {
-      alert("Please select a file first!");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/upload/", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-
-      if (data.error) {
-        alert(`Upload failed: ${data.error}`);
-      } else {
-        this.currentDatasetId = data.datasetId;
-        onFileUploaded(data.fileName);
-        alert(`File uploaded successfully! Dataset ID: ${data.datasetId}`);
-      }
-    } catch (error) {
-      alert("Upload failed. Please try again.");
-    }
+    this.datasetManager = datasetManager;
   }
 
   // 下载文件

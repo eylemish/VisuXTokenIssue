@@ -1,7 +1,5 @@
 import os
 from pathlib import Path
-
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from django.views.decorators.csrf import csrf_exempt
@@ -332,34 +330,49 @@ class CorrelationView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+@method_decorator(csrf_exempt, name="dispatch")  # ✅ 允许无 CSRF 保护请求（仅用于测试）
 class DimensionalReductionView(APIView):
     def post(self, request):
         try:
-            # Parse the request body
+            # 解析请求体
             body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")  # The ID of the uploaded file
-            method = body.get("method", "PCA")  # The method for dimensional reduction ("PCA", "t-SNE", "LDA")
-            n_components = body.get("n_components", 2)  # The number of components to reduce to
+            dataset_id = body.get("dataset_id")
+            method = body.get("method", "pca").lower()  # ✅ 统一小写，防止大小写不匹配
+            n_components = body.get("n_components", 2)
 
-            # Fetch the uploaded file by its ID
-            dataset = UploadedFile.objects.get(id=dataset_id)
-            
-            # Convert the file to pandas DataFrame
-            dataset_df = Engine.data_to_panda(dataset)
-            
-            # Perform dimensional reduction
+            # ✅ 仅允许支持的方法
+            valid_methods = ["pca", "tsne", "umap"]
+            if method not in valid_methods:
+                return JsonResponse({"error": f"Invalid dimensional reduction method. Choose from {valid_methods}."}, status=400)
+
+            # ✅ 确保 dataset_id 存在
+            if not dataset_id:
+                return JsonResponse({"error": "Missing dataset_id."}, status=400)
+
+            try:
+                dataset = UploadedFile.objects.get(id=dataset_id)
+            except UploadedFile.DoesNotExist:
+                return JsonResponse({"error": f"Dataset with ID {dataset_id} not found."}, status=404)
+
+            # ✅ 转换数据
+            dataset_df = Engine.data_to_panda(dataset_id)
+
+            # ✅ 执行降维
             reduced_data = Engine.dimensional_reduction(
-                dataset_df, 
-                method=method, 
+                dataset_df,
+                method=method,
                 n_components=n_components
             )
-            
-            # Return the reduced data as a JSON response
+
+            # ✅ 返回结果
             reduced_data_json = reduced_data.to_dict(orient="records")
-            return JsonResponse({"reduced_data": reduced_data_json})
+            return JsonResponse({"reduced_data": reduced_data_json}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format."}, status=400)
 
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            return JsonResponse({"error": str(e)}, status=500)
 
 class OversampleDataView(APIView):
     def post(self, request):

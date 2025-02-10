@@ -18,39 +18,91 @@ class Engine:
     def __init__(self):
         pass
 
-    def data_to_panda(data: UploadedFile):
-        file_path = data.file_path.path
+    @staticmethod
+    def data_to_panda(dataset_id: int) -> pd.DataFrame:
+        """
+        根据 dataset_id 获取数据并转换为 Pandas DataFrame
+        """
+        try:
+            dataset = UploadedFile.objects.get(id=dataset_id)
+            file_path = dataset.file_path.path
 
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"File not found: {file_path}")
 
-        if data.file_type == "csv":
-            return pd.read_csv(file_path)
-        elif data.file_type == "xlsx":
-            return pd.read_excel(file_path, engine="openpyxl")
-        else:
-            raise ValueError(f"Unsupported file type: {data.file_type}")
+            if dataset.file_type == "csv":
+                return pd.read_csv(file_path)
+            elif dataset.file_type == "xlsx":
+                return pd.read_excel(file_path, engine="openpyxl")
+            else:
+                raise ValueError(f"Unsupported file type: {dataset.file_type}")
 
+        except UploadedFile.DoesNotExist:
+            raise ValueError(f"Dataset with ID {dataset_id} not found.")
+        except Exception as e:
+            raise ValueError(f"Error loading dataset: {e}")
 
-
-    # Apply PCA with given data and number of dimensions after dimensionality reduction.
-    # The default number of dimensions after dimensionality reduction is 2.
-    def apply_pca(self, data: pd.DataFrame,n_components: int = 2) -> pd.DataFrame:
+    @staticmethod
+    def apply_pca(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
+        """
+        执行 PCA 降维
+        """
         try:
             pca = PCA(n_components=n_components)
             transformed_data = pca.fit_transform(data)
             columns = [f'PC{i + 1}' for i in range(n_components)]
-            return pd.DataFrame(transformed_data, columns = columns)
+            return pd.DataFrame(transformed_data, columns=columns)
         except Exception as e:
             raise ValueError(f"Error in PCA processing: {e}")
 
-    def apply_tsne(self, n_components):
-        tsne = TSNE(n_components=n_components)
-        return tsne.fit_transform(self.data)
+    @staticmethod
+    def apply_tsne(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
+        """
+        执行 t-SNE 降维
+        """
+        try:
+            tsne = TSNE(n_components=n_components)
+            transformed_data = tsne.fit_transform(data)
+            columns = [f'TSNE{i + 1}' for i in range(n_components)]
+            return pd.DataFrame(transformed_data, columns=columns)
+        except Exception as e:
+            raise ValueError(f"Error in t-SNE processing: {e}")
 
-    def apply_umap(self, n_components):
-        reducer = umap.UMAP(n_components=n_components)
-        return reducer.fit_transform(self.data)
+    @staticmethod
+    def apply_umap(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
+        """
+        执行 UMAP 降维
+        """
+        try:
+            reducer = umap.UMAP(n_components=n_components)
+            transformed_data = reducer.fit_transform(data)
+            columns = [f'UMAP{i + 1}' for i in range(n_components)]
+            return pd.DataFrame(transformed_data, columns=columns)
+        except Exception as e:
+            raise ValueError(f"Error in UMAP processing: {e}")
+
+    @staticmethod
+    def dimensional_reduction(data: pd.DataFrame, method: str, n_components: int = 2) -> pd.DataFrame:
+        """
+        根据指定方法执行降维
+        """
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError("Input data must be a pandas DataFrame.")
+
+        # 选择数值型数据
+        numeric_data = data.select_dtypes(include=['number'])
+        if numeric_data.empty:
+            raise ValueError("Dataset does not contain numeric data suitable for dimensionality reduction.")
+
+        # 执行降维
+        if method == "pca":
+            return Engine.apply_pca(numeric_data, n_components)
+        elif method == "tsne":
+            return Engine.apply_tsne(numeric_data, n_components)
+        elif method == "umap":
+            return Engine.apply_umap(numeric_data, n_components)
+        else:
+            raise ValueError(f"Unsupported dimensionality reduction method: {method}")
     """
     # Do interpolate with given data, given kind of interpolation, the number of generated data and the given range.
     # The default generated kind is linear.
@@ -318,36 +370,6 @@ class Engine:
 
         except Exception as e:
             raise ValueError(f"Error in oversampling data: {e}")
-
-    def dimensional_reduction(data: pd.DataFrame, method="PCA", n_components=2):
-        """
-        Perform dimensionality reduction on a given pandas DataFrame.
-
-        :param data: pandas.DataFrame, input data
-        :param method: str, reduction method ("PCA", "t-SNE", "LDA")
-        :param n_components: int, target dimension after reduction
-        :return: pandas.DataFrame, transformed data
-        """
-
-        if not isinstance(data, pd.DataFrame):
-            raise TypeError("Input data must be a pandas DataFrame")
-
-        if method == "PCA":
-            reducer = PCA(n_components=n_components)
-        elif method == "t-SNE":
-            reducer = TSNE(n_components=n_components)
-        elif method == "LDA":
-            reducer = LDA(n_components=n_components)
-        elif method == "UMAP":
-            reducer = umap.UMAP(n_components=n_components)
-        else:
-            raise ValueError("Invalid dimensional reduction method. Choose from 'PCA', 't-SNE', or 'LDA'.")
-
-        reduced_data = reducer.fit_transform(data)
-
-        # back to pandas DataFrame
-        column_names = [f"Component_{i+1}" for i in range(n_components)]
-        return pd.DataFrame(reduced_data, columns=column_names)
 
     def suggest_feature_dropping(dataset: pd.DataFrame, correlation_threshold=0.95, variance_threshold=0.01):
         """
