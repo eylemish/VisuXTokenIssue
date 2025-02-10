@@ -5,11 +5,18 @@ import pandas as pd
 
 # Create your models here.
 class UploadedFile(models.Model):
-    # Save file information
-    name = models.CharField(max_length=255)  # file name
-    upload_time = models.DateTimeField(auto_now_add=True)  # upload time
-    file_path = models.FileField(upload_to='uploads/')  # file path
-    file_type = models.CharField(max_length=10, default="csv") # file type
+    # 保存文件信息
+    name = models.CharField(max_length=255)  # Name of data set
+    features = models.JSONField(default=list)  # Store column names, e.g. [‘age’, ‘salary’, ‘city’].
+    records = models.JSONField(default=list)  # Store data, e.g. [{‘age’: 25, ‘salary’: 50000}]
+
+    @property
+    def df(self):
+        # 将 records 转换为 pandas DataFrame
+        return panda.DataFrame(self.records)
+
+    def __str__(self):
+        return self.name
 
 class AnalysisResult(models.Model):
     # Save analysis consequense
@@ -47,6 +54,8 @@ class AuditLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     params = models.JSONField(default=dict)
     is_reverted = models.BooleanField(default=False)
+    uploaded_file = models.ForeignKey(UploadedFile, on_delete=models.CASCADE, related_name='audit_logs')
+
 
     def revert(self):
         self.is_reverted = True
