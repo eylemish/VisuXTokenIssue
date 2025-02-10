@@ -11,7 +11,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.feature_selection import VarianceThreshold
 from scipy.interpolate import interp1d, UnivariateSpline
 from itertools import combinations
-from backend.api.models import UploadedFile
+from backend.api.models import UploadedFile, AuditLog
 import umap.umap_ as umap
 
 class Engine:
@@ -82,7 +82,7 @@ class Engine:
             raise ValueError(f"Error in UMAP processing: {e}")
 
     @staticmethod
-    def dimensional_reduction(data: pd.DataFrame, method: str, n_components: int = 2) -> pd.DataFrame:
+    def dimensional_reduction(data: pd.DataFrame, method: str, n_components: int = 2, filename="unknown.csv") -> pd.DataFrame:
         """
         根据指定方法执行降维
         """
@@ -93,6 +93,8 @@ class Engine:
         numeric_data = data.select_dtypes(include=['number'])
         if numeric_data.empty:
             raise ValueError("Dataset does not contain numeric data suitable for dimensionality reduction.")
+
+        Engine.log_action(method.upper(), filename, n_components, len(numeric_data))
 
         # 执行降维
         if method == "pca":
@@ -461,3 +463,16 @@ class Engine:
             raise ValueError("Invalid correlation method. Choose from 'pearson', 'spearman', or 'kendall'.")
 
         return correlation
+    
+    @staticmethod
+    def log_action(tool_type: str, filename: str, n_components: int, rows: int):
+        AuditLog.objects.create(
+            tool_type=tool_type,
+            timestamp=now(),
+            params={ 
+                "filename": filename,
+                "n_components": n_components,
+                "rows": rows
+            },
+            is_reverted=False
+        )
