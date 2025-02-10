@@ -1,6 +1,9 @@
 import React from "react";
 import FileUpload from "./FileUpload";
 import FileDownload from "./FileDownload";
+import DatasetManager from "./DatasetManager";
+
+const datasetManager = new DatasetManager();
 
 const FileComponent = ({ uiController }) => {
     if (!uiController) {
@@ -11,7 +14,7 @@ const FileComponent = ({ uiController }) => {
   return (
 
     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-      <FileUpload uiController={uiController} />
+      <FileUpload datasetManager={datasetManager} />
       <FileDownload uiController={uiController} />
     </div>
   );
