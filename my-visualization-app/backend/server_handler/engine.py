@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
+
+from django.utils.timezone import now
 from sklearn.decomposition import PCA
 from scipy.interpolate import interp1d
 from sklearn.linear_model import LinearRegression
