@@ -36,13 +36,13 @@ const FileUpload = ({ datasetManager }) => {
       }
       setFile(file);
       setFileName(file.name);
-      console.log("📁 File selected:", file.name);
+      console.log("File selected:", file.name);
       return false; // block automatic upload
     },
     onRemove: () => {
       setFile(null);
       setFileName("No file selected");
-      console.log("❌ File removed.");
+      console.log("File removed.");
     },
     showUploadList: false,
   };
@@ -71,7 +71,7 @@ const FileUpload = ({ datasetManager }) => {
       }
 
       const data = await response.json();
-      console.log("✅ Upload response:", data);
+      console.log("Upload response:", data);
 
       if (data.dataset_id) {
         // add dataset_id to DatasetManager
@@ -81,7 +81,7 @@ const FileUpload = ({ datasetManager }) => {
         message.warning("No dataset ID returned from backend.");
       }
     } catch (error) {
-      console.error("❌ Upload failed:", error);
+      console.error("Upload failed:", error);
       message.error("File upload failed. Please try again.");
     } finally {
       setUploading(false);

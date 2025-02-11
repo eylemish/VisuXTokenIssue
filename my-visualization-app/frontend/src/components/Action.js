@@ -14,14 +14,14 @@ class Action {
     this.name = name; // 例如 "UPLOAD_FILE"
     this.type = type; // "user" or "system"
     this.data = data; // { fileName, file }
-    this.userId = userId; // 记录是谁执行的
+    this.userId = userId; // Records of who performs
     this.timestamp = new Date();
     this.status = "pending"; // "pending", "success", "failed"
-    this.executeFunction = executeFunction; // UI 操作
-    this.undoFunction = undoFunction; // UI 操作撤销
+    this.executeFunction = executeFunction; // UI Operation
+    this.undoFunction = undoFunction; // UI operation undo
   }
 
-  // 执行动作（本地操作）
+  // Execute the action (local operation)
   execute() {
     if (this.executeFunction) {
         try {
@@ -37,7 +37,7 @@ class Action {
 }
 
 
-  // 撤销动作
+  // Undo the action
   undo() {
     if (this.undoFunction) {
       try {
@@ -51,17 +51,17 @@ class Action {
     }
   }
 
-  // 是否是用户触发的
+  // whether it was triggered by the user
   isUserAction() {
     return this.type === "user";
   }
 
-  // 更新状态
+  // Update status
   updateStatus(newStatus) {
     this.status = newStatus;
   }
 
-  // 转换为 JSON
+  // Convert to JSON
   toJSON() {
     return JSON.stringify({
       name: this.name,
@@ -73,12 +73,12 @@ class Action {
     });
   }
 
-  // 获取操作详情（日志用）
+  // Get operation details (for logging)
   getActionDetails() {
     return `Action: ${this.name}, Type: ${this.type}, User: ${this.userId}, Time: ${this.timestamp}, Status: ${this.status}`;
   }
 
-  // 异步执行（与后端交互）
+  // Asynchronous execution (interaction with the backend)
   async handleUserAction(actionType, parameters = {}) {
     try {
       const response = await axios.post(`${API_URL}handle_user_action/`, {
@@ -86,7 +86,7 @@ class Action {
         parameters: parameters,
       });
 
-      // 将状态设置为成功
+      // Set status to success
       this.status = "success";
       console.log(`Action succeeded: ${this.name}`);
       return response.data;

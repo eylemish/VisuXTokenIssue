@@ -4,17 +4,17 @@ import { Modal, Select, Button, Input, message } from "antd";
 const { Option } = Select;
 
 /**
- * 副本管理 Modal 链接可修改
- * 基于解析数据创建多个副本，这些副本可用于不同的数据处理，比如降维、清理、合并等。
- * 每个副本可以有自己的副本，形成 副本的副本，支持复杂的数据处理流程。
- * 每个副本有自己的日志，记录它经历的所有数据处理操作，以便追溯数据变化。
+ * Replica management Modal links can be modified
+ * Creates multiple replicas based on parsed data, which can be used for different data processing, such as dimensionality reduction, cleansing, merging, and so on.
+ * Each replica can have its own copy, forming replicas of replicas to support complex data processing processes.
+ * Each replica has its own log of all the data processing operations it undergoes in order to trace data changes.
  */
 const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
-  const [options, setOptions] = useState([]); // 存储可选择的解析数据 & 副本
-  const [selectedOption, setSelectedOption] = useState(null); // 选中的数据（原数据或副本）
-  const [isCreating, setIsCreating] = useState(false); // 控制 "创建副本" 弹窗显示
+  const [options, setOptions] = useState([]); // Stores optional parsed data & copies
+  const [selectedOption, setSelectedOption] = useState(null); // Selected data (original or copy)
+  const [isCreating, setIsCreating] = useState(false); // Control the display of the ‘Create a copy’ popup.
 
-  // ✅ 获取解析数据和副本列表
+  // Getting parsed data and copy list
   useEffect(() => {
     if (visible && datasetId) {
       fetchOptions();
@@ -24,29 +24,29 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
 
   const fetchOptions = async () => {
     try {
-      console.log("📌 Fetching parsed data and replicas for dataset:", datasetId);
+      console.log("Fetching parsed data and replicas for dataset:", datasetId);
 
-      // 获取原解析数据
+      // Getting the original parsed data
       const parsedDataResponse = await uiController.fetchData(`http://127.0.0.1:8000/data/${datasetId}/parsed/`);
-      console.log("✅ Parsed Data:", parsedDataResponse);
+      console.log("Parsed Data:", parsedDataResponse);
 
-      // 获取所有副本
+      // Get all copies
       const replicasResponse = await uiController.fetchData(`http://127.0.0.1:8000/data/${datasetId}/replicas/`);
-      console.log("✅ Replicas:", replicasResponse);
+      console.log("Replicas:", replicasResponse);
 
-      // 组合数据（包含原始解析数据和副本）
+      // Combined data (contains original parsed data and copies)
       const formattedOptions = [];
 
-      // 添加原解析数据
+      // Adding raw parsed data
       if (parsedDataResponse) {
         formattedOptions.push({
-          id: datasetId, // 原始数据 ID
-          name: "Original Parsed Data", // 名称
+          id: datasetId, // Raw Data ID
+          name: "Original Parsed Data", // name (of a thing)
           type: "parsed_data",
         });
       }
 
-      // 添加所有副本
+      // Add all copies
       if (replicasResponse.replicas) {
         replicasResponse.replicas.forEach(replica => {
           formattedOptions.push({
@@ -60,19 +60,19 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
       setOptions(formattedOptions);
       setSelectedOption(formattedOptions.length > 0 ? formattedOptions[0].id : null);
     } catch (error) {
-      console.error("❌ Failed to load data:", error);
+      console.error("Failed to load data:", error);
       message.error("Failed to load options.");
     }
   };
 
-  // ✅ 删除副本
+  // Delete Copy
   const handleDeleteReplica = async () => {
     if (!selectedOption) {
       message.warning("Please select a replica to delete.");
       return;
     }
 
-    // 不能删除原解析数据
+    // Original parsed data cannot be deleted
     const selectedItem = options.find(opt => opt.id === selectedOption);
     if (selectedItem.type === "parsed_data") {
       message.warning("Original parsed data cannot be deleted.");
@@ -80,19 +80,19 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
     }
 
     try {
-      console.log(`📌 Deleting replica: ${selectedOption}`);
+      console.log(`Deleting replica: ${selectedOption}`);
       await uiController.modifyData(`http://127.0.0.1:8000/data/replica/${selectedOption}/delete/`, "DELETE");
       message.success("Replica deleted successfully.");
-      fetchOptions(); // 重新获取副本列表
+      fetchOptions(); // Retrieve copy list
     } catch (error) {
-      console.error("❌ Failed to delete replica:", error);
+      console.error("Failed to delete replica:", error);
       message.error("Failed to delete replica.");
     }
   };
 
   return (
     <>
-      {/* 副本管理 Modal */}
+      {/* Copy Management Modal */}
       <Modal
         title="Replication Manager"
         visible={visible}
@@ -100,7 +100,7 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
         footer={null}
         width={400}
       >
-        {/* 选择原解析数据或副本 */}
+        {/* Selection of original parsed data or copy */}
         <Select
           value={selectedOption}
           onChange={setSelectedOption}
@@ -119,7 +119,7 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
           )}
         </Select>
 
-        {/* 按钮 */}
+        {/* button */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Button danger onClick={handleDeleteReplica} disabled={!selectedOption}>
             Delete
@@ -130,14 +130,14 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
         </div>
       </Modal>
 
-      {/* 创建副本 Modal */}
+      {/* Create Copy Modal */}
       {isCreating && (
         <CreateReplicaModal
           visible={isCreating}
           onClose={() => setIsCreating(false)}
           onConfirm={() => {
             setIsCreating(false);
-            fetchOptions(); // 重新获取副本列表
+            fetchOptions(); // Retrieve the list of copies
           }}
           datasetId={datasetId}
           selectedOption={selectedOption}
@@ -149,12 +149,12 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
 };
 
 /**
- * 创建副本 Modal
+ * Creating a copy Modal
  */
 const CreateReplicaModal = ({ visible, onClose, onConfirm, datasetId, selectedOption, uiController }) => {
   const [replicaName, setReplicaName] = useState("");
 
-  // ✅ 处理副本创建
+  // Handling Copy Creation
   const handleCreateReplica = async () => {
     if (!replicaName.trim()) {
       message.warning("Please enter a valid replica name.");
@@ -162,7 +162,7 @@ const CreateReplicaModal = ({ visible, onClose, onConfirm, datasetId, selectedOp
     }
 
     try {
-      console.log("📌 Creating replica:", {
+      console.log("Creating replica:", {
         datasetId,
         baseData: selectedOption,
         name: replicaName,
@@ -181,12 +181,12 @@ const CreateReplicaModal = ({ visible, onClose, onConfirm, datasetId, selectedOp
       );
 
       if (data) {
-        console.log("✅ Replica created:", data);
+        console.log("Replica created:", data);
         message.success(`Replica "${replicaName}" created.`);
         onConfirm();
       }
     } catch (error) {
-      console.error("❌ Failed to create replica:", error);
+      console.error("Failed to create replica:", error);
       message.error("Failed to create replica.");
     }
   };

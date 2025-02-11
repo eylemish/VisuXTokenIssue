@@ -12,8 +12,8 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
 
 
 
-  //这个部分是因为前端部分完全不存数据集了，为了能调用列
-  const [columns, setColumns] = useState([]); // 存储列名
+  // This part is because the front-end part doesn't store the dataset at all anymore, in order to be able to call the columns
+  const [columns, setColumns] = useState([]); // Store column names
   const [fittedData, setFittedData] = useState([]);
   const [params, setParams] = useState([]);
   const [covariance, setCovariance] = useState([]);
@@ -21,7 +21,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
-  // **当用户选择数据集时，获取列名**
+  // **Get column names when the user selects a dataset**
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
@@ -34,7 +34,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
     };
 
     fetchColumns();
-  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+  }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
 
 

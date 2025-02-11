@@ -8,12 +8,12 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
 
-  const [columns, setColumns] = useState([]); // 存储列名
+  const [columns, setColumns] = useState([]); // Store column names
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
-  // **当用户选择数据集时，获取列名**
+  // **Get column names when the user selects a dataset**
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
@@ -26,7 +26,7 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
     };
 
     fetchColumns();
-  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+  }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
   const handleCorrelate = () => {
     if (!datasetId || !xColumn || !yColumn) {

@@ -17,7 +17,7 @@ class GraphWindowController {
     }
 
     const windowId = `graph_window_${graphData.id}`;
-    console.log(`🖼Creating Graph Window for ID: ${windowId}`);
+    console.log(`Creating Graph Window for ID: ${windowId}`);
 
     if (document.getElementById(windowId)) {
       console.warn(`Graph window ${windowId} already exists.`);

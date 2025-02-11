@@ -3,9 +3,9 @@ class LogManager {
     this.logs = [];
     this.redoStack = [];
     this.lastSyncTime = null;
-    this.datasetVersions = []; // 存储所有数据版本
+    this.datasetVersions = []; // Store all data versions
 
-    // 自动同步日志（每 10 秒）
+    // Automatic synchronisation of logs (every 10 seconds)
     setInterval(() => this.autoSyncLogs(), 10000);
   }
 
@@ -18,43 +18,43 @@ class LogManager {
       timestamp: new Date().toISOString(),
     };
     this.logs.push(logEntry);
-    this.datasetVersions.push(datasetAfter); // 存储数据版本
+    this.datasetVersions.push(datasetAfter); // Store the data version
     this.redoStack = [];
 
     console.log("Logged operation:", logEntry);
   }
 
-  // **增加 undo 方法**
+  // **Add undo method**
   undo() {
     if (this.logs.length > 0) {
       const lastLog = this.logs.pop();
       this.redoStack.push(lastLog);
       console.log(`Undo: ${lastLog.tool}`);
-      return lastLog.datasetBefore; // 返回上一个数据集
+      return lastLog.datasetBefore; // Return to previous dataset
     }
     console.warn("No actions to undo.");
     return null;
   }
 
-  // **增加 redo 方法**
+  // **add redo method**
   redo() {
     if (this.redoStack.length > 0) {
       const lastRedo = this.redoStack.pop();
       this.logs.push(lastRedo);
       console.log(`Redo: ${lastRedo.tool}`);
-      return lastRedo.datasetAfter; // 返回 redo 后的数据集
+      return lastRedo.datasetAfter; // return the redo dataset
     }
     console.warn("No actions to redo.");
     return null;
   }
 
 
-  // **自动同步日志**
+  // **Automatic synchronisation of logs**
   async autoSyncLogs() {
     if (this.logs.length === 0) return;
 
     const now = Date.now();
-    if (this.lastSyncTime && now - this.lastSyncTime < 10000) return; // 避免频繁同步
+    if (this.lastSyncTime && now - this.lastSyncTime < 10000) return; // Avoid frequent synchronisation
 
     this.lastSyncTime = now;
     await this.sendLogsToBackend();

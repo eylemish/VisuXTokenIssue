@@ -1,7 +1,7 @@
 class TableManager {
     constructor(datasetManager) {
         this.datasetManager = datasetManager;
-        this.tables = new Map(); // 记录 UI 上的表格
+        this.tables = new Map(); // Record the form on the UI
     }
 
     updateTableDataset(oldDatasetId, newDatasetId) {

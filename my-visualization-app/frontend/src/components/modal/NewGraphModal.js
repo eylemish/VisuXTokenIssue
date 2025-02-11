@@ -14,7 +14,7 @@ import datasetManager from "../file/DatasetManager";
 
 const { TabPane } = Tabs;
 
-// 定义图表类别
+// Define chart categories
 const chartCategories = {
   "Basic Charts": [
     { type: "scatter", name: "Scatter Plot", icon: <PictureOutlined />, requiredFeatures: 2 },
@@ -37,7 +37,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
   const [numFeatures, setNumFeatures] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 获取当前数据集的特征列
+  // Get the feature columns of the current dataset
   useEffect(() => {
     const fetchFeatures = async () => {
       const datasetId = datasetManager.getCurrentDatasetId();
@@ -62,41 +62,41 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
     }
   }, [visible]);
 
-  // 获取所选图表所需的特征数量
+  // Get the number of features needed for the selected charts
   const getRequiredFeatures = (graphType) => {
     for (let category in chartCategories) {
       const chart = chartCategories[category].find((chart) => chart.type === graphType);
       if (chart) return chart.requiredFeatures;
     }
-    return 0; // 默认
+    return 0; // default
   };
 
-  // 监听所选图表类型的变化，并更新所需的特征数量
+  // Listen for changes in the selected chart type and update the number of features required
   useEffect(() => {
     if (selectedGraphType) {
       const required = getRequiredFeatures(selectedGraphType);
       console.log(`🔄 Updated numFeatures for ${selectedGraphType}: ${required}`);
       setNumFeatures(required);
-      setSelectedFeatures([]); // 切换图表时清空特征选择
+      setSelectedFeatures([]); // Clear feature selection when switching charts
     }
   }, [selectedGraphType]);
 
-  // 确保 `selectedGraphType` 被记录
+  // Ensure that `selectedGraphType` is recorded.
   const handleGraphSelection = (graphType) => {
-    console.log(`✅ User selected graph type: ${graphType}`);
+    console.log(`User selected graph type: ${graphType}`);
     setSelectedGraphType(graphType);
   };
 
-  // 确保 `graphType` 在 `handleConfirm` 里正确传递
+  // Make sure `graphType` is passed correctly in `handleConfirm`.
   const handleConfirm = async () => {
-    console.log("🛠️ Creating graph with info:", {
+    console.log("Creating graph with info:", {
       graphType: selectedGraphType,
       datasetId: datasetManager.getCurrentDatasetId(),
       selectedFeatures,
     });
 
     if (!selectedGraphType) {
-      console.error("❌ No graph type selected! selectedGraphType:", selectedGraphType);
+      console.error("No graph type selected! selectedGraphType:", selectedGraphType);
       return;
     }
 
@@ -114,12 +114,12 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
 
     const graphInfo = {
       graphName: `New ${selectedGraphType} Chart`,
-      graphType: selectedGraphType, // ✅ 确保 graphType 传递正确
+      graphType: selectedGraphType, // Ensure that graphType is passed correctly
       dataset,
       selectedFeatures,
     };
 
-    console.log("📡 Sending graphInfo to UIController:", graphInfo);
+    console.log("Sending graphInfo to UIController:", graphInfo);
 
     uiController.handleUserAction({
       type: "CREATE_GRAPH",
@@ -129,7 +129,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
     onCancel();
   };
 
-  // 处理特征选择
+  // Processing Feature Selection
   const handleFeatureSelect = (checkedValues) => {
     setSelectedFeatures(checkedValues);
   };
@@ -152,7 +152,6 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
         <p>Loading dataset features...</p>
       ) : (
         <>
-          {/* 选择图表类型 */}
           <Tabs defaultActiveKey="1">
             {Object.entries(chartCategories).map(([category, charts]) => (
               <TabPane tab={category} key={category}>
@@ -177,7 +176,6 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
             ))}
           </Tabs>
 
-          {/* 选择特征 */}
           {selectedGraphType && (
             <div>
               <h3>Select {numFeatures} Features:</h3>

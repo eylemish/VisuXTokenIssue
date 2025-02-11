@@ -149,7 +149,7 @@ class DataVisualizationView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadView(APIView):
     """
-    上传文件并解析成数据集，存入 Dataset 数据库
+    Uploading files and parsing them into datasets for storage in the Dataset database
     """
     parser_classes = [MultiPartParser]
 
@@ -158,19 +158,19 @@ class UploadView(APIView):
         if not file:
             return Response({"error": "No file received"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 确保上传目录存在
+        # Make sure the upload directory exists
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # ✅ 保存文件到后端
+            # Saving files to the backend
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # ✅ 解析 CSV / Excel 文件
+            # Parsing CSV / Excel files
             if file.name.lower().endswith(".csv"):
                 df = pd.read_csv(file_path)
                 file_type = "csv"
@@ -180,18 +180,18 @@ class UploadView(APIView):
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # ✅ 提取列名 & 数据记录
+            # Extract Column Names & Data Records
             features = list(df.columns)
             records = df.to_dict(orient="records")
 
-            # ✅ 存入数据库 Dataset
+            # Stored in database Dataset
             dataset = Dataset.objects.create(
                 name=file.name,
                 features=features,
                 records=records
             )
 
-            # ✅ 可选：存入 UploadedFile 记录
+            # Optional: Deposit to UploadedFile record
             file_instance = UploadedFile.objects.create(
                 file_path=file_path, name=file.name, file_type=file_type
             )
@@ -547,40 +547,40 @@ class CorrelationView(APIView):
 class DimensionalReductionView(APIView):
     def post(self, request):
         try:
-            # 解析请求体
+            # Parsing the request body
             body = json.loads(request.body)
             dataset_id = body.get("dataset_id")
-            method = body.get("method", "pca").lower()  # 统一小写，避免大小写不匹配
+            method = body.get("method", "pca").lower()  # Harmonise lower case to avoid case mismatch
             n_components = body.get("n_components", 2)
 
-            # 允许的降维方法
+            # Permitted downscaling methods
             valid_methods = ["pca", "tsne", "umap"]
             if method not in valid_methods:
                 return JsonResponse({"error": f"Invalid dimensionality reduction method. Choose from {valid_methods}."}, status=400)
 
-            # 确保 dataset_id 存在
+            # Ensure dataset_id exists
             if not dataset_id:
                 return JsonResponse({"error": "Missing dataset_id."}, status=400)
 
             try:
-                # **✅ 从 `Dataset` 获取数据，而不是 `UploadedFile`**
+                # **Get data from `Dataset` instead of `UploadedFile`**
                 dataset = Dataset.objects.get(id=int(dataset_id))
             except (Dataset.DoesNotExist, ValueError):
                 return JsonResponse({"error": f"Dataset with ID {dataset_id} not found or invalid."}, status=404)
 
-            # **✅ 获取 DataFrame**
+            # **Get DataFrame**
             dataset_df = dataset.get_dataframe()
             if dataset_df.empty:
                 return JsonResponse({"error": "Dataset is empty or invalid."}, status=400)
 
-            # **✅ 进行降维**
+            # **Perform dimensionality reduction**
             reduced_data = Engine.dimensional_reduction(
                 dataset_df,
                 method=method,
                 n_components=n_components
             )
 
-            # 返回数据
+            # Return data
             reduced_data_json = reduced_data.to_dict(orient="records")
             return JsonResponse({"reduced_data": reduced_data_json}, status=200)
 

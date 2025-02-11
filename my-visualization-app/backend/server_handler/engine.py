@@ -23,7 +23,7 @@ class Engine:
     @staticmethod
     def data_to_panda(dataset_id: int) -> pd.DataFrame:
         """
-        根据 dataset_id 获取数据并转换为 Pandas DataFrame
+        Get data based on dataset_id and convert to Pandas DataFrame
         """
         try:
             dataset = UploadedFile.objects.get(id=dataset_id)
@@ -47,7 +47,7 @@ class Engine:
     @staticmethod
     def apply_pca(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
         """
-        执行 PCA 降维
+        Perform PCA downscaling
         """
         try:
             pca = PCA(n_components=n_components)
@@ -60,7 +60,7 @@ class Engine:
     @staticmethod
     def apply_tsne(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
         """
-        执行 t-SNE 降维
+        Perform t-SNE dimensionality reduction
         """
         try:
             tsne = TSNE(n_components=n_components)
@@ -73,7 +73,7 @@ class Engine:
     @staticmethod
     def apply_umap(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
         """
-        执行 UMAP 降维
+        Perform UMAP dimensionality reduction
         """
         try:
             reducer = umap.UMAP(n_components=n_components)
@@ -86,19 +86,19 @@ class Engine:
     @staticmethod
     def dimensional_reduction(data: pd.DataFrame, method: str, n_components: int = 2, filename="unknown.csv") -> pd.DataFrame:
         """
-        根据指定方法执行降维
+        Performs downscaling according to the specified method
         """
         if not isinstance(data, pd.DataFrame):
             raise ValueError("Input data must be a pandas DataFrame.")
 
-        # 选择数值型数据
+        # Selecting Numeric Data
         numeric_data = data.select_dtypes(include=['number'])
         if numeric_data.empty:
             raise ValueError("Dataset does not contain numeric data suitable for dimensionality reduction.")
 
         Engine.log_action(method.upper(), filename, n_components, len(numeric_data))
 
-        # 执行降维
+        # Implementation of dimensionality reduction
         if method == "pca":
             return Engine.apply_pca(numeric_data, n_components)
         elif method == "tsne":

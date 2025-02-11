@@ -11,10 +11,10 @@ const GraphSection = () => {
   const [graphScripts, setGraphScripts] = useState([]);
 
   useEffect(() => {
-    const graphs = GraphManager.getAllGraphs(); // Singleton GraphManager kullan
+    const graphs = GraphManager.getAllGraphs(); // Use Singleton GraphManager
     const scripts = graphs.map((graph) => visualizationManager.visualize(graph));
     setGraphScripts(scripts);
-  }, [GraphManager.graphs]); // Graphs değiştiğinde güncelle
+  }, [GraphManager.graphs]); // Update when graphs change
 
   return (
     <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>

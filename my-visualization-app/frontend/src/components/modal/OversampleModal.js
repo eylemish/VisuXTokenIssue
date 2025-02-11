@@ -3,18 +3,18 @@ import { Modal, Button, InputNumber, Select, message } from "antd";
 import Action from "../Action";
 
 const OversampleModal = ({ visible, onCancel, uiController }) => {
-  const [method, setMethod] = useState("linear"); // 选择过采样方法
+  const [method, setMethod] = useState("linear"); // Select oversampling method
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
-  const [oversamplingFactor, setOversamplingFactor] = useState(2); // 默认过采样倍数
+  const [oversamplingFactor, setOversamplingFactor] = useState(2); // Default oversampling multiplier
 
-  const [columns, setColumns] = useState([]); // 存储列名
+  const [columns, setColumns] = useState([]); // Store column names
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
-  // **当用户选择数据集时，获取列名**
+  // **Get column names when the user selects a dataset**
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
@@ -27,7 +27,7 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
     };
 
     fetchColumns();
-  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+  }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
   const handleOversample = () => {
     if (!datasetId || !xColumn || !yColumn || oversamplingFactor <= 0) {
@@ -62,7 +62,6 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
         ))}
       </Select>
 
-      {/* 选择 X 轴列 */}
       <Select
         style={{ width: "100%", marginTop: "10px" }}
         placeholder="Select X Column"
@@ -74,7 +73,6 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
         ))}
       </Select>
 
-      {/* 选择 Y 轴列 */}
       <Select
         style={{ width: "100%", marginTop: "10px" }}
         placeholder="Select Y Column"
@@ -86,14 +84,14 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
         ))}
       </Select>
 
-      {/* 选择过采样方法 */}
+      {/* Selection of oversampling method */}
       <Select defaultValue="linear" onChange={setMethod} style={{ width: "100%", marginTop: "10px" }}>
         <Select.Option value="linear">Linear Interpolation</Select.Option>
         <Select.Option value="spline">Spline Interpolation</Select.Option>
         <Select.Option value="polynomial">Polynomial Interpolation</Select.Option>
       </Select>
 
-      {/* 输入过采样倍数 */}
+      {/* Input oversampling multiplier */}
       <InputNumber
         min={1}
         max={10}

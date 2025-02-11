@@ -12,12 +12,11 @@ import LogWindow from "../log/LogWindow";
 
 const gridConfig = {
   cols: 12,
-  rowHeight: 80, // 适配窗口高度，避免变成竖长条
-  width: window.innerWidth - 200, // 让网格适配屏幕宽度
+  rowHeight: 80, // Adapt the height of the window to prevent it from becoming a vertical bar.
+  width: window.innerWidth - 200, // Make the grid fit the width of the screen
 };
 
 const defaultLayout = [
-    //最开始的设置尺寸，看最后需不需要删掉
   { i: "dataTable", x: 0, y: 0, w: 6, h: 5, minW: 5, minH: 5, maxW: 8, maxH: 8 },
   { i: "graphSection", x: 0, y: 0, w: 6, h: 4, minW: 4, minH: 2 },
   { i: "logWindow", x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
@@ -25,22 +24,22 @@ const defaultLayout = [
   { i: "graphWindow", x: 0, y: 5, w: 6, h: 5, minW: 6, minH: 4 },
 ];
 
-//这个函数是为了布局，普通布局是往下排列，这个保证右侧有空间时会向右排列
+//This function is for layout, the normal layout is downwards, this ensures that when there is space on the right side, it will be aligned to the right.
 const getDefaultLayout = ({ showGraph, showData, showLog }) => {
   const layout = [];
-  let lastX = 0, lastY = 0; // 记录当前布局中最右边和最下面的窗口位置
+  let lastX = 0, lastY = 0; // Record the positions of the right-most and bottom-most windows in the current layout.
 
   const addWindow = (key, width, height) => {
-    // **如果右侧有空间**，优先往右排
+    // **If there is space on the right side**, prioritise right rows
     if (lastX + width <= gridConfig.cols) {
       layout.push({ i: key, x: lastX, y: lastY, w: width, h: height, minW: 4, minH: 4 });
-      lastX += width; // 更新 lastX
+      lastX += width; // Update lastX
     } else {
-      // **否则换到下一行**
+      // **Otherwise go to next line**
       lastX = 0;
-      lastY += height; // 向下排列
+      lastY += height; // downwards
       layout.push({ i: key, x: lastX, y: lastY, w: width, h: height, minW: 4, minH: 4 });
-      lastX += width; // 更新 lastX
+      lastX += width; // Update lastX
     }
   };
 
@@ -59,7 +58,7 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
 
   const [graphWindows, setGraphWindows] = useState([]);
 
-  const logManager = uiController.getLogManager(); // 通过 UIController 访问日志管理器
+  const logManager = uiController.getLogManager(); // Access to the log manager via UIController
   const [logs, setLogs] = useState(logManager.getLogs());
 
 
@@ -77,7 +76,7 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
     console.log("Updated Layout:", newLayout);
   };
 
-  // 当 `showGraph`、`showData`、`showLog` 变化时，更新 layout
+  // Update the layout when `showGraph`, `showData`, `showLog` change.
   useEffect(() => {
     setLayout(getDefaultLayout({ showGraph, showData, showLog }));
   }, [showGraph, showData, showLog]);
@@ -87,7 +86,7 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
 
   const openGraph = (graphId) => {
   const newWindow = uiController.openGraphWindow(graphId);
-  console.log("New Graph Window:", newWindow); // 确保 window 数据正确
+  console.log("New Graph Window:", newWindow); // Make sure the window data is correct
   if (newWindow) {
     setGraphWindows([...graphWindows, newWindow]);
   } else {
@@ -162,34 +161,34 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
           cols={gridConfig.cols}
           rowHeight={gridConfig.rowHeight}
           width={gridWidth}
-          margin={[16, 16]} // 窗口之间的距离
-          containerPadding={[24, 24]} //距离content边界的距离
+          margin={[16, 16]} // Distance between windows
+          containerPadding={[24, 24]} // Distance from the border of the content
           onLayoutChange={onLayoutChange}
           draggableHandle=".drag-handle"
       >
 
-        {/* 仅在 showData 为 true 时渲染 DataWindow */}
+        {/* Render DataWindow only if showData is true */}
         {showData && (
           <div key="dataTable" className="drag-handle" style={{ height: "100%", width: "100%", display:"flex", minWidth: "400px", minHeight: "300px" }}>
             <DataWindow style={{ flex: 1 }} isVisible={true} />
           </div>
         )}
 
-        {/* 仅在 showGraph 为 true 时渲染 GraphSection */}
+        {/* Render GraphSection only if showGraph is true */}
         {showGraph && (
           <div key="graphSection" className="drag-handle" style={{ height: "100%", width: "100%" }}>
             <GraphSection style={{ flex: 1 }} />
           </div>
         )}
 
-            {/* 仅在 showLog 为 true 时渲染 LogWindow */}
+            {/* Render LogWindow only if showLog is true */}
         {showLog && (
           <div key="logWindow"
                className="drag-handle"
                style={{
-                 height: "100%", // 让窗口适应内容高度
+                 height: "100%", // Make the window fit the height of the content
                  width: "100%",
-                 minHeight: "300px", //确保最小高度合适
+                 minHeight: "300px",
                  minWidth: "400px",
                  display:"flex",
           }}>

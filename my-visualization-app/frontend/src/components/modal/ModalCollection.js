@@ -7,7 +7,7 @@ const ModalCollection = ({ uiController }) => {
 
   return (
     <>
-      {/* 下载文件的 Modal */}
+      {/* Modal for downloading files */}
       <Modal
         title="Select Download Format"
         visible={modalController.isModalActive("download")}
@@ -28,7 +28,7 @@ const ModalCollection = ({ uiController }) => {
         </Select>
       </Modal>
 
-      {/* 上传进度的 Modal */}
+      {/* Modal for uploading progress */}
       <Modal
         title="Uploading File"
         visible={modalController.isModalActive("uploadProgress")}
@@ -38,7 +38,7 @@ const ModalCollection = ({ uiController }) => {
         <Progress percent={modalData?.progress || 0} />
       </Modal>
 
-      {/* 删除确认的 Modal */}
+      {/* Delete confirmed Modal */}
       <Modal
         title="Confirm Deletion"
         visible={modalController.isModalActive("deleteConfirmation")}

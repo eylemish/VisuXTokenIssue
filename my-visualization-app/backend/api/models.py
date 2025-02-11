@@ -2,12 +2,12 @@ from django.db import models
 import pandas as pd
 
 
-### **📌 存储上传文件信息（只记录文件路径，不存数据）**
+### **Stores uploaded file information (only the file path is recorded, no data is stored)**
 class UploadedFile(models.Model):
-    name = models.CharField(max_length=255)  # 文件名称
-    file_path = models.CharField(max_length=500)  # 文件路径
-    file_type = models.CharField(max_length=10, choices=[("csv", "CSV"), ("xlsx", "Excel")])  # 文件类型
-    uploaded_at = models.DateTimeField(auto_now_add=True)  # 上传时间
+    name = models.CharField(max_length=255)  # Name of the document
+    file_path = models.CharField(max_length=500)  # file path
+    file_type = models.CharField(max_length=10, choices=[("csv", "CSV"), ("xlsx", "Excel")])  # Document type
+    uploaded_at = models.DateTimeField(auto_now_add=True)  # Upload time
 
     def __str__(self):
         return self.name
@@ -28,12 +28,12 @@ class UploadedFile(models.Model):
             ###descendants.extend(child.get_all_descendant_replicas())
         ###return descendants
 
-### **📌 解析后的数据集（存储表头 & 数据）**
+### **Parsed dataset (store table headers & data)**
 class Dataset(models.Model):
-    name = models.CharField(max_length=255)  # 数据集名称
-    uploaded_file = models.OneToOneField(UploadedFile, on_delete=models.CASCADE, null=True, blank=True, related_name="dataset")  # 关联上传文件
-    features = models.JSONField(default=list)  # 列名，如 ['age', 'salary', 'city']
-    records = models.JSONField(default=list)  # 数据，如 [{'age': 25, 'salary': 50000}]
+    name = models.CharField(max_length=255)  # dataset name
+    uploaded_file = models.OneToOneField(UploadedFile, on_delete=models.CASCADE, null=True, blank=True, related_name="dataset")  # Associated Upload Files
+    features = models.JSONField(default=list)  # Column names, e.g. [‘age’, ‘salary’, ‘city’]
+    records = models.JSONField(default=list)  # Data, e.g. [{‘age’: 25, ‘salary’: 50000}]
 
     last_dataset = models.OneToOneField(
         "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="next"
@@ -47,15 +47,15 @@ class Dataset(models.Model):
 
     def get_dataframe(self):
         """
-        安全地将 records 转换为 Pandas DataFrame
+        Securely convert records to Pandas DataFrame
         """
         if not isinstance(self.records, list) or not all(isinstance(row, dict) for row in self.records):
-            print("❌ Error: Invalid records format!")
-            return pd.DataFrame()  # 避免报错，返回空 DataFrame
+            print("Error: Invalid records format!")
+            return pd.DataFrame()  # Avoid reporting errors by returning an empty DataFrame
 
         df = pd.DataFrame(self.records)
 
-        # ✅ 确保 DataFrame 里包含 features 里的字段
+        # Ensure that the DataFrame contains the fields from features.
         if self.features and all(col in df.columns for col in self.features):
             return df[self.features]
         return df
@@ -84,20 +84,20 @@ class Dataset(models.Model):
         return new_dataset
 
 
-### **📌 记录数据分析结果**
+### **Recording the results of data analysis**
 class AnalysisResult(models.Model):
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True, blank=True)  # 允许为空，避免迁移错误
-    columns = models.JSONField()  # 列名信息
-    shape = models.CharField(max_length=50)  # 形状信息
-    missing_values = models.JSONField()  # 缺失值统计
-    mean_values = models.JSONField()  # 平均值统计
-    created_at = models.DateTimeField(auto_now_add=True)  # 记录分析时间
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True, blank=True)  # Allowed to be empty to avoid migration errors
+    columns = models.JSONField()  # Listing information
+    shape = models.CharField(max_length=50)  # Shape information
+    missing_values = models.JSONField()  # Missing value statistics
+    mean_values = models.JSONField()  # Mean value statistics
+    created_at = models.DateTimeField(auto_now_add=True)  # Record analysis time
 
 ###log也需要加上id
 ###log_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 ###last next 移到这里
 
-### **📌 操作日志**
+### **operating log**
 class AuditLog(models.Model):
     tool_type = models.CharField(max_length=50, choices=[
         ('ADD_FEATURE', 'Add Feature'),
@@ -121,7 +121,7 @@ class AuditLog(models.Model):
     ], default="")
 
     timestamp = models.DateTimeField(auto_now_add=True)
-    params = models.JSONField(null=True, blank=True, default=dict)  # ✅ 允许 `NULL`，避免迁移失败
+    params = models.JSONField(null=True, blank=True, default=dict)  # Allow `NULL` to avoid migration failures
     is_reverted = models.BooleanField(default=False)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True, blank=True, related_name='audit_logs', default=None)
 
