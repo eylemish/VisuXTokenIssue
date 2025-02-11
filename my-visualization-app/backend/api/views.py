@@ -146,7 +146,7 @@ class DataVisualizationView(APIView):
 #             return Response({"error": str(e)}, status=500)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class UploadDatasetView(APIView):
+class UploadView(APIView):
     """
     上传文件并解析成数据集，存入 Dataset 数据库
     """
