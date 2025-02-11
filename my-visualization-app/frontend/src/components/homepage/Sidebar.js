@@ -75,7 +75,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
           icon={<SettingOutlined />}
           onClick={() => setReplicasModalVisible(true)}
         >
-          Data Copy Management
+          Replication Manager
         </Menu.Item>
 
         {/* Graph Manager */}

@@ -94,7 +94,7 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
     <>
       {/* 副本管理 Modal */}
       <Modal
-        title="Replica Manager"
+        title="Replication Manager"
         visible={visible}
         onCancel={onClose}
         footer={null}
