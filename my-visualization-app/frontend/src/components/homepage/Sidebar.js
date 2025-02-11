@@ -37,7 +37,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
     setOpenKeys(keys);
   };
 
-  // 处理降维
+  // Deal with dimensionality reduction
   const handleDimensionalityReduction = () => {
     const datasetId = datasetManager.getCurrentDatasetId();
     if (!datasetId) {
@@ -56,7 +56,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         defaultSelectedKeys={["graphOverview"]}
         style={{ height: "100%", borderRight: 0 }}
       >
-        {/* 窗口开关（Graph / DataTable / Log） */}
+        {/* Open/Close a window（Graph / DataTable / Log） */}
         <Menu.Item key="toggleGraph" icon={<BarChartOutlined />} onClick={() => setShowGraph(!showGraph)}>
           {showGraph ? "Close Graph Window" : "Open Graph Window"}
         </Menu.Item>
@@ -100,27 +100,27 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         </SubMenu>
       </Menu>
 
-      {/* modal 组件区 */}
+      {/* modal area */}
 
-      {/* 新建 Graph 的 Modal */}
+      {/* Modal of new Graph */}
       <NewGraphModal visible={newGraphModalVisible} onCancel={() => setNewGraphModalVisible(false)} uiController={uiController} />
 
-      {/* curve fitting 的 Modal */}
+      {/* curve fitting Modal */}
       <CurveFittingModal visible={curveFittingModalVisible} onCancel={() => setCurveFittingModalVisible(false)} uiController={uiController} />
 
-      {/* interpolation 的 Modal */}
+      {/* interpolation Modal */}
       <InterpolationModal visible={interpolationModalVisible} onCancel={() => setInterpolationModalVisible(false)} uiController={uiController} />
 
-      {/* extrapolation 的 Modal */}
+      {/* extrapolation Modal */}
       <ExtrapolationModal visible={extrapolationModalVisible} onCancel={() => setExtrapolationModalVisible(false)} uiController={uiController} />
 
-      {/* oversample data 的 Modal */}
+      {/* oversample data Modal */}
       <OversampleModal visible={oversampleModalVisible} onCancel={() => setOversampleModalVisible(false)} uiController={uiController} />
 
       {/* correlate data 的 Modal */}
       <CorrelationModal visible={correlationModalVisible} onCancel={() => setCorrelationModalVisible(false)} uiController={uiController} />
 
-      {/* 降维 Modal */}
+      {/* dimensionality reduction Modal */}
       <DimReductionModal
         visible={dimReductionModalVisible}
         onClose={() => setDimReductionModalVisible(false)}
