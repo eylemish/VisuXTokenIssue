@@ -1,183 +1,106 @@
-// import React, { useState } from "react";
-// import { Table, Button, Card, message } from "antd";
-// import { DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Card, Select, Spin, message } from "antd";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import datasetManager from "../file/DatasetManager"; // Import the singleton instance of DatasetManager
 
-// const DataWindow = ({ uploadedData = [] }) => {
-//   const [tableData, setTableData] = useState(uploadedData.length > 0 ? uploadedData : [
-//     { key: "1", rank: "1", keyword: "Example A", users: "1000", weeklyRange: "+5" },
-//     { key: "2", rank: "2", keyword: "Example B", users: "800", weeklyRange: "-2" },
-//     { key: "3", rank: "3", keyword: "Example C", users: "600", weeklyRange: "+3" },
-//     { key: "4", rank: "4", keyword: "Example D", users: "500", weeklyRange: "-1" },
-//     { key: "5", rank: "5", keyword: "Example E", users: "400", weeklyRange: "+2" },
-//     { key: "6", rank: "6", keyword: "Example F", users: "300", weeklyRange: "-3" },
-//     { key: "7", rank: "7", keyword: "Example G", users: "200", weeklyRange: "+4" }
-//   ]);
-//   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
-//   // 处理行选择
-//   const rowSelection = {
-//     selectedRowKeys,
-//     onChange: setSelectedRowKeys,
-//   };
-
-//   // 删除选中行
-//   const handleDelete = () => {
-//     if (selectedRowKeys.length === 0) {
-//       message.warning("Please select rows to delete!");
-//       return;
-//     }
-//     setTableData(tableData.filter((_, index) => !selectedRowKeys.includes(index)));
-//     setSelectedRowKeys([]);
-//     message.success("Selected rows deleted successfully!");
-//   };
-
-//   // 导出数据为 CSV
-//   const handleExport = () => {
-//     if (tableData.length === 0) {
-//       message.warning("No data to export!");
-//       return;
-//     }
-//     const csvContent = [
-//       Object.keys(tableData[0]).join(","),
-//       ...tableData.map((row) => Object.values(row).join(",")),
-//     ].join("\n");
-
-//     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-//     const link = document.createElement("a");
-//     link.href = URL.createObjectURL(blob);
-//     link.download = "data_table.csv";
-//     document.body.appendChild(link);
-//     link.click();
-//     document.body.removeChild(link);
-//     message.success("Data exported successfully!");
-//   };
-
-//   const columns = [
-//     { title: "Rank", dataIndex: "rank", key: "rank" },
-//     { title: "Keyword", dataIndex: "keyword", key: "keyword" },
-//     { title: "Users", dataIndex: "users", key: "users" },
-//     { title: "Weekly Range", dataIndex: "weeklyRange", key: "weeklyRange" },
-//   ];
-
-//   return (
-//     <Card title="Data Table" style={{ width: "100%", minWidth: "450px", minHeight: "360px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-//       <div style={{ flex: 1, overflow: "auto", minHeight: "250px", maxHeight: "500px" }}>
-//         <Table
-//           rowKey={(record) => record.key}
-//           dataSource={tableData}
-//           columns={columns}
-//           rowSelection={rowSelection}
-//           pagination={{ pageSize: 5}}
-//           scroll={{ x: "max-content" }}
-//           style={{ fontSize: "8px" }}
-//           size={"small"}
-//         />
-//       </div>
-//       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10, padding: "10px", flexShrink: 0, background: "#fff", borderTop: "1px solid #ddd", minHeight: "50px" }}>
-//         <Button type="danger" icon={<DeleteOutlined />} style={{ marginRight: 10 }} onClick={handleDelete}>
-//           Delete Selected Rows
-//         </Button>
-//         <Button type="primary" icon={<DownloadOutlined />} onClick={handleExport}>
-//           Export Data
-//         </Button>
-//       </div>
-//     </Card>
-//   );
-// };
-
-// export default DataWindow;
-import { useState, useEffect } from "react";
-import { Card } from "antd";
-import "./DataWindow.css";
+const { Option } = Select;
 
 const DataWindow = () => {
-    const [data, setData] = useState(null);
-    const [selectedFeatures, setSelectedFeatures] = useState([0, 1]); //Selected columns
+    const [features, setFeatures] = useState([]); // Stores dataset feature names
+    const [data, setData] = useState([]); // Stores dataset records
+    const [selectedFeatures, setSelectedFeatures] = useState([]); // Stores selected features for visualization
+    const [loading, setLoading] = useState(true); // Loading state indicator
+    const [datasetId, setDatasetId] = useState(null); // Stores current dataset ID
 
-    //we need something to use the right features and data
-    const features = ["id", "name", "age", "city", "salary"];
-
+    // Fetch the current dataset ID from DatasetManager on component mount
     useEffect(() => {
-        const exampleData = [
-            { "id": 1, "name": "Alice", "age": 25, "city": "New York", "salary": 50000 },
-            { "id": 2, "name": "Bob", "age": 30, "city": "Los Angeles", "salary": 60000 },
-            { "id": 3, "name": "Charlie", "age": 28, "city": "Chicago", "salary": 55000 },
-            { "id": 4, "name": "David", "age": 35, "city": "Houston", "salary": 70000 },
-            { "id": 5, "name": "Eve", "age": 27, "city": "San Francisco", "salary": 65000 },
-            { "id": 6, "name": "Frank", "age": 32, "city": "Seattle", "salary": 62000 },
-            { "id": 7, "name": "Grace", "age": 29, "city": "Boston", "salary": 58000 },
-            { "id": 8, "name": "Hank", "age": 33, "city": "Denver", "salary": 63000 }
-        ];
-        setData(exampleData);
+        const id = datasetManager.getCurrentDatasetId();
+        if (!id) {
+            message.warning("No dataset ID available. Did you upload a dataset?");
+            setLoading(false);
+            return;
+        }
+        setDatasetId(id);
     }, []);
 
-    if (!data) return <p>Data Uploading...</p>;
+    // Fetch dataset records when datasetId is set
+    useEffect(() => {
+        if (!datasetId) return;
 
-    // Clicking feature strings
-    const handleFeatureClick = (index) => {
-        let updatedFeatures = [];
+        fetch(`http://127.0.0.1:8000/api/datasets/${datasetId}/`)
+            .then((response) => response.json())
+            .then((result) => {
+                console.log("Fetched dataset:", result); // Debugging log
+                if (!result || result.error) {
+                    message.error("Dataset not found.");
+                    setLoading(false);
+                    return;
+                }
 
-        if (selectedFeatures.includes(index)) {
-            updatedFeatures = selectedFeatures.filter(f => f !== index);
-        } else {
-            updatedFeatures = [index, ...selectedFeatures];
-        }
+                if (!result.records || result.records.length === 0) {
+                    console.error("Dataset has no records:", result);
+                    message.error("Dataset is empty.");
+                    setLoading(false);
+                    return;
+                }
 
-        if (updatedFeatures.length > 2) {
-            updatedFeatures = updatedFeatures.slice(0, 2);
-        }
+                setFeatures(result.features || []);  // Extract feature names
+                setData(result.records);  // Extract dataset records
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error fetching dataset:", error);
+                message.error("Failed to fetch dataset.");
+                setLoading(false);
+            });
+    }, [datasetId]);
 
-        setSelectedFeatures(updatedFeatures);
-    };
-
-    const FeatureTable = ({ data, features, selectedFeatures, onFeatureClick }) => {
-        return (
-            <div className="feature-table">
-                <h3>Feature List:</h3>
-                <h4>Click feature name to change selected features.</h4>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            {features.map((feature, index) => (
-                                <th 
-                                    key={index} 
-                                    className={selectedFeatures.includes(index) ? "selected-feature" : ""}
-                                    onClick={() => onFeatureClick(index)}
-                                >
-                                    {feature}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.map((row, rowIndex) => (
-                            <tr key={rowIndex}>
-                                <td>Data {rowIndex + 1}</td>
-                                {features.map((feature, featureIndex) => (
-                                    <td 
-                                        key={featureIndex} 
-                                        className={selectedFeatures.includes(featureIndex) ? "selected-column" : ""}
-                                    >
-                                        {row[feature]}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        );
+    // Handles feature selection for visualization
+    const handleFeatureChange = (values) => {
+        setSelectedFeatures(values);
     };
 
     return (
-        <Card title="Data Table" style={{ width: "100%", minWidth: "450px", minHeight: "360px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <FeatureTable
-                features={features}
-                data={data}
-                selectedFeatures={selectedFeatures}
-                onFeatureClick={handleFeatureClick}
-            />
+        <Card title="Data Preview" style={{ width: "100%", minHeight: "400px" }}>
+            {loading ? (
+                <Spin tip="Loading data..." />
+            ) : (
+                <>
+                    {features.length === 0 ? (
+                        <p>No data available.</p>
+                    ) : (
+                        <>
+                            <Select
+                                mode="multiple"
+                                placeholder="Select up to 2 features"
+                                style={{ width: "100%", marginBottom: "16px" }}
+                                onChange={handleFeatureChange}
+                                maxTagCount={2}
+                            >
+                                {features.map((feature) => (
+                                    <Option key={feature} value={feature}>{feature}</Option>
+                                ))}
+                            </Select>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={data}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="id" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    {selectedFeatures.length > 0 ? (
+                                        selectedFeatures.map((feature, index) => (
+                                            <Line key={index} type="monotone" dataKey={feature} stroke={index === 0 ? "#8884d8" : "#82ca9d"} />
+                                        ))
+                                    ) : (
+                                        <p style={{ textAlign: 'center' }}>Please select features to visualize.</p>
+                                    )}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </>
+                    )}
+                </>
+            )}
         </Card>
     );
 };
