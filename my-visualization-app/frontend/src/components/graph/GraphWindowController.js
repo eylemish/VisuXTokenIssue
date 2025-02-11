@@ -29,7 +29,7 @@ class GraphWindowController {
     graphContainer.className = "graph-window";
     graphContainer.style.position = "absolute";
     graphContainer.style.top = "100px";
-    graphContainer.style.left = "100px";
+    graphContainer.style.left = "250px";
     graphContainer.style.width = "600px";
     graphContainer.style.height = "400px";
     graphContainer.style.background = "#fff";
