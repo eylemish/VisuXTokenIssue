@@ -44,46 +44,6 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       return;
     }
 
-    const requestData = {
-      dataset_id: datasetId,
-      x_feature: xColumn,
-      y_feature: yColumn,
-      method: fitType,
-      degree: fitType === "polynomial" ? degree : undefined,
-      initial_params: null, // Can be extended to support user-input initial parameters
-    };
-
-    console.log({
-      datasetId,
-      xColumn,
-      yColumn,
-      type: fitType,
-      params: { degree },
-    });
-
-    setLoading(true);
-
-    try {
-      // Use uiController's postRequest to send the request
-      const responseData = await uiController.postRequest("http://127.0.0.1:8000/api/fit_curve/", requestData);
-
-      message.success("Curve fitting completed!");
-      console.log("Fitted Data:", responseData);
-
-      // Save the response data to state
-      setParams(responseData.params);
-      setCovariance(responseData.covariance);
-      setFittedData(responseData.fitted_data);  // This should be an array of fitted data
-
-    } catch (error) {
-      console.error("Curve fitting error:", error);
-      message.error("Curve fitting failed. Please try again.");
-    } finally {
-      setLoading(false);
-      //onCancel();
-    }
-
-    /* 
     const action = new Action("EXECUTE_TOOL", "user", {
       toolName: "Curve Fitting",
       datasetId,
@@ -96,7 +56,6 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
     uiController.handleUserAction(action);
     message.success("Curve fitting started!");
     onCancel();
-    */
   };
 
   
