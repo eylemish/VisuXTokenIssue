@@ -6,7 +6,7 @@ import {
   FileTextOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import datasetManager from "../file/DatasetManager"; // Use a singleton DatasetManager
+import datasetManager from "../file/DatasetManager"; // ✅ 使用单例 DatasetManager
 import DimReductionModal from "../modal/DimReductionModal";
 import NewGraphModal from "../modal/NewGraphModal";
 import CurveFittingModal from "../modal/CurveFittingModal";
@@ -20,7 +20,7 @@ const { Sider } = Layout;
 const { SubMenu } = Menu;
 
 const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGraph, showData, showLog }) => {
-  // Control tool window
+  // 控制工具窗口
   const [openKeys, setOpenKeys] = useState([]);
   const [newGraphModalVisible, setNewGraphModalVisible] = useState(false);
   const [dimReductionModalVisible, setDimReductionModalVisible] = useState(false);
@@ -32,16 +32,16 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
   const [replicasModalVisible, setReplicasModalVisible] = useState(false);
 
 
-  // Handle menu expansion
+  // 处理菜单展开
   const handleOpenChange = (keys) => {
     setOpenKeys(keys);
   };
 
-  // Handling downsizing
+  // Deal with dimensionality reduction
   const handleDimensionalityReduction = () => {
     const datasetId = datasetManager.getCurrentDatasetId();
     if (!datasetId) {
-      message.error("No dataset available. Please upload a dataset first.");
+      message.error("⚠️ No dataset available. Please upload a dataset first.");
       return;
     }
     setDimReductionModalVisible(true);
@@ -56,7 +56,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         defaultSelectedKeys={["graphOverview"]}
         style={{ height: "100%", borderRight: 0 }}
       >
-        {/* Window switches (Graph / DataTable / Log) */}
+        {/* Open/Close a window（Graph / DataTable / Log） */}
         <Menu.Item key="toggleGraph" icon={<BarChartOutlined />} onClick={() => setShowGraph(!showGraph)}>
           {showGraph ? "Close Graph Window" : "Open Graph Window"}
         </Menu.Item>
@@ -100,9 +100,9 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         </SubMenu>
       </Menu>
 
-      {/* modal component area */}
+      {/* modal area */}
 
-      {/* create new Graph Modal */}
+      {/* Modal of new Graph */}
       <NewGraphModal visible={newGraphModalVisible} onCancel={() => setNewGraphModalVisible(false)} uiController={uiController} />
 
       {/* curve fitting Modal */}
@@ -117,10 +117,10 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
       {/* oversample data Modal */}
       <OversampleModal visible={oversampleModalVisible} onCancel={() => setOversampleModalVisible(false)} uiController={uiController} />
 
-      {/* correlate data Modal */}
+      {/* correlate data 的 Modal */}
       <CorrelationModal visible={correlationModalVisible} onCancel={() => setCorrelationModalVisible(false)} uiController={uiController} />
 
-      {/* dim reduction Modal */}
+      {/* dimensionality reduction Modal */}
       <DimReductionModal
         visible={dimReductionModalVisible}
         onClose={() => setDimReductionModalVisible(false)}
