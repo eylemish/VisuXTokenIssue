@@ -1,6 +1,21 @@
 import React, {useEffect, useState} from "react";
 import { Modal, Button, Input, Select, message, Table } from "antd";
 import Action from "../Action";
+import CurveFitPlot from "../graph/CurveFitPlot";
+
+// Get CSRF Token（fit Django）
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie) {
+    document.cookie.split(";").forEach((cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "csrftoken") {
+        cookieValue = decodeURIComponent(value);
+      }
+    });
+  }
+  return cookieValue;
+}
 
 const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   const [degree, setDegree] = useState(2);
@@ -12,8 +27,9 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
 
 
 
-  // This part is because the front-end part doesn't store the dataset at all anymore, in order to be able to call the columns
-  const [columns, setColumns] = useState([]); // Store column names
+  //这个部分是因为前端部分完全不存数据集了，为了能调用列
+  const [columns, setColumns] = useState([]); // 存储列名
+  const [originalData, setOriginalData] = useState([]);
   const [fittedData, setFittedData] = useState([]);
   const [params, setParams] = useState([]);
   const [covariance, setCovariance] = useState([]);
@@ -21,7 +37,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
-  // **Get column names when the user selects a dataset**
+  // **当用户选择数据集时，获取列名**
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
@@ -34,7 +50,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
     };
 
     fetchColumns();
-  }, [datasetId]); // Dependent on `datasetId`, triggered on change
+  }, [datasetId]); // 依赖 `datasetId`，变更时触发
 
 
 
@@ -43,19 +59,52 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       message.error("Please select a dataset and two columns!");
       return;
     }
+  
+    const requestData = {
+      dataset_id: datasetId,  // 确保 datasetId 是有效的
+      params: {
+        xColumn: xColumn,
+        yColumn: yColumn,
+        type: fitType,
+        degree: degree
+      }
+    };
+    
+    console.log("Request data:", requestData);  // 打印请求数据
+    
+    
+    try {
+      const result = await fetch("http://127.0.0.1:8000/api/fit_curve/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken()  // 确保发送 CSRF Token
+      },
+      body: JSON.stringify(requestData),
+      credentials: "include", // allow to include Cookie
+      });
+      console.log(result.generated_data);
+  
+      const resultData = await result.json(); // 解析为JSON格式
 
-    const action = new Action("EXECUTE_TOOL", "user", {
-      toolName: "Curve Fitting",
-      datasetId,
-      xColumn,
-      yColumn,
-      type: fitType,
-      params: { degree },
-    });
+      if (resultData.error) {
+        message.error(`Curve fitting failed: ${resultData.error}`);
+        return;
+      }
 
-    uiController.handleUserAction(action);
-    message.success("Curve fitting started!");
-    onCancel();
+      
+      console.log(resultData.original_data);
+      setOriginalData(resultData.original_data); // 存储原始数据
+      setFittedData(resultData.generated_data);
+      console.log(fittedData);  // 输出生成的数据
+      setParams(resultData.params);
+      setCovariance(resultData.covariance);
+      message.success("Curve fitting completed!");
+    } catch (error) {
+      message.error(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   
@@ -114,7 +163,20 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       <Button type="primary" onClick={handleFit} block style={{ marginTop: "10px" }}>
         Run Curve Fitting
       </Button>
+
+      {fittedData.length > 0 && (
+      <div style={{ marginTop: "20px" }}>
+        <h3>Fitting Results</h3>
+        <CurveFitPlot originalData={originalData} fittedData={fittedData} />
+
+        <div style={{ marginTop: "20px" }}>
+        <h4>Fitting Parameters</h4>
+        <pre>{JSON.stringify(params, null, 2)}</pre> {/* 以 JSON 格式显示 params */}
+        </div>
+      </div>
+    )}
     </Modal>
+    
   );
 };
 

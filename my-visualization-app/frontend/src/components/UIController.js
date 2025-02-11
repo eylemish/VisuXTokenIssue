@@ -61,7 +61,7 @@ class UIController {
         console.log(`Graph created: ${newGraph.id}`);
 
         // Open the Graph window and pass in the new graphData
-        this.graphWindowController.openGraphWindow(newGraph);
+        //this.graphWindowController.openGraphWindow(newGraph);
 
         break;
       }

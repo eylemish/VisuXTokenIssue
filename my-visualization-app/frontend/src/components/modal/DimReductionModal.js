@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Modal, Radio, InputNumber, Button, message } from "antd";
 import axios from "axios";
-import datasetManager from "../file/DatasetManager";
+import datasetManager from "../file/DatasetManager"; //  ensure the path
 
-// Getting a CSRF Token (for Django)
+// get CSRF Token（for Django ）
 const getCSRFToken = () => {
   let cookieValue = null;
   if (document.cookie) {
@@ -18,10 +18,10 @@ const getCSRFToken = () => {
 };
 
 const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datasetId }) => {
-  const [method, setMethod] = useState("pca"); // PCA is selected by default
-  const [nComponents, setNComponents] = useState(2); // Target dimension
-  const [isProcessing, setIsProcessing] = useState(false); // Processing status
-  const [reducedData, setReducedData] = useState(null); // Store the downsized data
+  const [method, setMethod] = useState("pca"); // default: PCA
+  const [nComponents, setNComponents] = useState(2); // target dimension
+  const [isProcessing, setIsProcessing] = useState(false); // process state
+  const [reducedData, setReducedData] = useState(null); // store the data after reduction
 
   const handleReduce = async () => {
     if (!nComponents || nComponents <= 0) {
@@ -29,7 +29,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       return;
     }
 
-    // Get the latest datasetId.
+    // get latest datasetId
     const currentDatasetId = datasetId || datasetManager.getCurrentDatasetId();
     if (!currentDatasetId) {
       message.error("No valid dataset ID found. Please upload a dataset first.");
@@ -41,22 +41,22 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       const response = await axios.post(
         "http://127.0.0.1:8000/api/dimensional_reduction/",
         {
-          dataset_id: currentDatasetId, // Pass the dataset ID
+          dataset_id: currentDatasetId, // pass dataset_id
           method,
           n_components: nComponents,
         },
         {
           headers: {
-            "X-CSRFToken": getCSRFToken(), // Add a CSRF token
+            "X-CSRFToken": getCSRFToken(), // add CSRF toekn
             "Content-Type": "application/json",
           },
-          withCredentials: true,
+          withCredentials: true, // ensure that the request contains Cookie
         }
       );
 
-      // Update front-end data
-      setReducedData(response.data.reduced_data); // Storing Results
-      onUpdateDataset(response.data.reduced_data); // Trigger external updates
+      // update frontend data
+      setReducedData(response.data.reduced_data); // store the result
+      onUpdateDataset(response.data.reduced_data); //  update the dataset
 
       // log
       logAction(
@@ -80,7 +80,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       footer={null}
       width={500}
     >
-      {/* Choosing a method */}
+      {/* choose dimensionality reduction methods */}
       <div style={{ marginBottom: "15px" }}>
         <Radio.Group onChange={(e) => setMethod(e.target.value)} value={method}>
           <Radio value="pca">PCA</Radio>
@@ -89,7 +89,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         </Radio.Group>
       </div>
 
-      {/* Select components of dimensionality reduction */}
+      {/* number of components */}
       <div style={{ marginBottom: "15px" }}>
         <label>Number of Components:</label>
         <InputNumber
@@ -101,7 +101,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         />
       </div>
 
-      {/* Confirmation button */}
+      {/* comfirmation button */}
       <div style={{ textAlign: "right", marginBottom: "15px" }}>
         <Button onClick={onClose} style={{ marginRight: 10 }}>
           Cancel
@@ -111,7 +111,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         </Button>
       </div>
 
-      {/* Show results */}
+      {/* show the result */}
       {reducedData && (
         <div style={{ marginTop: "20px", padding: "10px", background: "#f7f7f7", borderRadius: "5px" }}>
           <h3>Reduced Data:</h3>
