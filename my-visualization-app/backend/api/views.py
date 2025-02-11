@@ -458,7 +458,6 @@ class InterpolateView(APIView):
 
             # Convert dataset to Pandas DataFrame
             dataset_df = dataset.get_dataframe()
-            
             # Perform interpolation
             interpolated_data = Engine.interpolate(
                 dataset_df, 
@@ -469,7 +468,7 @@ class InterpolateView(APIView):
                 min_value=min_value, 
                 max_value=max_value
             )
-            
+            print(interpolated_data)
             # Return the interpolated data in JSON format
             return JsonResponse({"interpolated_data": interpolated_data.to_dict(orient='records')})
 

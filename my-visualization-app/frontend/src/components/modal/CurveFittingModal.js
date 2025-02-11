@@ -70,9 +70,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       }
     };
     
-    console.log("Request data:", requestData);  // 打印请求数据
-    
-    
+    setLoading(true);
     try {
       const result = await fetch("http://127.0.0.1:8000/api/fit_curve/", {
       method: "POST",
@@ -83,7 +81,6 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       body: JSON.stringify(requestData),
       credentials: "include", // allow to include Cookie
       });
-      console.log(result.generated_data);
   
       const resultData = await result.json(); // 解析为JSON格式
 
@@ -93,10 +90,8 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       }
 
       
-      console.log(resultData.original_data);
       setOriginalData(resultData.original_data); // 存储原始数据
       setFittedData(resultData.generated_data);
-      console.log(fittedData);  // 输出生成的数据
       setParams(resultData.params);
       setCovariance(resultData.covariance);
       message.success("Curve fitting completed!");

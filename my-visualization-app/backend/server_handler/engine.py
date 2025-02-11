@@ -127,7 +127,7 @@ class Engine:
             raise ValueError(f"Error in interpolation: {e}")
     """
 
-    def interpolate(self, dataset: pd.DataFrame, x_feature: str, y_feature: str, kind: str = 'linear', num_points: int = 100, min_value=None, max_value=None, degree: int = 3) -> pd.DataFrame:
+    def interpolate(dataset: pd.DataFrame, x_feature: str, y_feature: str, kind: str = 'linear', num_points: int = 100, min_value=None, max_value=None, degree: int = 3) -> pd.DataFrame:
         """
         Perform interpolation (or extrapolation) on a given dataset.
 
@@ -151,6 +151,13 @@ class Engine:
             x = dataset[x_feature].values
             y = dataset[y_feature].values
 
+             # Handle NaN values in y by replacing them with the mean or by removing the rows with NaN values
+            if np.any(np.isnan(y)):
+                # Option 1: Remove rows where y is NaN
+                mask = ~np.isnan(y)
+                x = x[mask]
+                y = y[mask]
+
             # Use min and max values from the dataset if not provided
             if min_value is None:
                 min_value = np.min(x)
@@ -164,6 +171,10 @@ class Engine:
             if kind == "linear":
                 interpolator = interp1d(x, y, kind="linear", fill_value="extrapolate")
                 y_new = interpolator(x_new)
+                # Check if NaN values were generated during interpolation
+                if np.any(np.isnan(y_new)):
+                    print("Warning: NaN values generated during linear interpolation.")
+                    y_new = np.nan_to_num(y_new)  # Replace NaNs with 0 or another suitable value
 
             # Polynomial interpolation
             elif kind == "polynomial":
