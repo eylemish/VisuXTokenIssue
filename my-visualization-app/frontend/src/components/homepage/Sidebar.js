@@ -14,6 +14,7 @@ import InterpolationModal from "../modal/InterpolationModal";
 import ExtrapolationModal from "../modal/ExtrapolationModal";
 import OversampleModal from "../modal/OversampleModal";
 import CorrelationModal from "../modal/CorrelationModal";
+import ReplicaManagerModal from "../modal/ReplicaManagerModal";
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -28,6 +29,8 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
   const [extrapolationModalVisible, setExtrapolationModalVisible] = useState(false);
   const [oversampleModalVisible, setOversampleModalVisible] = useState(false);
   const [correlationModalVisible, setCorrelationModalVisible] = useState(false);
+  const [replicasModalVisible, setReplicasModalVisible] = useState(false);
+
 
   // 处理菜单展开
   const handleOpenChange = (keys) => {
@@ -64,6 +67,15 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
 
         <Menu.Item key="toggleLog" icon={<FileTextOutlined />} onClick={() => setShowLog(!showLog)}>
           {showLog ? "Close Log Window" : "Open Log Window"}
+        </Menu.Item>
+
+
+        <Menu.Item
+          key="dataCopyManagement"
+          icon={<SettingOutlined />}
+          onClick={() => setReplicasModalVisible(true)}
+        >
+          Data Copy Management
         </Menu.Item>
 
         {/* Graph Manager */}
@@ -117,6 +129,16 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         }}
         logAction={(log) => console.log("Log:", log)}
       />
+
+
+        {/* data copy manage Modal */}
+        <ReplicaManagerModal
+            visible={replicasModalVisible}
+            onClose={() => setReplicasModalVisible(false)}
+            uiController={uiController}
+            datasetId={null}// don't need it because data structure changed
+        />
+
     </Sider>
   );
 };
