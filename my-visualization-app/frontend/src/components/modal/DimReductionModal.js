@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Modal, Radio, InputNumber, Button, message } from "antd";
 import axios from "axios";
-import datasetManager from "../file/DatasetManager"; // ✅ 确保路径正确
+import datasetManager from "../file/DatasetManager"; //  ensure the path
 
-// 获取 CSRF Token（适用于 Django ）
+// get CSRF Token（for Django ）
 const getCSRFToken = () => {
   let cookieValue = null;
   if (document.cookie) {
@@ -18,10 +18,10 @@ const getCSRFToken = () => {
 };
 
 const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datasetId }) => {
-  const [method, setMethod] = useState("pca"); // 默认选择 PCA
-  const [nComponents, setNComponents] = useState(2); // 目标维度
-  const [isProcessing, setIsProcessing] = useState(false); // 处理状态
-  const [reducedData, setReducedData] = useState(null); // 存储降维后的数据
+  const [method, setMethod] = useState("pca"); // default: PCA
+  const [nComponents, setNComponents] = useState(2); // target dimension
+  const [isProcessing, setIsProcessing] = useState(false); // process state
+  const [reducedData, setReducedData] = useState(null); // store the data after reduction
 
   const handleReduce = async () => {
     if (!nComponents || nComponents <= 0) {
@@ -29,7 +29,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       return;
     }
 
-    // 获取最新的 datasetId
+    // get latest datasetId
     const currentDatasetId = datasetId || datasetManager.getCurrentDatasetId();
     if (!currentDatasetId) {
       message.error("No valid dataset ID found. Please upload a dataset first.");
@@ -41,21 +41,21 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       const response = await axios.post(
         "http://127.0.0.1:8000/api/dimensional_reduction/",
         {
-          dataset_id: currentDatasetId, // 传递数据集 ID
+          dataset_id: currentDatasetId, // pass dataset_id
           method,
           n_components: nComponents,
         },
         {
           headers: {
-            "X-CSRFToken": getCSRFToken(), // 添加 CSRF 令牌
+            "X-CSRFToken": getCSRFToken(), // add CSRF toekn
             "Content-Type": "application/json",
           },
-          withCredentials: true, // 确保请求携带 Cookie
+          withCredentials: true, // ensure that the request contains Cookie
         }
       );
 
-      // 更新前端数据
-      setReducedData(response.data.reduced_data); // ✅ 存储降维结果
+      // update frontend data
+      setReducedData(response.data.reduced_data); // store the result
       onUpdateDataset(response.data.reduced_data); // ✅ 触发外部更新
 
       // 记录日志
@@ -80,7 +80,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       footer={null}
       width={500}
     >
-      {/* 选择降维方法 */}
+      {/* choose dimensionality reduction methods */}
       <div style={{ marginBottom: "15px" }}>
         <Radio.Group onChange={(e) => setMethod(e.target.value)} value={method}>
           <Radio value="pca">PCA</Radio>
@@ -89,7 +89,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         </Radio.Group>
       </div>
 
-      {/* 选择降维维度 */}
+      {/* number of components */}
       <div style={{ marginBottom: "15px" }}>
         <label>Number of Components:</label>
         <InputNumber
@@ -101,7 +101,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         />
       </div>
 
-      {/* 确认按钮 */}
+      {/* comfirmation button */}
       <div style={{ textAlign: "right", marginBottom: "15px" }}>
         <Button onClick={onClose} style={{ marginRight: 10 }}>
           Cancel
@@ -111,7 +111,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         </Button>
       </div>
 
-      {/* 显示降维结果 */}
+      {/* show the result */}
       {reducedData && (
         <div style={{ marginTop: "20px", padding: "10px", background: "#f7f7f7", borderRadius: "5px" }}>
           <h3>Reduced Data:</h3>
