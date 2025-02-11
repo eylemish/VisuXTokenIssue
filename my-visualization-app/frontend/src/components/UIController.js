@@ -9,8 +9,8 @@ import datasetManager from "./file/DatasetManager";
 class UIController {
   constructor() {
     this.modalController = new ModalController(); // Manages modal windows
-    this.graphManager = new GraphManager(); // Manages graph creation and modification
-    this.graphWindowController = new GraphWindowController(this.graphManager); // Manages graph windows
+    //this.graphManager = new GraphManager(); // Manages graph creation and modification
+    this.graphWindowController = new GraphWindowController(this.GraphManager); // Manages graph windows
     this.toolManager = new ToolManager(this); // Manages UI tools //change toolManager add uiController in its param
     this.logManager = new LogManager(); // 确保 logManager 全局可用
     this.tableManager = new TableManager(this);
@@ -62,7 +62,7 @@ class UIController {
 
       {/*来自NewGraphModal的Action，注意这里的参数还没写完*/} //please in english
       case 'CREATE_GRAPH':
-        this.graphManager.createGraph(action.graphInfo);
+        GraphManager.createGraph(action.graphInfo);
         this.graphWindowController.openGraphWindow();
         break;
 
@@ -139,9 +139,9 @@ getCSRFToken() {
     this.graphWindowController = graphWindowController;
   }
 
-  setGraphManager(graphManager) {
-    this.graphManager = graphManager;
-  }
+  // setGraphManager(graphManager) {
+  //   this.graphManager = graphManager;
+  // }
 
   setToolManager(toolManager) {
     this.toolManager = toolManager;
@@ -151,9 +151,9 @@ getCSRFToken() {
     this.imageDisplayArea = imageDisplayArea;
   }
 
-  getGraphManager() {
-    return this.graphManager;
-  }
+  // getGraphManager() {
+  //   return this.graphManager;
+  // }
 
   getModalController() {
     return this.modalController;

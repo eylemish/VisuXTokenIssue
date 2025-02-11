@@ -40,7 +40,7 @@ class VisualizationManager {
     // taking data values from selected features
     const featureData = selectedFeatures.map(feature => dataset[feature]);
 
-    // 4️⃣ Plotly verisini oluştur
+    // 4️⃣ Plotly data will fix more
     let plotData = {
       type: type,
       marker: { color: style.color || "red" }
@@ -63,7 +63,7 @@ class VisualizationManager {
 
     return graphScript;
   }
-  
+
 
   renderChart(graph) {
     const graphContainer = document.getElementById(graph.id);

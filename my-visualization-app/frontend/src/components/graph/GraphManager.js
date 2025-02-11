@@ -4,10 +4,14 @@ import Graph from "./Graph";
 
 class GraphManager {
   constructor() {
-    this.graphs = new Map();
-    this.currentGraph = null;
-    this.visualizationManager = new VisualizationManager();
-    this.loadGraphs();
+    if (!GraphManager.instance) {
+      this.graphs = new Map();
+      this.currentGraph = null;
+      this.visualizationManager = new VisualizationManager();
+      this.loadGraphs();
+      GraphManager.instance = this; // Saving the only instance
+    }
+    return GraphManager.instance;
   }
 
   async loadGraphs() {
@@ -147,6 +151,14 @@ class GraphManager {
   getAllGraphs() {
     return Array.from(this.graphs.values());
   }
+
+  static getInstance() {
+    if (!GraphManager.instance) {
+      GraphManager.instance = new GraphManager();
+    }
+    return GraphManager.instance;
+  }
+  
 }
 
-export default GraphManager;
+export default GraphManager.getInstance();
