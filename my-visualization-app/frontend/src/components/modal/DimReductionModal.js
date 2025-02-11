@@ -56,9 +56,9 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
 
       // update frontend data
       setReducedData(response.data.reduced_data); // store the result
-      onUpdateDataset(response.data.reduced_data); // ✅ 触发外部更新
+      onUpdateDataset(response.data.reduced_data); //  update the dataset
 
-      // 记录日志
+      // log
       logAction(
         `Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions on dataset ID ${currentDatasetId}.`
       );
