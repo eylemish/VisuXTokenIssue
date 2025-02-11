@@ -120,9 +120,17 @@ class UploadView(APIView):
 
             # Processed according to document type
             if file.name.lower().endswith(".csv"):
-                file_instance = UploadedFile.objects.create(file_path=file, name=file.name, file_type="csv")
+                file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
+                df = pd.read_csv(file)  
+                file_instance.features = list(df.columns)  
+                file_instance.records = df.to_dict(orient="records")  
+                file_instance.save()
             elif file.name.lower().endswith(".xlsx"):
-                file_instance = UploadedFile.objects.create(file_path=file, name=file.name, file_type="xlsx")
+                file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
+                df = pd.read_excel(file) 
+                file_instance.features = list(df.columns)  
+                file_instance.records = df.to_dict(orient="records")  
+                file_instance.save()
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
 
