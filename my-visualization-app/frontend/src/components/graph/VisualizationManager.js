@@ -69,34 +69,38 @@ class VisualizationManager {
   }
 
   renderChart(graph) {
-    if (!graph.dataset || !graph.selectedFeatures || graph.selectedFeatures.length === 0) {
-      console.error("Error: Graph dataset or selected features are invalid.");
-      return null;
-    }
+  console.log(`📊 Rendering Graph: ${graph.id}`);
 
-    // Getting Plotly Configuration Data
-    const plotConfig = this.visualize(graph);
-    if (!plotConfig) {
-      console.error("Error: Failed to generate visualization data.");
-      return null;
-    }
-
-    return (
-      <Plot
-        data={plotConfig.data}
-        layout={plotConfig.layout}
-        style={{ width: "100%", height: "100%" }}
-      />
-    );
+  const plotConfig = this.visualize(graph);
+  if (!plotConfig) {
+    console.error(`❌ Failed to generate visualization data for Graph: ${graph.id}`);
+    return;
   }
+
+  return (
+    <Plot
+      data={plotConfig.data}
+      layout={plotConfig.layout}
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
+}
+
 
   getRequiredFeatures(type) {
-    for (const category of Object.values(this.chartCategories)) {
-      const chart = category.find(chart => chart.type === type);
-      if (chart) return chart.requiredFeatures;
-    }
+  if (!type) {
+    console.error("❌ Graph type is undefined!");
     return 0;
   }
+
+  for (const category of Object.values(this.chartCategories)) {
+    const chart = category.find(chart => chart.type === type);
+    if (chart) return chart.requiredFeatures;
+  }
+
+  console.warn(`⚠️ No matching chart type found for: ${type}`);
+  return 0;
+}
 }
 
 class GraphStyle {

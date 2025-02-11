@@ -43,31 +43,36 @@ class GraphManager {
   createGraph(graphInfo) {
   const graphId = `graph_${Date.now()}`;
 
-  if (!graphInfo.dataset || !graphInfo.dataset.records || !graphInfo.dataset.features) {
-    console.error("Invalid dataset format. Missing `records` or `features`.");
+  if (!graphInfo.graphType) {
+    console.error("❌ Missing `graphType` in graphInfo.");
     return null;
   }
 
-  // Convert records to { feature1: [], feature2: [] }.
   const transformedDataset = {};
-  graphInfo.dataset.features.forEach(feature => {
-    transformedDataset[feature] = graphInfo.dataset.records.map(record => record[feature]);
-  });
+  if (graphInfo.dataset && graphInfo.dataset.records && graphInfo.dataset.features) {
+    graphInfo.dataset.features.forEach(feature => {
+      transformedDataset[feature] = graphInfo.dataset.records.map(record => record[feature]);
+    });
+  } else {
+    console.error("❌ Invalid dataset structure.");
+    return null;
+  }
 
-  console.log(`Transformed dataset for Graph ID ${graphId}:`, transformedDataset);
+  console.log(`✅ Transformed dataset for Graph ID ${graphId}:`, transformedDataset);
 
   const newGraph = new Graph(
     graphId,
-    graphInfo.graphName,
-    transformedDataset, // Pass in the converted data
-    graphInfo.graphType,
-    graphInfo.selectedFeatures,
+    graphInfo.graphName || "Untitled Graph",
+    transformedDataset,
+    graphInfo.graphType, // ✅ 确保类型传递正确
+    graphInfo.selectedFeatures || [],
     {}
   );
 
   this.addGraphToMap(newGraph);
-  return newGraph; // Ensure that the Graph instance is returned
+  return newGraph;
 }
+
 
   addGraphToMap(graph) {
     if (!(graph instanceof Graph)) {
