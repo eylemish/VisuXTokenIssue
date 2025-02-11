@@ -8,7 +8,7 @@ const HeaderNav = ({ uiController }) => {
   return (
       <Header style={{background: '#fff', padding: '0 20px', display: 'flex', justifyContent: 'space-between'}}>
           <div style={{margin: '-20px'}}>
-              <h2>APP LOGO</h2>
+              <h2>Visux</h2>
           </div>
           <div style={{marginLeft: "auto"}}>
               <FileComponent uiController={uiController}/>

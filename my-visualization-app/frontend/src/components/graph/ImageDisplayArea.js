@@ -4,23 +4,23 @@ import { DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
 import Plot from "react-plotly.js";
 
 const ImageDisplayArea = () => {
-  const [graphs, setGraphs] = useState([]); // 存储显示的 Graph
-  const [selectedGraph, setSelectedGraph] = useState(null); // 当前选中的 Graph
+  const [graphs, setGraphs] = useState([]); // Store the displayed Graph
+  const [selectedGraph, setSelectedGraph] = useState(null); // The currently selected Graph
 
-  // 1. 添加 Graph
+  // 1. Add Graph
   const addGraph = (graph) => {
     setGraphs((prevGraphs) => [...prevGraphs, graph]);
     message.success(`Graph "${graph.name}" added to Image Display Area.`);
   };
 
-  // 2. 删除 Graph
+  // 2. Delete Graph
   const removeGraph = (graphId) => {
     setGraphs((prevGraphs) => prevGraphs.filter((g) => g.id !== graphId));
     if (selectedGraph?.id === graphId) setSelectedGraph(null);
     message.success("Graph removed.");
   };
 
-  // 3. 选择 Graph
+  // 3. Select Graph
   const selectGraph = (graphId) => {
     const graph = graphs.find((g) => g.id === graphId);
     if (graph) {
@@ -29,13 +29,13 @@ const ImageDisplayArea = () => {
     }
   };
 
-  // 4. 取消选择
+  // 4. Cancellation of selection
   const deselectGraph = () => {
     setSelectedGraph(null);
     message.info("Deselected graph.");
   };
 
-  // 5. 下载 Graph
+  // 5. Download Graph
   const downloadGraph = (graph) => {
     const filename = `${graph.name}.png`;
     Plot.downloadImage(`graph-container-${graph.id}`, { format: "png", filename });
@@ -64,7 +64,7 @@ const ImageDisplayArea = () => {
               <Button
                 icon={<DownloadOutlined />}
                 onClick={(e) => {
-                  e.stopPropagation(); // 避免触发选择操作
+                  e.stopPropagation(); // Avoid triggering selection operations
                   downloadGraph(graph);
                 }}
                 style={{ marginRight: 8 }}

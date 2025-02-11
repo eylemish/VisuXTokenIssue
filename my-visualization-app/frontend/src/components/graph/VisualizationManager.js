@@ -22,7 +22,7 @@ class VisualizationManager {
   };
 
   /**
-   * 生成 Plotly 可视化数据
+   * Generate Plotly visualisation data
    */
   visualize(graph) {
     const { dataset, type, selectedFeatures = [], name, style } = graph;
@@ -32,7 +32,7 @@ class VisualizationManager {
       return null;
     }
 
-    // 获取该图表类型所需的特征数
+    // Get the number of features required for this chart type
     const requiredFeatures = this.getRequiredFeatures(type);
     if (selectedFeatures.length !== requiredFeatures) {
       console.error(
@@ -41,40 +41,40 @@ class VisualizationManager {
       return null;
     }
 
-    // 确保 dataset 存在
+    // Make sure the dataset exists
     if (!dataset || typeof dataset !== "object") {
       console.error(`❌ Error: Invalid dataset format`, dataset);
       return null;
     }
 
-    // 解析数据
+    // parsing data
     const featureData = selectedFeatures.map((feature) => dataset?.[feature] || []);
     if (!featureData.every(Array.isArray) || featureData.some((arr) => arr.length === 0)) {
       console.error(`❌ Error: One or more selected features are not valid arrays.`, featureData);
       return null;
     }
 
-    // 生成 Plotly 数据
+    // Generate Plotly data
     let plotData;
     if (type === "pie") {
       plotData = {
         type: "pie",
         labels: featureData[0],
-        values: featureData[0].map(() => 1), // Pie 需要 `values`，这里只是占位
+        values: featureData[0].map(() => 1), // Pie needs `values`, this is just a placeholder.
       };
     } else {
       plotData = {
-        type: type === "scatter3d" ? "scatter3d" : type, // 3D 散点图
+        type: type === "scatter3d" ? "scatter3d" : type, // 3D Scatterplot
         mode: type === "scatter" || type === "scatter3d" ? "markers" : undefined,
         marker: { color: style?.color || "blue" },
       };
 
-      if (requiredFeatures >= 1) plotData.x = featureData[0]; // X 轴
-      if (requiredFeatures >= 2) plotData.y = featureData[1]; // Y 轴
-      if (requiredFeatures >= 3) plotData.z = featureData[2]; // Z 轴 (3D)
+      if (requiredFeatures >= 1) plotData.x = featureData[0]; // X-axis
+      if (requiredFeatures >= 2) plotData.y = featureData[1]; // Y-axis
+      if (requiredFeatures >= 3) plotData.z = featureData[2]; // Z-axis (3D)
     }
 
-    // 构建布局
+    // Build the layout
     const layout = {
       title: name,
       xaxis: { title: selectedFeatures[0] || "X" },
@@ -82,7 +82,7 @@ class VisualizationManager {
       ...this.graphStyle.getLayout(),
     };
 
-    // 3D 图表布局
+    // 3D chart layout
     if (type === "scatter3d" || requiredFeatures >= 3) {
       layout.scene = {
         xaxis: { title: selectedFeatures[0] || "X" },
@@ -95,34 +95,34 @@ class VisualizationManager {
   }
 
   /**
-   * 渲染 Plotly 图表
+   * Rendering Plotly Charts
    */
   renderChart(graph) {
-  console.log(`📊 Rendering Graph: ${graph.id}`, graph);
+  console.log(`Rendering Graph: ${graph.id}`, graph);
 
   const plotConfig = this.visualize(graph);
   if (!plotConfig) {
-    console.error(`❌ Failed to generate visualization data for Graph: ${graph.id}`);
+    console.error(`Failed to generate visualization data for Graph: ${graph.id}`);
     return;
   }
 
   const graphContainer = document.getElementById(`plot_${graph.id}`);
   if (!graphContainer) {
-    console.error(`❌ Graph container not found: plot_${graph.id}`);
+    console.error(`Graph container not found: plot_${graph.id}`);
     return;
   }
 
-  console.log(`✅ Rendering Plotly chart in: plot_${graph.id}`);
+  console.log(`Rendering Plotly chart in: plot_${graph.id}`);
 
   Plotly.newPlot(graphContainer, plotConfig.data, plotConfig.layout);
 }
 
   /**
-   * 获取图表类型所需的特征数
+   * Get the number of features required for the chart type
    */
   getRequiredFeatures(type) {
     if (!type) {
-      console.error("❌ Graph type is undefined!");
+      console.error("Graph type is undefined!");
       return 0;
     }
 
@@ -131,7 +131,7 @@ class VisualizationManager {
       if (chart) return chart.requiredFeatures;
     }
 
-    console.warn(`⚠️ No matching chart type found for: ${type}`);
+    console.warn(`No matching chart type found for: ${type}`);
     return 0;
   }
 }

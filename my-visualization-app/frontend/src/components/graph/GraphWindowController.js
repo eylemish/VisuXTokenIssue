@@ -2,25 +2,25 @@ import VisualizationManager from "./VisualizationManager";
 
 class GraphWindowController {
   constructor(graphManager) {
-    this.graphManager = graphManager; // 让它可以访问 GraphManager
-    this.windows = new Map(); // 存储所有的窗口
-    this.visualizationManager = new VisualizationManager(); // 可视化管理器
+    this.graphManager = graphManager; // Make it accessible to the GraphManager
+    this.windows = new Map(); // Store all windows
+    this.visualizationManager = new VisualizationManager();
   }
 
   /**
-   * 创建新图表窗口
+   * Creating a New Chart Window
    */
   openGraphWindow(graphData) {
     if (!graphData || !graphData.id) {
-      console.error("❌ Invalid graphData. Missing ID.");
+      console.error("Invalid graphData. Missing ID.");
       return null;
     }
 
     const windowId = `graph_window_${graphData.id}`;
-    console.log(`🖼️ Creating Graph Window for ID: ${windowId}`);
+    console.log(`🖼Creating Graph Window for ID: ${windowId}`);
 
     if (document.getElementById(windowId)) {
-      console.warn(`⚠️ Graph window ${windowId} already exists.`);
+      console.warn(`Graph window ${windowId} already exists.`);
       return;
     }
 
@@ -38,7 +38,7 @@ class GraphWindowController {
     graphContainer.style.padding = "10px";
     graphContainer.style.zIndex = "1000";
 
-    // 关闭按钮
+    // close button
     const closeButton = document.createElement("button");
     closeButton.innerText = "×";
     closeButton.style.position = "absolute";
@@ -52,7 +52,7 @@ class GraphWindowController {
 
     graphContainer.appendChild(closeButton);
 
-    // 渲染 Plotly 图表
+    // render plotly chart
     const graphContent = document.createElement("div");
     graphContent.id = `plot_${graphData.id}`;
     graphContent.style.width = "100%";
@@ -61,12 +61,12 @@ class GraphWindowController {
 
     document.body.appendChild(graphContainer);
 
-    // 调用 VisualizationManager 渲染图表
+    // Call VisualizationManager to render the diagram
     setTimeout(() => {
       this.visualizationManager.renderChart(graphData);
     }, 200);
 
-    // 存储窗口
+    // Storage window
     const newWindow = {
       id: windowId,
       graphData,
@@ -78,54 +78,54 @@ class GraphWindowController {
   }
 
   /**
-   * 通过 Graph ID 打开窗口
+   * Open window by Graph ID
    */
   openGraphWindowById(graphId) {
     const graphData = this.graphManager.getGraphById(graphId);
     if (!graphData) {
-      console.error(`❌ Graph ID ${graphId} not found.`);
+      console.error(`Graph ID ${graphId} not found.`);
       return null;
     }
     return this.openGraphWindow(graphData);
   }
 
   /**
-   * 关闭窗口并移除 DOM
+   * Close the window and remove the DOM
    */
   closeGraphWindow(windowId) {
     if (this.windows.has(windowId)) {
       const windowData = this.windows.get(windowId);
       document.body.removeChild(windowData.element);
       this.windows.delete(windowId);
-      console.log(`✅ Closed Graph Window (ID: ${windowId})`);
+      console.log(`Closed Graph Window (ID: ${windowId})`);
       return true;
     }
-    console.warn(`❌ Cannot close window. ID ${windowId} not found.`);
+    console.warn(`Cannot close window. ID ${windowId} not found.`);
     return false;
   }
 
   /**
-   * 获取窗口对象
+   * Get window object
    */
   getGraphWindowById(windowId) {
     return this.windows.get(windowId) || null;
   }
 
   /**
-   * 获取所有窗口
+   * Get all windows
    */
   getAllGraphWindows() {
     return Array.from(this.windows.values());
   }
 
   /**
-   * 更新窗口的 Graph 数据
+   * Update the Graph data of the window
    */
   updateGraphWindow(windowId, newGraphData) {
     if (this.windows.has(windowId)) {
       const window = this.windows.get(windowId);
       window.graphData = newGraphData;
-      this.visualizationManager.renderChart(newGraphData); // 重新渲染
+      this.visualizationManager.renderChart(newGraphData); // Re-render
       return true;
     }
     return false;

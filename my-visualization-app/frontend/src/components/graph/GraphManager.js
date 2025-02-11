@@ -44,7 +44,7 @@ class GraphManager {
   const graphId = `graph_${Date.now()}`;
 
   if (!graphInfo.graphType) {
-    console.error("❌ Missing `graphType` in graphInfo.");
+    console.error("Missing `graphType` in graphInfo.");
     return null;
   }
 
@@ -54,17 +54,17 @@ class GraphManager {
       transformedDataset[feature] = graphInfo.dataset.records.map(record => record[feature]);
     });
   } else {
-    console.error("❌ Invalid dataset structure.");
+    console.error("Invalid dataset structure.");
     return null;
   }
 
-  console.log(`✅ Transformed dataset for Graph ID ${graphId}:`, transformedDataset);
+  console.log(`Transformed dataset for Graph ID ${graphId}:`, transformedDataset);
 
   const newGraph = new Graph(
     graphId,
     graphInfo.graphName || "Untitled Graph",
     transformedDataset,
-    graphInfo.graphType, // ✅ 确保类型传递正确
+    graphInfo.graphType, // Ensure that types are passed correctly
     graphInfo.selectedFeatures || [],
     {}
   );
@@ -120,7 +120,7 @@ class GraphManager {
     const graph = this.graphs.get(graphId);
     if (graph) {
       graph.type = newType;
-      console.log(`🔄 Switched Graph (ID: ${graphId}) to type: ${newType}`);
+      console.log(`Switched Graph (ID: ${graphId}) to type: ${newType}`);
       if (this.visualizationManager) {
         this.visualizationManager.renderChart(graph);
       } else {
