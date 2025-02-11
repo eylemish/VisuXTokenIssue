@@ -72,7 +72,7 @@ const DataWindow = () => {
                         <>
                             <Select
                                 mode="multiple"
-                                placeholder="Select up to 2 features"
+                                placeholder="Select features"
                                 style={{ width: "100%", marginBottom: "16px" }}
                                 onChange={handleFeatureChange}
                                 maxTagCount={2}
