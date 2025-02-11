@@ -339,7 +339,7 @@ const ExportLogsButton = () => {
 
 export default ExportLogsButton;
 """
-
+@method_decorator(csrf_exempt, name='dispatch')
 class FitCurveView(APIView):
     def post(self, request):
         try:
@@ -349,21 +349,23 @@ class FitCurveView(APIView):
             y_feature = body.get("y_feature")
             method = body.get("method", "linear")  # Default is linear
             degree = body.get("degree", 2)  # Default degree is 2
-            initial_params = body.get("initial_params", None) 
+            initial_params = body.get("initial_params", None)
 
-            # Make sure that dataset_id exist
+            # Ensure dataset_id is provided
             if not dataset_id:
-                return JsonResponse({"error": "File ID is required"}, status=400)
+                return JsonResponse({"error": "Dataset ID is required"}, status=400)
 
-            # get file
-            try:
-                data_file = UploadedFile.objects.get(id=dataset_id)
-            except UploadedFile.DoesNotExist:
-                return JsonResponse({"error": "Dataset not found"}, status=404)
+            # Get the dataset object
+            dataset = get_object_or_404(Dataset, id=dataset_id)
 
-            # read file
-            dataset_df = Engine.data_to_panda(data_file)
+            # Convert dataset to Pandas DataFrame
+            dataset_df = dataset.get_dataframe()
 
+            # Ensure required features exist in the dataset
+            if x_feature not in dataset_df.columns or y_feature not in dataset_df.columns:
+                return JsonResponse({"error": "Specified features not found in dataset"}, status=400)
+
+            # Perform curve fitting using Engine
             params, covariance, fitted_data = Engine.fit_curve(
                 dataset_df, 
                 x_feature, 
@@ -379,11 +381,10 @@ class FitCurveView(APIView):
                 "fitted_data": fitted_data.to_dict(orient='records')
             })
 
-        except UploadedFile.DoesNotExist:
-            return JsonResponse({"error": "File not found"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class InterpolateView(APIView):
     def post(self, request):
         try:
@@ -397,11 +398,15 @@ class InterpolateView(APIView):
             min_value = body.get("min_value", None)  # Minimum x value for interpolation (optional)
             max_value = body.get("max_value", None)  # Maximum x value for interpolation (optional)
 
-            # Fetch the uploaded file by its ID
-            dataset = UploadedFile.objects.get(id=dataset_id)
-            
-            # Convert the file to pandas DataFrame
-            dataset_df = Engine.data_to_panda(dataset)
+            # Ensure dataset_id is provided
+            if not dataset_id:
+                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+
+            # Get the dataset object
+            dataset = get_object_or_404(Dataset, id=dataset_id)
+
+            # Convert dataset to Pandas DataFrame
+            dataset_df = dataset.get_dataframe()
             
             # Perform interpolation
             interpolated_data = Engine.interpolate(
@@ -420,6 +425,7 @@ class InterpolateView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ExtrapolateView(APIView):
     def post(self, request):
         try:
@@ -432,11 +438,15 @@ class ExtrapolateView(APIView):
             method = body.get("method", "linear")  # The type of extrapolation (linear, polynomial, exponential, spline)
             degree = body.get("degree", 2)  # Degree of polynomial for polynomial method
 
-            # Fetch the uploaded file by its ID
-            dataset = UploadedFile.objects.get(id=dataset_id)
-            
-            # Convert the file to pandas DataFrame
-            dataset_df = Engine.data_to_panda(dataset)
+            # Ensure dataset_id is provided
+            if not dataset_id:
+                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+
+            # Get the dataset object
+            dataset = get_object_or_404(Dataset, id=dataset_id)
+
+            # Convert dataset to Pandas DataFrame
+            dataset_df = dataset.get_dataframe()
             
             # Perform extrapolation
             extrapolated_data = Engine.extrapolate(
@@ -454,6 +464,7 @@ class ExtrapolateView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CorrelationView(APIView):
     def post(self, request):
         try:
@@ -464,11 +475,15 @@ class CorrelationView(APIView):
             feature_2 = body.get("feature_2")  # The second feature/column to compare
             method = body.get("method", "pearson")  # The type of correlation ("pearson", "spearman", "kendall")
 
-            # Fetch the uploaded file by its ID
-            dataset = UploadedFile.objects.get(id=dataset_id)
-            
-            # Convert the file to pandas DataFrame
-            dataset_df = Engine.data_to_panda(dataset)
+            # Ensure dataset_id is provided
+            if not dataset_id:
+                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+
+            # Get the dataset object
+            dataset = get_object_or_404(Dataset, id=dataset_id)
+
+            # Convert dataset to Pandas DataFrame
+            dataset_df = dataset.get_dataframe()
             
             # Compute correlation
             correlation_value = Engine.compute_correlation(
@@ -576,7 +591,7 @@ class DimensionalReductionView(APIView):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class OversampleDataView(APIView):
     def post(self, request):
         try:
@@ -591,11 +606,15 @@ class OversampleDataView(APIView):
             num_samples = body.get("num_samples", 100)  # Number of samples to generate (default: 100)
             degree = body.get("degree", 3)  # Polynomial degree (default: 3, used only for polynomial interpolation)
 
-            # Fetch the uploaded file from the database
-            dataset = UploadedFile.objects.get(id=dataset_id)
-            
-            # Convert the uploaded file to a pandas DataFrame using the existing method
-            dataset_df = Engine.data_to_panda(dataset)
+            # Ensure dataset_id is provided
+            if not dataset_id:
+                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+
+            # Get the dataset object
+            dataset = get_object_or_404(Dataset, id=dataset_id)
+
+            # Convert dataset to Pandas DataFrame
+            dataset_df = dataset.get_dataframe()
             
             # Perform oversampling (data interpolation)
             oversampled_data = Engine.oversample_data(

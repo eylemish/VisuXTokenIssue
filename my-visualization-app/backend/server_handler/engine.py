@@ -249,6 +249,7 @@ class Engine:
         # Return extrapolated data as a pandas DataFrame
         return pd.DataFrame({x_feature: target_x, y_feature: y_pred})
 
+    @staticmethod
     def fit_curve(self, dataset: pd.DataFrame, x_feature: str, y_feature: str, method: str = "linear", degree: int = 2, initial_params: list = None):
         """
         Perform curve fitting on the given dataset.
