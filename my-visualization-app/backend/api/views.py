@@ -345,26 +345,22 @@ class FitCurveView(APIView):
         try:
             body = json.loads(request.body)
             dataset_id = body.get("dataset_id")
-            x_feature = body.get("x_feature")
-            y_feature = body.get("y_feature")
-            method = body.get("method", "linear")  # Default is linear
-            degree = body.get("degree", 2)  # Default degree is 2
-            initial_params = body.get("initial_params", None)
-
+            params = body.get("params", {})
+            x_feature = params.get("xColumn")  # 从 params 读取 x 特征
+            y_feature = params.get("yColumn")  # 从 params 读取 y 特征
+            method = params.get("type", "linear")  # 从 params 读取 method，默认 "linear"
+            degree = params.get("degree", 2)  # 从 params 读取 degree，默认 2
+            initial_params = params.get("initial_params", None)
             # Ensure dataset_id is provided
             if not dataset_id:
                 return JsonResponse({"error": "Dataset ID is required"}, status=400)
-
             # Get the dataset object
             dataset = get_object_or_404(Dataset, id=dataset_id)
-
             # Convert dataset to Pandas DataFrame
             dataset_df = dataset.get_dataframe()
-
             # Ensure required features exist in the dataset
             if x_feature not in dataset_df.columns or y_feature not in dataset_df.columns:
                 return JsonResponse({"error": "Specified features not found in dataset"}, status=400)
-
             # Perform curve fitting using Engine
             params, covariance, fitted_data = Engine.fit_curve(
                 dataset_df, 
@@ -374,15 +370,17 @@ class FitCurveView(APIView):
                 degree=degree, 
                 initial_params=initial_params
             )
-
+            # Create original data array with x_feature and y_feature values
+            original_data = dataset_df[[x_feature, y_feature]].rename(columns={x_feature: 'x', y_feature: 'y'}).to_dict(orient='records')
             return JsonResponse({
                 "params": params.tolist(),
                 "covariance": covariance.tolist() if covariance is not None else None,
-                "fitted_data": fitted_data.to_dict(orient='records')
+                "generated_data": fitted_data.to_dict(orient='records'),
+                "original_data": original_data
             })
-
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class InterpolateView(APIView):
