@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { Modal, Button, Input, Select, message } from "antd";
+import { Modal, Button, Input, Select, message, Table } from "antd";
 import Action from "../Action";
 
 const CurveFittingModal = ({ visible, onCancel, uiController }) => {
@@ -8,11 +8,16 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
+  const [loading, setLoading] = useState(false);
 
 
 
   //这个部分是因为前端部分完全不存数据集了，为了能调用列
   const [columns, setColumns] = useState([]); // 存储列名
+  const [fittedData, setFittedData] = useState([]);
+  const [params, setParams] = useState([]);
+  const [covariance, setCovariance] = useState([]);
+
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
@@ -33,12 +38,52 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
 
 
 
-  const handleFit = () => {
+  const handleFit = async () => {
     if (!datasetId || !xColumn || !yColumn) {
       message.error("Please select a dataset and two columns!");
       return;
     }
 
+    const requestData = {
+      dataset_id: datasetId,
+      x_feature: xColumn,
+      y_feature: yColumn,
+      method: fitType,
+      degree: fitType === "polynomial" ? degree : undefined,
+      initial_params: null, // Can be extended to support user-input initial parameters
+    };
+
+    console.log({
+      datasetId,
+      xColumn,
+      yColumn,
+      type: fitType,
+      params: { degree },
+    });
+
+    setLoading(true);
+
+    try {
+      // Use uiController's postRequest to send the request
+      const responseData = await uiController.postRequest("http://127.0.0.1:8000/api/fit_curve/", requestData);
+
+      message.success("Curve fitting completed!");
+      console.log("Fitted Data:", responseData);
+
+      // Save the response data to state
+      setParams(responseData.params);
+      setCovariance(responseData.covariance);
+      setFittedData(responseData.fitted_data);  // This should be an array of fitted data
+
+    } catch (error) {
+      console.error("Curve fitting error:", error);
+      message.error("Curve fitting failed. Please try again.");
+    } finally {
+      setLoading(false);
+      //onCancel();
+    }
+
+    /* 
     const action = new Action("EXECUTE_TOOL", "user", {
       toolName: "Curve Fitting",
       datasetId,
@@ -51,8 +96,10 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
     uiController.handleUserAction(action);
     message.success("Curve fitting started!");
     onCancel();
+    */
   };
 
+  
   return (
     <Modal title="Curve Fitting" open={visible} onCancel={onCancel} footer={null}>
       <Select
