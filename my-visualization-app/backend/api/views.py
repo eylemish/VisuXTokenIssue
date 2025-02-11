@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
 
 from backend.api.serializers import DatasetSerializer
 from backend.server_handler.engine import Engine
@@ -245,6 +246,42 @@ class UploadDatasetView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChangeDataView(APIView):
+    def post(self, request, dataset_id):
+        """
+        Create a copy of the Dataset, modify it, and return the updated version.
+        """
+        dataset = get_object_or_404(Dataset, id=dataset_id)
+
+        # Create a copy of the dataset
+        new_dataset = dataset.copy_dataset()
+
+        # Get modification parameters
+        modifications = request.POST.get("modifications", "{}")  # Expecting JSON format
+        try:
+            modifications = json.loads(modifications)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+        # Modify features
+        if "features" in modifications:
+            new_dataset.features = modifications["features"]
+
+        # Modify records
+        if "records" in modifications:
+            new_dataset.records = modifications["records"]
+
+        new_dataset.save()
+
+        return JsonResponse({
+            "message": "Dataset copied and modified successfully",
+            "dataset_id": new_dataset.id,
+            "name": new_dataset.name,
+            "features": new_dataset.features,
+            "records": new_dataset.records
+        })
 
 class AddDataView(APIView):
     def post(self, request):
