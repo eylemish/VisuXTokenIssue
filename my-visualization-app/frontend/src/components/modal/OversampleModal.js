@@ -26,6 +26,7 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
   const [columns, setColumns] = useState([]); // Store column names
   const [originalData, setOriginalData] = useState([]);
   const [oversampledData, setOversampledData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -50,15 +51,6 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
       message.error("Please select a dataset, two columns, and enter a valid oversampling factor!");
       return;
     }
-
-    const action = new Action("EXECUTE_TOOL", "user", {
-      toolName: "Oversampling",
-      datasetId,
-      xColumn,
-      yColumn,
-      method,
-      params: { oversamplingFactor }
-    });
 
     const requestData = {
       datasetId: datasetId,
@@ -93,9 +85,9 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
     
           
       console.log(resultData.original_data);
-      setOriginalData(resultData.original_data); // 存储原始数据
+      setOriginalData(resultData.original_data); // Store original data
       setOversampledData(resultData.generated_data);
-      console.log(fittedData);  // 输出生成的数据
+      console.log(oversampledData);  // Output generated data
       message.success("Oversampling completed!");
       } catch (error) {
           message.error(`Error: ${error.message}`);
@@ -103,9 +95,6 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
           setLoading(false);
       }
 
-    uiController.handleUserAction(action);
-    message.success("Oversampling started!");
-    onCancel();
   };
 
   return (
