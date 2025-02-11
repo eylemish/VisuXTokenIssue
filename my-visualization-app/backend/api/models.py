@@ -1,7 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.utils.timezone import now
-import pandas as pd
 
 # Create your models here.
 class UploadedFile(models.Model):
@@ -61,18 +58,39 @@ class AuditLog(models.Model):
         self.is_reverted = True
         self.save()
 
+from django.db import models
+import pandas as pd
+
 class Dataset(models.Model):
     name = models.CharField(max_length=255)  # Name of data set
-    features = models.JSONField(default=list)  # Store column names, e.g. [‘age’, ‘salary’, ‘city’].
-    records = models.JSONField(default=list)  # Store data, e.g. [{‘age’: 25, ‘salary’: 50000}]
-    df = pd.DataFrame(records)
-    df = df[features]
-    last_dataset = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="next")
-    next_dataset = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="prev")
-    
+    features = models.JSONField(default=list)  # Store column names, e.g. ['age', 'salary', 'city']
+    records = models.JSONField(default=list)  # Store data, e.g. [{'age': 25, 'salary': 50000}]
+
+    last_dataset = models.OneToOneField(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="next"
+    )
+    next_dataset = models.OneToOneField(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="prev"
+    )
 
     def __str__(self):
         return self.name
+
+    def get_dataframe(self):
+        """
+        Convert records to a Pandas DataFrame safely
+        """
+        if not isinstance(self.records, list) or not all(isinstance(row, dict) for row in self.records):
+            print("❌ Error: Invalid records format!")
+            return pd.DataFrame()  # Return empty DataFrame to avoid errors
+
+        df = pd.DataFrame(self.records)
+
+        # ✅ Ensure features exist in DataFrame
+        if self.features and all(col in df.columns for col in self.features):
+            return df[self.features]
+        return df
+
 
 """
 class CSVFile(models.Model):

@@ -97,53 +97,112 @@ class DataVisualizationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+# @method_decorator(csrf_exempt, name='dispatch')
+# class UploadView(APIView):
+#     parser_classes = [MultiPartParser]
+#
+#     def post(self, request, *args, **kwargs):
+#         file = request.FILES.get("file")
+#         if not file:
+#             return Response({"error": "No file received"}, status=400)
+#
+#         # Ensure that the upload directory exists
+#         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+#         os.makedirs(UPLOAD_DIR, exist_ok=True)
+#
+#         file_path = os.path.join(UPLOAD_DIR, file.name)
+#
+#         try:
+#             # Save files to the back-end
+#             with open(file_path, "wb") as f:
+#                 for chunk in file.chunks():
+#                     f.write(chunk)
+#
+#             # Processed according to document type
+#             if file.name.lower().endswith(".csv"):
+#                 file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
+#                 df = pd.read_csv(file)
+#                 file_instance.features = list(df.columns)
+#                 file_instance.records = df.to_dict(orient="records")
+#                 file_instance.save()
+#             elif file.name.lower().endswith(".xlsx"):
+#                 file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
+#                 df = pd.read_excel(file)
+#                 file_instance.features = list(df.columns)
+#                 file_instance.records = df.to_dict(orient="records")
+#                 file_instance.save()
+#             else:
+#                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
+#
+#             # Return dataset_id
+#             return_data = {
+#                 "message": f"File '{file.name}' uploaded successfully.",
+#                 "dataset_id": file_instance.id
+#             }
+#             return Response(return_data, status=201)
+#
+#         except Exception as e:
+#             print("error:", str(e))
+#             return Response({"error": str(e)}, status=500)
+
 @method_decorator(csrf_exempt, name='dispatch')
-class UploadView(APIView):
+class UploadDatasetView(APIView):
+    """
+    上传文件并解析成数据集，存入 Dataset 数据库
+    """
     parser_classes = [MultiPartParser]
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         file = request.FILES.get("file")
         if not file:
-            return Response({"error": "No file received"}, status=400)
+            return Response({"error": "No file received"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Ensure that the upload directory exists
+        # 确保上传目录存在
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # Save files to the back-end
+            # ✅ 保存文件到后端
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # Processed according to document type
+            # ✅ 解析 CSV / Excel 文件
             if file.name.lower().endswith(".csv"):
-                file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
-                df = pd.read_csv(file)  
-                file_instance.features = list(df.columns)  
-                file_instance.records = df.to_dict(orient="records")  
-                file_instance.save()
+                df = pd.read_csv(file_path)
+                file_type = "csv"
             elif file.name.lower().endswith(".xlsx"):
-                file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
-                df = pd.read_excel(file) 
-                file_instance.features = list(df.columns)  
-                file_instance.records = df.to_dict(orient="records")  
-                file_instance.save()
+                df = pd.read_excel(file_path)
+                file_type = "xlsx"
             else:
-                return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
+                return Response({"error": "Only CSV and XLSX files are supported"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Return dataset_id
-            return_data = {
-                "message": f"File '{file.name}' uploaded successfully.",
-                "dataset_id": file_instance.id
-            }
-            return Response(return_data, status=201)
+            # ✅ 提取列名 & 数据记录
+            features = list(df.columns)
+            records = df.to_dict(orient="records")
+
+            # ✅ 存入数据库 Dataset
+            dataset = Dataset.objects.create(
+                name=file.name,
+                features=features,
+                records=records
+            )
+
+            # ✅ 可选：存入 UploadedFile 记录
+            file_instance = UploadedFile.objects.create(
+                file_path=file_path, name=file.name, file_type=file_type
+            )
+
+            return Response(
+                {"message": f"File '{file.name}' uploaded and stored successfully.", "dataset_id": dataset.id},
+                status=status.HTTP_201_CREATED
+            )
 
         except Exception as e:
             print("error:", str(e))
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DatasetDetailView(APIView):
