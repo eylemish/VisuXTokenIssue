@@ -2,6 +2,20 @@ import React, {useEffect, useState} from "react";
 import { Modal, Button, InputNumber, Select, message } from "antd";
 import Action from "../Action";
 
+// Get CSRF Token（fit Django）
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie) {
+    document.cookie.split(";").forEach((cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "csrftoken") {
+        cookieValue = decodeURIComponent(value);
+      }
+    });
+  }
+  return cookieValue;
+}
+
 const OversampleModal = ({ visible, onCancel, uiController }) => {
   const [method, setMethod] = useState("linear"); // Select oversampling method
   const [datasetId, setDatasetId] = useState(null);
@@ -10,6 +24,9 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
   const [oversamplingFactor, setOversamplingFactor] = useState(2); // Default oversampling multiplier
 
   const [columns, setColumns] = useState([]); // Store column names
+  const [originalData, setOriginalData] = useState([]);
+  const [oversampledData, setOversampledData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -29,29 +46,60 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
     fetchColumns();
   }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
-  const handleOversample = () => {
+  const handleOversample = async () => {
     if (!datasetId || !xColumn || !yColumn || oversamplingFactor <= 0) {
       message.error("Please select a dataset, two columns, and enter a valid oversampling factor!");
       return;
     }
 
-    const action = new Action("EXECUTE_TOOL", "user", {
-      toolName: "Oversampling",
-      datasetId,
-      xColumn,
-      yColumn,
-      method,
-      params: { oversamplingFactor }
-    });
+    const requestData = {
+      datasetId: datasetId,
+      params:{
+      xColumn: xColumn,
+      yColumn: yColumn,
+      method: method,
+      factor :oversamplingFactor
+      }
+    }
 
-    uiController.handleUserAction(action);
-    message.success("Oversampling started!");
-    onCancel();
+    console.log("Request data:", requestData);
+
+    try {
+      const result = await fetch("http://127.0.0.1:8000/api/oversample_data/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken()  // ensure send CSRF Token
+      },
+      body: JSON.stringify(requestData),
+      credentials: "include", // allow to include Cookie
+      });
+      console.log(result.generated_data);
+      
+      const resultData = await result.json(); // to JSON
+    
+      if (resultData.error) {
+        message.error(`Oversampling failed: ${resultData.error}`);
+        return;
+      }
+    
+          
+      console.log(resultData.original_data);
+      setOriginalData(resultData.original_data); // Store original data
+      setOversampledData(resultData.generated_data);
+      console.log(oversampledData);  // Output generated data
+      message.success("Oversampling completed!");
+      } catch (error) {
+          message.error(`Error: ${error.message}`);
+      } finally {
+          setLoading(false);
+      }
+
   };
 
   return (
     <Modal title="Oversampling" open={visible} onCancel={onCancel} footer={null}>
-      {/* 选择数据集 */}
+      {/* select dataset */}
       <Select
         style={{ width: "100%" }}
         placeholder="Choose a dataset"
@@ -85,10 +133,9 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
       </Select>
 
       {/* Selection of oversampling method */}
-      <Select defaultValue="linear" onChange={setMethod} style={{ width: "100%", marginTop: "10px" }}>
-        <Select.Option value="linear">Linear Interpolation</Select.Option>
-        <Select.Option value="spline">Spline Interpolation</Select.Option>
-        <Select.Option value="polynomial">Polynomial Interpolation</Select.Option>
+      <Select defaultValue="smote" onChange={setMethod} style={{ width: "100%", marginTop: "10px" }}>
+        <Select.Option value="smote">SMOTE</Select.Option>
+        <Select.Option value="random">Random Oversampling</Select.Option>
       </Select>
 
       {/* Input oversampling multiplier */}

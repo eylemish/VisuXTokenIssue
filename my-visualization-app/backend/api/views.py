@@ -149,7 +149,7 @@ class DataVisualizationView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadView(APIView):
     """
-    Uploading files and parsing them into datasets for storage in the Dataset database
+    上传文件并解析成数据集，存入 Dataset 数据库
     """
     parser_classes = [MultiPartParser]
 
@@ -158,19 +158,19 @@ class UploadView(APIView):
         if not file:
             return Response({"error": "No file received"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Make sure the upload directory exists
+        # 确保上传目录存在
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # Saving files to the backend
+            # ✅ 保存文件到后端
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # Parsing CSV / Excel files
+            # ✅ 解析 CSV / Excel 文件
             if file.name.lower().endswith(".csv"):
                 df = pd.read_csv(file_path)
                 file_type = "csv"
@@ -180,18 +180,18 @@ class UploadView(APIView):
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Extract Column Names & Data Records
+            # ✅ 提取列名 & 数据记录
             features = list(df.columns)
             records = df.to_dict(orient="records")
 
-            # Stored in database Dataset
+            # ✅ 存入数据库 Dataset
             dataset = Dataset.objects.create(
                 name=file.name,
                 features=features,
                 records=records
             )
 
-            # Optional: Deposit to UploadedFile record
+            # ✅ 可选：存入 UploadedFile 记录
             file_instance = UploadedFile.objects.create(
                 file_path=file_path, name=file.name, file_type=file_type
             )
@@ -339,7 +339,6 @@ const ExportLogsButton = () => {
 
 export default ExportLogsButton;
 """
-"""
 @method_decorator(csrf_exempt, name='dispatch')
 class FitCurveView(APIView):
     def post(self, request):
@@ -380,56 +379,6 @@ class FitCurveView(APIView):
                 "params": params.tolist(),
                 "covariance": covariance.tolist() if covariance is not None else None,
                 "fitted_data": fitted_data.to_dict(orient='records')
-            })
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-"""
-@method_decorator(csrf_exempt, name='dispatch')
-class FitCurveView(APIView):
-    def post(self, request):
-        try:
-            body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")
-            params = body.get("params", {})
-
-            x_feature = params.get("xColumn")  # 从 params 读取 x 特征
-            y_feature = params.get("yColumn")  # 从 params 读取 y 特征
-            method = params.get("type", "linear")  # 从 params 读取 method，默认 "linear"
-            degree = params.get("degree", 2)  # 从 params 读取 degree，默认 2
-            initial_params = params.get("initial_params", None)
-
-            # Ensure dataset_id is provided
-            if not dataset_id:
-                return JsonResponse({"error": "Dataset ID is required"}, status=400)
-
-            # Get the dataset object
-            dataset = get_object_or_404(Dataset, id=dataset_id)
-
-            # Convert dataset to Pandas DataFrame
-            dataset_df = dataset.get_dataframe()
-
-            # Ensure required features exist in the dataset
-            if x_feature not in dataset_df.columns or y_feature not in dataset_df.columns:
-                return JsonResponse({"error": "Specified features not found in dataset"}, status=400)
-
-            # Perform curve fitting using Engine
-            params, covariance, fitted_data = Engine.fit_curve(
-                dataset_df, 
-                x_feature, 
-                y_feature, 
-                method=method, 
-                degree=degree, 
-                initial_params=initial_params
-            )
-            # Create original data array with x_feature and y_feature values
-            original_data = dataset_df[[x_feature, y_feature]].rename(columns={x_feature: 'x', y_feature: 'y'}).to_dict(orient='records')
-
-            return JsonResponse({
-                "params": params.tolist(),
-                "covariance": covariance.tolist() if covariance is not None else None,
-                "generated_data": fitted_data.to_dict(orient='records'),
-                "original_data": original_data
             })
 
         except Exception as e:
@@ -597,40 +546,40 @@ class CorrelationView(APIView):
 class DimensionalReductionView(APIView):
     def post(self, request):
         try:
-            # Parsing the request body
+            # 解析请求体
             body = json.loads(request.body)
             dataset_id = body.get("dataset_id")
-            method = body.get("method", "pca").lower()  # Harmonise lower case to avoid case mismatch
+            method = body.get("method", "pca").lower()  # 统一小写，避免大小写不匹配
             n_components = body.get("n_components", 2)
 
-            # Permitted downscaling methods
+            # 允许的降维方法
             valid_methods = ["pca", "tsne", "umap"]
             if method not in valid_methods:
                 return JsonResponse({"error": f"Invalid dimensionality reduction method. Choose from {valid_methods}."}, status=400)
 
-            # Ensure dataset_id exists
+            # 确保 dataset_id 存在
             if not dataset_id:
                 return JsonResponse({"error": "Missing dataset_id."}, status=400)
 
             try:
-                # **Get data from `Dataset` instead of `UploadedFile`**
+                # **✅ 从 `Dataset` 获取数据，而不是 `UploadedFile`**
                 dataset = Dataset.objects.get(id=int(dataset_id))
             except (Dataset.DoesNotExist, ValueError):
                 return JsonResponse({"error": f"Dataset with ID {dataset_id} not found or invalid."}, status=404)
 
-            # **Get DataFrame**
+            # **✅ 获取 DataFrame**
             dataset_df = dataset.get_dataframe()
             if dataset_df.empty:
                 return JsonResponse({"error": "Dataset is empty or invalid."}, status=400)
 
-            # **Perform dimensionality reduction**
+            # **✅ 进行降维**
             reduced_data = Engine.dimensional_reduction(
                 dataset_df,
                 method=method,
                 n_components=n_components
             )
 
-            # Return data
+            # 返回数据
             reduced_data_json = reduced_data.to_dict(orient="records")
             return JsonResponse({"reduced_data": reduced_data_json}, status=200)
 
@@ -650,11 +599,11 @@ class OversampleDataView(APIView):
             
             # Extract the relevant fields from the request
             dataset_id = body.get("dataset_id")  # Dataset ID to locate the file in the database
-            x_feature = body.get("x_feature")  # Independent feature (column name)
-            y_feature = body.get("y_feature")  # Dependent feature (column name)
-            method = body.get("method", "linear")  # Interpolation method (default: linear)
-            num_samples = body.get("num_samples", 100)  # Number of samples to generate (default: 100)
-            degree = body.get("degree", 3)  # Polynomial degree (default: 3, used only for polynomial interpolation)
+            params = body.get("params", {})
+            x_feature = params.get("xColumn")  # get x column from params
+            y_feature = params.get("yColumn")  # get y column from params
+            method = params.get("method", "smote")  # Interpolation method (default: smote)
+            oversample_factor = params.get("num_samples", 1)  # Oversampling factor (default: 1)
 
             # Ensure dataset_id is provided
             if not dataset_id:
@@ -672,8 +621,7 @@ class OversampleDataView(APIView):
                 x_feature=x_feature, 
                 y_feature=y_feature, 
                 method=method, 
-                num_samples=num_samples, 
-                degree=degree
+                oversample_factor = oversample_factor
             )
             
             # Convert the oversampled data to a dictionary for easy JSON response

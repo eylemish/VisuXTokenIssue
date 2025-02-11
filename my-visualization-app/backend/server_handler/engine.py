@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from scipy.interpolate import interp1d
 from sklearn.linear_model import LinearRegression
 from scipy.optimize import curve_fit
-from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE,RandomOverSampler
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.feature_selection import VarianceThreshold
@@ -331,58 +331,46 @@ class Engine:
             raise ValueError(f"Error in oversampling: {e}")
     """
 
-    def oversample_data(dataset: pd.DataFrame, x_feature: str, y_feature: str, method: str = 'linear', num_samples: int = 100, degree: int = 3) -> pd.DataFrame:
+    def oversample_data(dataset: pd.DataFrame, x_feature: str, y_feature: str, method: str = 'smote', oversample_factor: int = 1) -> pd.DataFrame:
         """
-        Perform oversampling by interpolating between the existing data points.
+        Perform oversampling.
 
         :param dataset: pandas.DataFrame, input data containing the features to oversample
         :param x_feature: str, the column name for the independent variable (x-axis)
         :param y_feature: str, the column name for the dependent variable (y-axis)
         :param method: str, interpolation method ("linear", "spline", "polynomial")
-        :param num_samples: int, the number of samples to generate between the data points
-        :param degree: int, degree of the polynomial (used only for polynomial interpolation)
-        :return: pandas.DataFrame, oversampled data with interpolated values for the features
+        :param oversample_factor: int, the value of oversample factor
+        :return: pandas.DataFrame, oversampled data
         """
         try:
             # Ensure that x_feature and y_feature exist in the DataFrame
             if x_feature not in dataset.columns or y_feature not in dataset.columns:
                 raise ValueError(f"Columns '{x_feature}' and/or '{y_feature}' not found in dataset")
-
-            # Extract x and y data
-            x = dataset[x_feature].values
-            y = dataset[y_feature].values
-
-            # Sort the data by x values to ensure proper interpolation
-            sorted_indices = np.argsort(x)
-            x_sorted = x[sorted_indices]
-            y_sorted = y[sorted_indices]
-
-            # Generate new x values for interpolation (creating `num_samples` new points between existing points)
-            new_x_values = np.linspace(np.min(x_sorted), np.max(x_sorted), num_samples)
-
-            # Linear interpolation
-            if method == "linear":
-                interpolator = interp1d(x_sorted, y_sorted, kind="linear", fill_value="extrapolate")
-                new_y_values = interpolator(new_x_values)
-
-            # Polynomial interpolation
-            elif method == "polynomial":
-                poly_coeffs = np.polyfit(x_sorted, y_sorted, degree)
-                poly_func = np.poly1d(poly_coeffs)
-                new_y_values = poly_func(new_x_values)
-
-            # Spline interpolation
-            elif method == "spline":
-                spline = UnivariateSpline(x_sorted, y_sorted, k=degree, s=0)
-                new_y_values = spline(new_x_values)
-
+            
             else:
-                raise ValueError("Invalid interpolation method. Choose from 'linear', 'spline', or 'polynomial'.")
+                X = dataset[x_feature].values.reshape(-1, 1)  # X should be 2D
+                y = dataset[y_feature].values
 
-            # Create a new DataFrame with the oversampled data
-            oversampled_data = pd.DataFrame({x_feature: new_x_values, y_feature: new_y_values})
+                #Use SMOTE to oversample.
+                if method == 'smote':
+                    smote = SMOTE(sampling_strategy=oversample_factor, random_state=42)
+                    X_resampled, y_resampled = smote.fit_resample(X, y)
+                    print(f"Original dataset shape: {y.shape[0]}, Resampled dataset shape: {y_resampled.shape[0]}")
 
-            return oversampled_data
+                #Use random to oversample.
+                elif method == "random":
+                    ros = RandomOverSampler(sampling_strategy=oversample_factor, random_state=42)
+                    X_resampled, y_resampled = ros.fit_resample(X, y)
+                    print(f"Original dataset shape: {y.shape[0]}, Resampled dataset shape: {y_resampled.shape[0]}")
+                
+                else:
+                    raise ValueError("Invalid oversampling method. Choose from 'SMOTE' or 'Random Oversampling'.")
+
+                #Create a new DataFrame with the oversampled data
+                oversampled_data = pd.DataFrame(X_resampled, columns=[x_feature])
+                oversampled_data[y_feature] = y_resampled
+
+                return oversampled_data
 
         except Exception as e:
             raise ValueError(f"Error in oversampling data: {e}")
