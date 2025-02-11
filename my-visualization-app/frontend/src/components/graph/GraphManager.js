@@ -14,6 +14,7 @@ class GraphManager {
     return GraphManager.instance;
   }
 
+  //dont need this now
   async loadGraphs() {
     if (enableMock) {
       console.log("Using Mock Data");
@@ -40,18 +41,33 @@ class GraphManager {
   // }
 
   createGraph(graphInfo) {
-    const graphId = `graph_${Date.now()}`;
-    const newGraph = new Graph(
-      graphId,
-      graphInfo.graphName,
-      graphInfo.graphData,
-      graphInfo.graphType,
-      graphInfo.selectedFeatures,
-      {}
-    )
-    
-    this.addGraphToMap(newGraph);
+  const graphId = `graph_${Date.now()}`;
+
+  if (!graphInfo.dataset || !graphInfo.dataset.records || !graphInfo.dataset.features) {
+    console.error("Invalid dataset format. Missing `records` or `features`.");
+    return null;
   }
+
+  // Convert records to { feature1: [], feature2: [] }.
+  const transformedDataset = {};
+  graphInfo.dataset.features.forEach(feature => {
+    transformedDataset[feature] = graphInfo.dataset.records.map(record => record[feature]);
+  });
+
+  console.log(`Transformed dataset for Graph ID ${graphId}:`, transformedDataset);
+
+  const newGraph = new Graph(
+    graphId,
+    graphInfo.graphName,
+    transformedDataset, // Pass in the converted data
+    graphInfo.graphType,
+    graphInfo.selectedFeatures,
+    {}
+  );
+
+  this.addGraphToMap(newGraph);
+  return newGraph; // Ensure that the Graph instance is returned
+}
 
   addGraphToMap(graph) {
     if (!(graph instanceof Graph)) {

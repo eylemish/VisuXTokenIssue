@@ -8,128 +8,139 @@ import datasetManager from "./file/DatasetManager";
 
 class UIController {
   constructor() {
-    this.modalController = new ModalController(); // Manages modal windows
-    //this.graphManager = new GraphManager(); // Manages graph creation and modification
-    this.graphWindowController = new GraphWindowController(this.GraphManager); // Manages graph windows
-    this.toolManager = new ToolManager(this); // Manages UI tools //change toolManager add uiController in its param
-    this.logManager = new LogManager(); // 确保 logManager 全局可用
+    this.modalController = new ModalController(); // Manage modal windows
+    this.graphManager = GraphManager; // Ensure the use of the singleton model
+    this.graphWindowController = new GraphWindowController(this.graphManager); // Import GraphManager instance
+    this.toolManager = new ToolManager(this);
+    this.logManager = new LogManager();
     this.tableManager = new TableManager(this);
     this.datasetManager = datasetManager;
   }
 
-  // 下载文件
-  async downloadFile(format) {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/api/download?format=${format}`);
-      if (!response.ok) {
-        throw new Error("Download failed.");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `dataset.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      alert("Download started!");
-    } catch (error) {
-      alert("Download failed. Please try again.");
-    }
-  }
-
-
+  /**
+   * handle user actions
+   */
   handleUserAction(action) {
+    console.log(`Handling action: ${action.type}`, action);
+
     switch (action.type) {
       case 'OPEN_MODAL':
         this.modalController.openModal(action.modalType, action.data);
         break;
+
       case 'CLOSE_MODAL':
         this.modalController.closeModal();
         break;
+
       case 'OPEN_GRAPH_WINDOW':
         this.graphWindowController.openGraphWindow(action.graphData);
         break;
+
       case 'CLOSE_GRAPH_WINDOW':
         this.graphWindowController.closeGraphWindow(action.windowId);
         break;
+
       case 'DISPLAY_ERROR':
         alert(`Error: ${action.errorDetails}`);
         break;
+
       case 'DISPATCH_REQUEST':
         console.log('Dispatching request to backend:', action);
         break;
 
-      {/*来自NewGraphModal的Action，注意这里的参数还没写完*/} //please in english
-      case 'CREATE_GRAPH':
-        GraphManager.createGraph(action.graphInfo);
-        this.graphWindowController.openGraphWindow();
-        break;
+      case 'CREATE_GRAPH': {
+        console.log('Creating new graph:', action.graphInfo);
 
-        {/*来自各个tool的Action，注意这里的参数还没写完*/}
+        // Create a new Graph instance
+        const newGraph = this.graphManager.createGraph(action.graphInfo);
+        if (!newGraph) {
+          console.error("Failed to create graph.");
+          return;
+        }
+
+        console.log(`Graph created: ${newGraph.id}`);
+
+        // Open the Graph window and pass in the new graphData
+        this.graphWindowController.openGraphWindow(newGraph);
+
+        break;
+      }
+
       case 'EXECUTE_TOOL':
-        this.toolManager.executeTool(action.data.toolName, action.data.datasetId, action.data.params);
+        this.toolManager.executeTool(
+          action.data.toolName,
+          action.data.datasetId,
+          action.data.params
+        );
         break;
 
       default:
-        console.warn('Unhandled action:', action);
+        console.warn(`Unhandled action: ${action.type}`, action);
     }
   }
 
-
-  //这个是前后端用post连接的地方，这个只负责传入传出这个动作,toolmamager里可改一部分url
+  /**
+   * Send POST request (supports timeout)
+   */
   async postRequest(url, data, headers = {}) {
-  try {
-    console.log(`📡 Sending POST request to: ${url}`, data);
+    try {
+      console.log(`📡 Sending POST request to: ${url}`, data);
 
-    // 获取 CSRF Token（适用于 Django 后端）
-    const csrfToken = this.getCSRFToken();
-    if (csrfToken) {
-      headers["X-CSRFToken"] = csrfToken;
-    }
-
-    // 发送请求
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers, // 允许自定义 headers
-      },
-      body: JSON.stringify(data),
-      credentials: "include", // 允许携带 Cookie（跨域需要）
-    });
-
-    // 检查 HTTP 响应状态码
-    if (!response.ok) {
-      const errorMessage = await response.text();
-      console.error(`❌ API request failed: ${url} (${response.status})`, errorMessage);
-      throw new Error(`Request failed: ${response.status} - ${errorMessage}`);
-    }
-
-    // 解析 JSON 响应
-    const responseData = await response.json();
-    console.log(`✅ Response received from ${url}:`, responseData);
-    return responseData;
-  } catch (error) {
-    console.error(`🚨 Network/API error for ${url}:`, error);
-    throw error;
-  }
-}
-
-// 获取 CSRF Token（适用于 Django）
-getCSRFToken() {
-  let cookieValue = null;
-  if (document.cookie) {
-    document.cookie.split(";").forEach((cookie) => {
-      const [name, value] = cookie.trim().split("=");
-      if (name === "csrftoken") {
-        cookieValue = decodeURIComponent(value);
+      // Getting a CSRF Token (for Django)
+      const csrfToken = this.getCSRFToken();
+      if (csrfToken) {
+        headers["X-CSRFToken"] = csrfToken;
       }
-    });
-  }
-  return cookieValue;
-}
 
+      // Request Timeout Control
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...headers,
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        console.error(`API request failed: ${url} (${response.status})`, errorMessage);
+        throw new Error(`Request failed: ${response.status} - ${errorMessage}`);
+      }
+
+      const responseData = await response.json();
+      console.log(`Response received from ${url}:`, responseData);
+      return responseData;
+    } catch (error) {
+      console.error(`Network/API error for ${url}:`, error);
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Getting a CSRF Token (for Django)
+   */
+  getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie) {
+      document.cookie.split(";").forEach((cookie) => {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "csrftoken") {
+          cookieValue = decodeURIComponent(value);
+        }
+      });
+    }
+    return cookieValue;
+  }
+
+  /* ============== GETTERS & SETTERS ============== */
 
   setModalController(modalController) {
     this.modalController = modalController;
@@ -139,10 +150,6 @@ getCSRFToken() {
     this.graphWindowController = graphWindowController;
   }
 
-  // setGraphManager(graphManager) {
-  //   this.graphManager = graphManager;
-  // }
-
   setToolManager(toolManager) {
     this.toolManager = toolManager;
   }
@@ -150,10 +157,6 @@ getCSRFToken() {
   setImageDisplayArea(imageDisplayArea) {
     this.imageDisplayArea = imageDisplayArea;
   }
-
-  // getGraphManager() {
-  //   return this.graphManager;
-  // }
 
   getModalController() {
     return this.modalController;
@@ -166,7 +169,6 @@ getCSRFToken() {
   getToolManager() {
     return this.toolManager;
   }
-
 
   getImageDisplayArea() {
     return this.imageDisplayArea;
@@ -195,7 +197,6 @@ getCSRFToken() {
   getTableManager() {
     return this.tableManager;
   }
-
 }
 
 export default UIController;

@@ -80,6 +80,29 @@ class DatasetManager {
         return [];
     }
   }
+
+  async getDatasetById(datasetId) {
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/api/datasets/${datasetId}/`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dataset: ${response.statusText}`);
+    }
+    const dataset = await response.json();
+
+    // Convert records to { feature1: [], feature2: [] } form
+    const transformedDataset = {};
+    dataset.features.forEach(feature => {
+      transformedDataset[feature] = dataset.records.map(record => record[feature]);
+    });
+
+    console.log(`Transformed dataset for ID ${datasetId}:`, transformedDataset);
+    return { ...dataset, data: transformedDataset }; // Add converted data
+  } catch (error) {
+    console.error("Error fetching dataset:", error);
+    return null;
+  }
+}
+
 }
 
 // **Export single case**

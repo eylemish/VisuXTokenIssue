@@ -22,6 +22,6 @@ urlpatterns = [
     path("get_csrf_token/", GetCsrfTokenView.as_view(), name="get_csrf_token"),
     path('datasets/<int:dataset_id>/', DatasetDetailView.as_view(), name='dataset-detail'),
     path('dataset/<int:dataset_id>/columns/', DatasetColumnsView.as_view(), name='dataset-columns'),
-    path('datasets/', UploadDatasetView.as_view(), name='upload-dataset'),
+    #path('datasets/', UploadDatasetView.as_view(), name='upload-dataset'),
     path('change_data/', ChangeDataView.as_view(), name='change-data'),
 ]

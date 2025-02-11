@@ -1,97 +1,3 @@
-// import React, { useState } from "react";
-// import { Modal, Tabs, Card, Row, Col, Button } from "antd";
-// import {
-//   BarChartOutlined,
-//   LineChartOutlined,
-//   PieChartOutlined,
-//   AreaChartOutlined,
-//   HeatMapOutlined,
-//   RadarChartOutlined,
-//   PictureOutlined,
-//   DotChartOutlined,
-// } from "@ant-design/icons";
-
-// const { TabPane } = Tabs;
-
-// // 定义图表选项 后期添加更多种类图表
-// const chartCategories = {
-//   "Basic Charts": [
-//     { type: "scatter", name: "Scatter Plot", icon: <PictureOutlined /> },
-//     { type: "line", name: "Line Chart", icon: <LineChartOutlined /> },
-//     { type: "bar", name: "Bar Chart", icon: <BarChartOutlined /> },
-//     { type: "pie", name: "Pie Chart", icon: <PieChartOutlined /> },
-//   ],
-//   "Advanced Charts": [
-//     { type: "heatmap", name: "Heatmap", icon: <HeatMapOutlined /> },
-//     { type: "radar", name: "Radar Chart", icon: <RadarChartOutlined /> },
-//     { type: "dot", name: "Dot Chart", icon: <DotChartOutlined /> },
-//     { type: "area", name: "Area Chart", icon: <AreaChartOutlined /> },
-//   ],
-// };
-
-// const GraphModal = ({ visible, onCancel, uiController }) => {
-//   const [data, setData] = useState(null);
-//   const [selectedGraph, setSelectedGraph] = useState(null); //?
-//   const [features, setFeatures] = useState([]);
-//   const [selectedFeatures, setSelectedFeatures] = useState([]);
-//   const [numFeatures, setNumFeatures] = useState(0);
-
-//   const handleConfirm = () => {
-//     if (!selectedGraph) return;
-
-//     const action = {
-//       type: "CREATE_GRAPH",
-//       data: { graphType: selectedGraph },
-//     };
-
-//     uiController.handleUserAction(action);
-//     onCancel(); // 关闭 Modal
-//   };
-
-//   return (
-//     <Modal
-//       title="Create New Graph"
-//       visible={visible}
-//       onCancel={onCancel}
-//       footer={[
-//         <Button key="cancel" onClick={onCancel}>
-//           Cancel
-//         </Button>,
-//         <Button key="confirm" type="primary" disabled={!selectedGraph} onClick={handleConfirm}>
-//           Confirm
-//         </Button>,
-//       ]}
-//     >
-//       <Tabs defaultActiveKey="1">
-//         {Object.entries(chartCategories).map(([category, charts]) => (
-//           <TabPane tab={category} key={category}>
-//             <Row gutter={[16, 16]}>
-//               {charts.map((chart) => (
-//                 <Col span={6} key={chart.type}>
-//                   <Card
-//                     hoverable
-//                     style={{
-//                       textAlign: "center",
-//                       border: selectedGraph === chart.type ? "2px solid #1890ff" : "1px solid #ccc",
-//                     }}
-//                     onClick={() => setSelectedGraph(chart.type)}
-//                   >
-//                     <div style={{ fontSize: "24px", marginBottom: "8px" }}>{chart.icon}</div>
-//                     <p>{chart.name}</p>
-//                   </Card>
-//                 </Col>
-//               ))}
-//             </Row>
-//           </TabPane>
-//         ))}
-//       </Tabs>
-//     </Modal>
-//   );
-// };
-
-// export default GraphModal;
-
-
 import { useState, useEffect } from "react";
 import { Modal, Tabs, Card, Row, Col, Button, Checkbox, message } from "antd";
 import {
@@ -108,7 +14,7 @@ import datasetManager from "../file/DatasetManager";
 
 const { TabPane } = Tabs;
 
-// Define chart options (more can be added later)
+// Definition of chart categories
 const chartCategories = {
   "Basic Charts": [
     { type: "scatter", name: "Scatter Plot", icon: <PictureOutlined />, requiredFeatures: 2 },
@@ -125,16 +31,16 @@ const chartCategories = {
 };
 
 const GraphModal = ({ visible, onCancel, uiController }) => {
-  const [features, setFeatures] = useState([]); // Features from backend
+  const [features, setFeatures] = useState([]); // 特征列
   const [selectedGraphType, setSelectedGraphType] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [numFeatures, setNumFeatures] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Fetch dataset features from backend
+  // Get the feature columns of the current dataset
   useEffect(() => {
     const fetchFeatures = async () => {
-      const datasetId = datasetManager.getCurrentDatasetId(); // Get the latest dataset ID
+      const datasetId = datasetManager.getCurrentDatasetId();
       if (!datasetId) {
         message.warning("No dataset ID found. Please upload a dataset.");
         return;
@@ -142,7 +48,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
 
       setLoading(true);
       try {
-        const columns = await datasetManager.getDatasetColumns(datasetId); // Fetch columns
+        const columns = await datasetManager.getDatasetColumns(datasetId);
         setFeatures(columns);
       } catch (error) {
         message.error("Failed to load dataset features.");
@@ -152,26 +58,30 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
     };
 
     if (visible) {
-      fetchFeatures(); // Only fetch when modal is visible
+      fetchFeatures();
     }
   }, [visible]);
 
+  // Get the number of features needed for the selected chart.
   const getRequiredFeatures = (graphType) => {
     for (let category in chartCategories) {
       const chart = chartCategories[category].find((chart) => chart.type === graphType);
       if (chart) return chart.requiredFeatures;
     }
-    return 0; // Default if no match
+    return 0; // Default
   };
 
+  // Listen to the selected chart type, update the required number of features and clear the selection
   useEffect(() => {
     if (selectedGraphType) {
       const required = getRequiredFeatures(selectedGraphType);
       setNumFeatures(required);
+      setSelectedFeatures([]); // Clear selection when switching charts
     }
   }, [selectedGraphType]);
 
-  const handleConfirm = () => {
+  // Confirm the creation of the chart
+  const handleConfirm = async () => {
     if (selectedFeatures.length !== numFeatures) {
       message.warning(`Please select exactly ${numFeatures} features.`);
       return;
@@ -183,20 +93,33 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
       return;
     }
 
-    const action = {
-      type: "CREATE_GRAPH",
-      graphInfo: {
-        graphName: "My New Graph",
-        datasetId, // Include dataset ID
-        graphType: selectedGraphType,
-        features: selectedFeatures,
-      },
+    // Get the full dataset
+    const dataset = await datasetManager.getDatasetById(datasetId);
+    if (!dataset) {
+      message.error("Failed to load dataset.");
+      return;
+    }
+
+    // Build GraphInfo
+    const graphInfo = {
+      id: `graph-${Date.now()}`, // Generate a unique ID
+      name: `New ${selectedGraphType} Chart`,
+      type: selectedGraphType,
+      dataset,
+      selectedFeatures,
+      style: { color: "blue" }, // Can be selected by the user in the UI
     };
 
-    uiController.handleUserAction(action);
+    // Trigger UI controller actions
+    uiController.handleUserAction({
+      type: "CREATE_GRAPH",
+      graphInfo,
+    });
+
     onCancel(); // Close Modal
   };
 
+  // Process feature selection
   const handleFeatureSelect = (checkedValues) => {
     setSelectedFeatures(checkedValues);
   };
@@ -219,6 +142,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
         <p>Loading dataset features...</p>
       ) : (
         <>
+          {/* Chart Selection Tabs */}
           <Tabs defaultActiveKey="1">
             {Object.entries(chartCategories).map(([category, charts]) => (
               <TabPane tab={category} key={category}>
@@ -243,10 +167,10 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
             ))}
           </Tabs>
 
-          {/* Display Feature Selection */}
+          {/* Display feature selection */}
           {selectedGraphType && (
             <div>
-              <h3>Required Features ({numFeatures}):</h3>
+              <h3>Select {numFeatures} Features:</h3>
               <Checkbox.Group
                 options={features.map((feature) => ({ label: feature, value: feature }))}
                 value={selectedFeatures}

@@ -1,8 +1,7 @@
-import Plotly from 'react-plotly.js';
+import Plot from 'react-plotly.js';
 
 class VisualizationManager {
   constructor() {
-    this.renderer = new PlotlyRenderer();
     this.graphStyle = new GraphStyle();
   }
 
@@ -22,87 +21,81 @@ class VisualizationManager {
   };
 
   visualize(Graph) {
-    const { dataset, type, selectedFeatures, name, style } = Graph;
+    const { dataset, type, selectedFeatures = [], name, style } = Graph;
 
-    // finding the required feature number depending on the graph type
-    let requiredFeatures = 0;
-    Object.values(this.chartCategories).forEach(category => {
-      const chart = category.find(chart => chart.type === type);
-      if (chart) requiredFeatures = chart.requiredFeatures;
-    });
+    // Make sure selectedFeatures is not undefined
+    if (!Array.isArray(selectedFeatures) || selectedFeatures.length === 0) {
+        console.error(`Error: selectedFeatures is invalid`, selectedFeatures);
+        return null;
+    }
 
-    // controllong features
+    // Get the number of features required for this chart type
+    let requiredFeatures = this.getRequiredFeatures(type);
+
+    // Check that the number of features matches
     if (selectedFeatures.length !== requiredFeatures) {
-      console.error(`Error: ${type} requires ${requiredFeatures} features, but ${selectedFeatures.length} selected.`);
+        console.error(`Error: ${type} requires ${requiredFeatures} features, but received ${selectedFeatures.length}.`);
+        return null;
+    }
+
+    // Get feature data
+    const featureData = selectedFeatures.map(feature => dataset?.[feature] || []);
+
+    // Ensure that all items in featureData are arrays
+    if (!featureData.every(Array.isArray) || featureData.some(arr => arr.length === 0)) {
+        console.error(`Error: One or more selected features are not valid arrays.`, featureData);
+        return null;
+    }
+
+    // Building Plotly Data
+    let plotData = {
+        type: type,
+        marker: { color: style?.color || "red" }
+    };
+
+    if (requiredFeatures >= 1) plotData.x = featureData[0];
+    if (requiredFeatures >= 2) plotData.y = featureData[1];
+    if (requiredFeatures >= 3) plotData.z = featureData[2];
+
+    // Build Layout
+    const layout = {
+        title: name,
+        xaxis: { title: selectedFeatures[0] || "X" },
+        yaxis: { title: selectedFeatures[1] || "Y" },
+        ...(requiredFeatures >= 3 ? { zaxis: { title: selectedFeatures[2] || "Z" } } : {})
+    };
+
+    return { data: [plotData], layout };
+  }
+
+  renderChart(graph) {
+    if (!graph.dataset || !graph.selectedFeatures || graph.selectedFeatures.length === 0) {
+      console.error("Error: Graph dataset or selected features are invalid.");
       return null;
     }
 
-    // taking data values from selected features
-    const featureData = selectedFeatures.map(feature => dataset[feature]);
-
-    // 4️⃣ Plotly data will fix more
-    let plotData = {
-      type: type,
-      marker: { color: style.color || "red" }
-    };
-
-    // X,Y and Z (depending on the type)
-    if (requiredFeatures >= 1) plotData.x = featureData[0]; // X axis
-    if (requiredFeatures >= 2) plotData.y = featureData[1]; // Y axis
-    if (requiredFeatures >= 3) plotData.z = featureData[2]; // 3D graph Z axis
-
-    // Graph\Plotly script
-    const graphScript = `
-      Plotly.newPlot('graph', [${JSON.stringify(plotData)}], {
-        title: '${name}',
-        xaxis: { title: '${selectedFeatures[0] || "X"}' },
-        yaxis: { title: '${selectedFeatures[1] || "Y"}' }
-        ${requiredFeatures >= 3 ? `, zaxis: { title: '${selectedFeatures[2] || "Z"}' }` : ""}
-      });
-    `;
-
-    return graphScript;
-  }
-
-
-  renderChart(graph) {
-    const graphContainer = document.getElementById(graph.id);
-    if (!graphContainer) {
-      console.error(`Graph container with ID ${graph.id} not found.`);
-      return;
+    // Getting Plotly Configuration Data
+    const plotConfig = this.visualize(graph);
+    if (!plotConfig) {
+      console.error("Error: Failed to generate visualization data.");
+      return null;
     }
 
-    const layout = {
-      title: graph.name,
-      xaxis: { title: graph.xAxisLabel },
-      yaxis: { title: graph.yAxisLabel },
-      showlegend: true,
-      ...this.graphStyle.getLayout(),
-    };
-
-    const trace = {
-      x: graph.dataset.x,
-      y: graph.dataset.y,
-      type: graph.type,
-      mode: 'markers',
-      marker: this.graphStyle.getMarkerStyle(),
-    };
-
-    Plotly.newPlot(graphContainer, [trace], layout);
+    return (
+      <Plot
+        data={plotConfig.data}
+        layout={plotConfig.layout}
+        style={{ width: "100%", height: "100%" }}
+      />
+    );
   }
 
-  highlightFeature(featureId) {
-    console.log(`Highlighting feature: ${featureId}`);
-    // Implement logic to highlight a specific feature on the graph
-  }
-}
-
-class PlotlyRenderer {
-  static render(graph) {
-    const graphContainer = document.getElementById(graph.id);
-    if (!graphContainer) return;
-
-    Plotly.react(graphContainer, graph.data, graph.layout);
+  getRequiredFeatures(type) {
+    for (const category of Object.values(this.chartCategories)) {
+      const chart = category.find(chart => chart.type === type);
+      if (chart) return chart.requiredFeatures;
+    }
+    return 0;
   }
 }
 
