@@ -1,6 +1,19 @@
 import React, {useEffect, useState} from "react";
-import { Modal, Button, Select, message } from "antd";
+import { Modal, Button, Select, message, Typography } from "antd";
 import Action from "../Action";
+
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie) {
+    document.cookie.split(";").forEach((cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "csrftoken") {
+        cookieValue = decodeURIComponent(value);
+      }
+    });
+  }
+  return cookieValue;
+}
 
 const CorrelationModal = ({ visible, onCancel, uiController }) => {
   const [method, setMethod] = useState("pearson");
@@ -9,6 +22,7 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
   const [yColumn, setYColumn] = useState(null);
 
   const [columns, setColumns] = useState([]); // store the columns
+  const [correlation, setCorrelation] = useState(null);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -28,23 +42,36 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
     fetchColumns();
   }, [datasetId]); // rely on `datasetId`，will be triggered if changed
 
-  const handleCorrelate = () => {
+  const handleCorrelate = async () => {
     if (!datasetId || !xColumn || !yColumn) {
       message.error("Please select a dataset and two columns!");
       return;
     }
 
-    const action = new Action("EXECUTE_TOOL", "user", {
-      toolName: "Correlation",
-      datasetId,
-      xColumn,
-      yColumn,
-      method
-    });
+    const requestData = {
+      dataset_id: datasetId, 
+      feature_1: xColumn,
+      feature_2: yColumn,
+      method: method,
+    };
 
-    uiController.handleUserAction(action);
-    message.success("Correlation started!");
-    onCancel();
+    try {
+      const result = await fetch("http://127.0.0.1:8000/api/correlation/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+        },
+        body: JSON.stringify(requestData),
+        credentials: "include", // allow to include Cookie
+      });
+  
+      const resultData = await result.json(); 
+      setCorrelation(resultData.correlation);
+      message.success("correlation calculation started!");
+    } catch (error) {
+      message.error(`Error: ${error.message}`);
+    }
   };
 
   return (
@@ -90,6 +117,18 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
       <Button type="primary" onClick={handleCorrelate} block style={{ marginTop: "10px" }}>
         Run Correlation
       </Button>
+
+      {/* Display correlation result if available */}
+      {correlation !== null && (
+        <div style={{ marginTop: "20px" }}>
+          <Typography.Title level={4}>Correlation Result</Typography.Title>
+          <Typography.Text>
+            The correlation coefficient between <strong>{xColumn}</strong> and{" "}
+            <strong>{yColumn}</strong> using <strong>{method}</strong> method is:{" "}
+            <strong>{correlation}</strong>
+          </Typography.Text>
+        </div>
+      )}
     </Modal>
   );
 };
