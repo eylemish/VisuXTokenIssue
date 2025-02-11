@@ -45,6 +45,29 @@ class Dataset(models.Model):
             return df[self.features]
         return df
 
+    def copy_dataset(self, new_name=None):
+        """
+        Create a copy of the current Dataset and establish the relationship 
+        between last_dataset and next_dataset.
+        """
+        if not new_name:
+            new_name = f"{self.name}_copy"
+
+        # Create a new dataset instance
+        new_dataset = Dataset.objects.create(
+            name=new_name,
+            uploaded_file=self.uploaded_file,  # Copy the reference to the uploaded file
+            features=self.features,  # Copy the feature list
+            records=self.records,  # Copy the data records
+            last_dataset=self  # Set the new dataset's last_dataset to the current dataset
+        )
+
+        # Update the current dataset's next_dataset to point to the new dataset
+        self.next_dataset = new_dataset
+        self.save(update_fields=["next_dataset"])
+
+        return new_dataset
+
 
 ### **📌 记录数据分析结果**
 class AnalysisResult(models.Model):
