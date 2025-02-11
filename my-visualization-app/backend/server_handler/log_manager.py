@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from backend.api.models import AuditLog
+from backend.api.models import UploadedFile
 
 
 def log_action(tool_type, params):
@@ -20,16 +21,24 @@ def revert_log(log_id):
     else:
         return JsonResponse({"error": "log revert failed"}, status=403)
 
-def export_logs():
-    # export logs
-    logs = AuditLog.objects.all()
+def export_logs(uploaded_file_id):
+    # Retrieve the specified UploadedFile instance
+    uploaded_file = get_object_or_404(UploadedFile, id=uploaded_file_id)
 
+    # Retrieve all AuditLog records associated with this UploadedFile
+    logs = uploaded_file.audit_logs.all()
+
+    # Create an HTTP response object with the appropriate CSV header
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="audit_logs.csv"'
+    # Set the Content-Disposition header to suggest a filename based on the uploaded file's name
+    response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name}_audit_logs.csv"'
 
+    # Create a CSV writer
     writer = csv.writer(response)
+    # Write the CSV header row
     writer.writerow(["Timestamp", "Tool", "Params"])
 
+    # Write each log record to the CSV
     for log in logs:
         writer.writerow([log.timestamp, log.tool_type, log.params])
 
