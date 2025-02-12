@@ -17,11 +17,11 @@ function getCSRFToken() {
 }
 
 const OversampleModal = ({ visible, onCancel, uiController }) => {
-  const [method, setMethod] = useState("linear"); // Select oversampling method
+  const [method, setMethod] = useState("smote"); // Select oversampling method
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
-  const [oversamplingFactor, setOversamplingFactor] = useState(2); // Default oversampling multiplier
+  const [factor, setOversamplingFactor] = useState(2); // Default oversampling multiplier
 
   const [columns, setColumns] = useState([]); // Store column names
   const [originalData, setOriginalData] = useState([]);
@@ -47,23 +47,22 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
   }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
   const handleOversample = async () => {
-    if (!datasetId || !xColumn || !yColumn || oversamplingFactor <= 0) {
+    if (!datasetId || !xColumn || !yColumn || factor <= 0) {
       message.error("Please select a dataset, two columns, and enter a valid oversampling factor!");
       return;
     }
-
     const requestData = {
       datasetId: datasetId,
       params:{
-      xColumn: xColumn,
-      yColumn: yColumn,
-      method: method,
-      factor :oversamplingFactor
+        xColumn: xColumn,
+        yColumn: yColumn,
+        method: method,
+        factor: factor
       }
     }
 
     console.log("Request data:", requestData);
-
+    setLoading(true);
     try {
       const result = await fetch("http://127.0.0.1:8000/api/oversample_data/", {
       method: "POST",
@@ -74,20 +73,19 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
       body: JSON.stringify(requestData),
       credentials: "include", // allow to include Cookie
       });
-      console.log(result.generated_data);
-      
       const resultData = await result.json(); // to JSON
-    
+      console.log(resultData)
       if (resultData.error) {
         message.error(`Oversampling failed: ${resultData.error}`);
-        return;
-      }
-    
-          
+        //进入这个分支
+        return
+      }  
+
       console.log(resultData.original_data);
       setOriginalData(resultData.original_data); // Store original data
-      setOversampledData(resultData.generated_data);
-      console.log(oversampledData);  // Output generated data
+      setOversampledData(resultData.oversampled_data);
+      console.log(resultData.oversampledData);  // Output generated data
+
       message.success("Oversampling completed!");
       } catch (error) {
           message.error(`Error: ${error.message}`);
@@ -99,7 +97,6 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
 
   return (
     <Modal title="Oversampling" open={visible} onCancel={onCancel} footer={null}>
-      {/* select dataset */}
       <Select
         style={{ width: "100%" }}
         placeholder="Choose a dataset"
@@ -142,7 +139,7 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
       <InputNumber
         min={1}
         max={10}
-        value={oversamplingFactor}
+        value={factor}
         onChange={setOversamplingFactor}
         style={{ width: "100%", marginTop: "10px" }}
       />

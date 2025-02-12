@@ -348,27 +348,43 @@ class Engine:
                 raise ValueError(f"Columns '{x_feature}' and/or '{y_feature}' not found in dataset")
             
             else:
-                X = dataset[x_feature].values.reshape(-1, 1)  # X should be 2D
+                X = dataset[[x_feature]].values
                 y = dataset[y_feature].values
+                class_counts = dataset[y_feature].value_counts()
+                num_classes = dataset[y_feature].nunique()
+                if num_classes == 2:
+                    min_class = class_counts.idxmin()  # Get min class
+                    max_class = class_counts.idxmax()  # Get max class
+
+                    minority_count = class_counts[min_class]
+                    majority_count = class_counts[max_class]
+
+                    target_minority_count = int(majority_count * oversample_factor)
+                    sampling_strategy = target_minority_count / majority_count
+                else:
+                    sampling_strategy = {cls: max(int(count * oversample_factor), count + 1) for cls, count in class_counts.items()}
+
 
                 #Use SMOTE to oversample.
                 if method == 'smote':
-                    smote = SMOTE(sampling_strategy=oversample_factor, random_state=42)
-                    X_resampled, y_resampled = smote.fit_resample(X, y)
-                    print(f"Original dataset shape: {y.shape[0]}, Resampled dataset shape: {y_resampled.shape[0]}")
+                    min_samples = min(class_counts.values)
+                    n_neighbors = max(1, min(5, min_samples - 1))
+                    oversampler = SMOTE(sampling_strategy=sampling_strategy, random_state=42, k_neighbors=n_neighbors)
 
                 #Use random to oversample.
                 elif method == "random":
-                    ros = RandomOverSampler(sampling_strategy=oversample_factor, random_state=42)
-                    X_resampled, y_resampled = ros.fit_resample(X, y)
-                    print(f"Original dataset shape: {y.shape[0]}, Resampled dataset shape: {y_resampled.shape[0]}")
+                    oversampler = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
                 
                 else:
                     raise ValueError("Invalid oversampling method. Choose from 'SMOTE' or 'Random Oversampling'.")
 
-                #Create a new DataFrame with the oversampled data
+                X_resampled, y_resampled = oversampler.fit_resample(X, y)
+
+                # Build DataFrame
                 oversampled_data = pd.DataFrame(X_resampled, columns=[x_feature])
-                oversampled_data[y_feature] = y_resampled
+                oversampled_data[y_feature] = y_resampled 
+
+                print("The classed after oversample:", oversampled_data[y_feature].value_counts())
 
                 return oversampled_data
 
