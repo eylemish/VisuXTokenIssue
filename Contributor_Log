@@ -43,7 +43,14 @@ and we execute agile development with a strong focus on collaboration.)
 2. Implemented Features
 ------------------------------------------------------------
 
-- [Feature 1] - [Short description] (Implemented by: [Member Name])
+- framework setup - Build react and django, front and back-end separation structure (Implemented by: Jing)
+- [Feature 2] - [Short description] (Implemented by: [Member Name])
+- connect file uploading - upload and store the user uploaded file (Implemented by: Jing)
+- [Feature 3] - [Short description] (Implemented by: [Member Name])
+- dataset passing- Implementing method to let frontend get data from backend (Implemented by: Jing)
+- connect dim reduction - dim reduction works on frontend and show text result (Implemented by: Jing)
+- connect visualization- show plotly visualization of dataset on frontend(Implemented by: Jing)
+- data preview chart- show data preview by features(Implemented by: Jing)
 - [Feature 2] - [Short description] (Implemented by: [Member Name])
 - [Feature 3] - [Short description] (Implemented by: [Member Name])
 
