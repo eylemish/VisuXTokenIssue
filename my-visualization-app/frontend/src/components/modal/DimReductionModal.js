@@ -20,7 +20,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
   const [method, setMethod] = useState("pca");
   const [nComponents, setNComponents] = useState(2);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [reducedData, setReducedData] = useState([]);
+  const [reducedData, setReducedData] = useState(null);
 
   const handleReduce = async () => {
     if (!nComponents || nComponents <= 0) {
@@ -53,10 +53,10 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       );
 
       const receivedData = response.data.reduced_data;
-      if (Array.isArray(receivedData)) {
+      if (Array.isArray(receivedData) && receivedData.length) {
         setReducedData(receivedData);
       } else {
-        setReducedData([]);
+        setReducedData(null);
       }
 
       onUpdateDataset(receivedData);
@@ -73,7 +73,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
   };
 
   const renderTable = () => {
-    if (!reducedData.length) return <p style={{ textAlign: "center" }}>No data available</p>;
+    if (!reducedData) return null;
 
     const columns = Object.keys(reducedData[0] || {}).map((key) => ({
       title: key,
@@ -106,7 +106,7 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         <Button type="primary" onClick={handleReduce} loading={isProcessing}>Confirm</Button>
       </div>
 
-      {renderTable()}
+      {reducedData && renderTable()}
     </Modal>
   );
 };
