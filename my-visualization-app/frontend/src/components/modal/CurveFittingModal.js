@@ -81,7 +81,6 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       });
   
       const resultData = await result.json(); // to JSON
-      print("resultData")
       if (resultData.error) {
         message.error(`Curve fitting failed: ${resultData.error}`);
         return;
