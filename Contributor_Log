@@ -30,9 +30,9 @@ and we execute agile development with a strong focus on collaboration.)
   Responsibilities: [Short description of tasks]
 
 - [Ezgi Yircali] - Frontend Developer
-  Email: [eylemish@gmail.com]
-  GitHub: [@slaymyway]
-  Responsibilities: [Frontend (adding functions to the not working components)]
+  Email: eylemish@gmail.com
+  GitHub: @slaymyway
+  Responsibilities: Frontend (adding functions to the not working components)
 
 - [Member 5] - Frontend Developer
   Email: [email@example.com]
@@ -58,6 +58,6 @@ and we execute agile development with a strong focus on collaboration.)
 3. Pending Features (To-Do List)
 ------------------------------------------------------------
 
-- [Feature 4] - [Short description] (Assigned to: [Member Name])
+- feature selection/edit graph menu -  (Assigned to: Ezgi)
 - [Feature 5] - [Short description] (Assigned to: [Member Name])
 - [Feature 6] - [Short description] (Assigned to: [Member Name])

@@ -17,10 +17,8 @@ const GraphSection = () => {
   const [selectedGraph, setSelectedGraph] = useState(null);
 
   useEffect(() => {
-    // Handle changes from the GraphManager
     const handleGraphChange = (data) => {
       if (data.type === 'graphColorChanged') {
-        // If color changed, find the corresponding graph and update visualization
         setGraphDetails((prevState) =>
           prevState.map((graph) =>
             graph.graphId === data.graphId
@@ -31,10 +29,8 @@ const GraphSection = () => {
       }
     };
 
-    // Subscribe to GraphManager changes
     GraphManager.onChange(handleGraphChange);
 
-    // Load the initial set of graphs
     const graphs = GraphManager.getAllGraphs();
     const validGraphDetails = graphs
       .map((graph) => {
@@ -45,7 +41,7 @@ const GraphSection = () => {
             graphType: graph.type,
             selectedFeatures: graph.selectedFeatures,
             graphScript: graphScript,
-            visible: graph.visible, // Add visible state from Graph
+            visible: graph.visible, 
           };
         }
         return null;
@@ -53,18 +49,16 @@ const GraphSection = () => {
       .filter((graph) => graph !== null);
 
     setGraphDetails(validGraphDetails);
-    // Set initial visibility based on the `visible` attribute of each graph
+
     const initialVisibleGraphs = validGraphDetails.reduce((acc, graph) => {
-      acc[graph.graphId] = graph.visible; // Set visibility based on the graph's visible property
+      acc[graph.graphId] = graph.visible;
       return acc;
     }, {});
     setVisibleGraphs(initialVisibleGraphs);
     setLoading(false);
 
-    // Cleanup event listener on component unmount
     return () => {
-      // Unsubscribe from events when the component unmounts
-      GraphManager.onChange(() => {}); // This removes the listener
+      GraphManager.onChange(() => {}); 
     };
   }, []);
 
@@ -86,25 +80,23 @@ const GraphSection = () => {
   };
 
   const handleModalSave = (updatedGraph) => {
-    // Update graph details after the modal save
     setGraphDetails((prevState) =>
       prevState.map((graph) =>
         graph.graphId === updatedGraph.graphId ? updatedGraph : graph
       )
     );
-    
-    // Re-visualize the updated graph
+
     setGraphDetails((prevState) =>
       prevState.map((graph) => {
         if (graph.graphId === updatedGraph.graphId) {
           const updatedGraphScript = visualizationManager.visualize(updatedGraph);
-          return { ...graph, graphScript: updatedGraphScript }; // Re-visualize
+          return { ...graph, graphScript: updatedGraphScript };
         }
         return graph;
       })
     );
 
-    setIsModalVisible(false); // Close modal
+    setIsModalVisible(false);
   };
 
   return (
@@ -123,17 +115,19 @@ const GraphSection = () => {
                   bordered
                   dataSource={graphDetails}
                   renderItem={(graph) => (
-                    <List.Item
-                      style={{ cursor: "pointer" }}
-                      onClick={() => toggleGraphVisibility(graph.graphId)}
-                    >
-                      {`Graph ID: ${graph.graphId} - ${graph.graphType}`}
+                    <List.Item>
+                      <span style={{ cursor: "pointer" }} onClick={() => toggleGraphVisibility(graph.graphId)}>
+                        {`Graph ID: ${graph.graphId} - ${graph.graphType}`}
+                      </span>
+                      <Button onClick={() => toggleGraphVisibility(graph.graphId)} style={{ marginLeft: "auto" }}>
+                        {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
+                      </Button>
                     </List.Item>
                   )}
                 />
               </Col>
 
-              {graphDetails.map((graph, index) => {
+              {graphDetails.map((graph) => {
                 const { graphScript, graphId } = graph;
                 const { data, layout } = graphScript || {};
 
