@@ -11,6 +11,7 @@ class Graph {
     this.metadata = {};
     this.createdAt = new Date();
     this.updatedAt = new Date();
+    this.visible = true;
   }
 
   updateDataset(newDataset) {
@@ -43,6 +44,11 @@ class Graph {
 
   getMetadata() {
     return this.metadata;
+  }
+
+  toggleVisibility() {
+    this.visible = !this.visible;
+    this.updatedAt = new Date();
   }
 
   // needs update
