@@ -1,7 +1,7 @@
 class GraphStyle {
   constructor() {
-    this.colorScheme = 'blue';
-    this.markerStyle = { size: 8, color: 'blue' };
+    this.colorScheme = '#0000FF';
+    this.markerStyle = { size: 8, color: '#0000FF' };
     this.lineStyle = { width: 2, dash: 'solid' };
     this.layoutSize = { width: 600, height: 400 };
   }

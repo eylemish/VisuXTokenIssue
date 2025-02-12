@@ -9,13 +9,14 @@ import {
   Divider,
   List,
   Button,
-  Dropdown,
-  Menu,
   Select,
 } from "antd";
 import Plot from "react-plotly.js";
 import VisualizationManager from "./VisualizationManager";
 import GraphManager from "./GraphManager";
+
+// react-color kütüphanesini import et
+import { ChromePicker } from "react-color";
 
 const { Title, Paragraph } = Typography;
 const visualizationManager = new VisualizationManager();
@@ -26,10 +27,7 @@ const GraphSection = () => {
   const [visibleGraphs, setVisibleGraphs] = useState({});
   // Edit Graph bölümünde seçilen grafik ve renk için state'ler
   const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
-  const [editColor, setEditColor] = useState("");
-
-  // Kullanılabilecek renk seçenekleri
-  const colorOptions = ["blue", "red", "green", "orange", "purple"];
+  const [editColor, setEditColor] = useState("#ffffff"); // Başlangıçta beyaz
 
   useEffect(() => {
     const handleGraphChange = (data) => {
@@ -60,7 +58,7 @@ const GraphSection = () => {
             selectedFeatures: graph.selectedFeatures,
             graphScript: graphScript,
             visible: graph.visible,
-            color: graph.style?.colorScheme || "blue",
+            color: graph.style?.colorScheme || "#ffffff", // Varsayılan renk (beyaz)
             style: graph.style,
           };
         }
@@ -96,13 +94,13 @@ const GraphSection = () => {
     if (graph) {
       setEditColor(graph.color);
     } else {
-      setEditColor("");
+      setEditColor("#ffffff");
     }
   };
 
   // Handler: Seçilen renk bilgisini state'e aktarır.
   const handleColorChange = (color) => {
-    setEditColor(color);
+    setEditColor(color.hex);
   };
 
   // Handler: "Update Graph" butonuna basıldığında ilgili grafik için rengi günceller.
@@ -163,8 +161,6 @@ const GraphSection = () => {
                         >
                           {`Graph ID: ${graph.graphId} - ${graph.graphType}`}
                         </span>
-                        {/* Bu örnekte inline renk seçme kısmı kaldırılmıştır.
-                            Artık "Edit Graph" bölümünde düzenleme yapılacaktır. */}
                         <Button
                           onClick={() => toggleGraphVisibility(graph.graphId)}
                           style={{ marginLeft: "auto" }}
@@ -256,18 +252,11 @@ const GraphSection = () => {
                   </div>
                   <div style={{ marginBottom: "10px" }}>
                     <label style={{ marginRight: "8px" }}>Color: </label>
-                    <Select
-                      style={{ width: 250 }}
-                      placeholder="Select color"
-                      value={editColor}
+                    {/* Renk seçici */}
+                    <ChromePicker
+                      color={editColor}
                       onChange={handleColorChange}
-                    >
-                      {colorOptions.map((color) => (
-                        <Select.Option key={color} value={color}>
-                          {color}
-                        </Select.Option>
-                      ))}
-                    </Select>
+                    />
                   </div>
                   <Button type="primary" onClick={handleEditGraphSubmit}>
                     Update Graph
