@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
-import { Modal, Button, Select, message, Typography } from "antd";
-import Action from "../Action";
+import React, { useEffect, useState } from "react";
+import { Modal, Button, Select, message, Typography, Spin } from "antd";
+import Plot from "react-plotly.js";
 
 function getCSRFToken() {
   let cookieValue = null;
@@ -18,19 +18,19 @@ function getCSRFToken() {
 const CorrelationModal = ({ visible, onCancel, uiController }) => {
   const [method, setMethod] = useState("pearson");
   const [datasetId, setDatasetId] = useState(null);
-  const [xColumn, setXColumn] = useState(null);
-  const [yColumn, setYColumn] = useState(null);
-
-  const [columns, setColumns] = useState([]); // store the columns
-  const [correlation, setCorrelation] = useState(null);
+  const [selectedColumns, setSelectedColumns] = useState([]); // multiple
+  const [columns, setColumns] = useState([]); // column info
+  const [correlationMatrix, setCorrelationMatrix] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
-  // **when user select a dataset, get the column**
+   // **when user select a dataset, get the column**
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
+      setSelectedColumns([]);
       return;
     }
 
@@ -43,39 +43,42 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
   }, [datasetId]); // rely on `datasetId`，will be triggered if changed
 
   const handleCorrelate = async () => {
-    if (!datasetId || !xColumn || !yColumn) {
-      message.error("Please select a dataset and two columns!");
+    if (!datasetId || selectedColumns.length < 2) {
+      message.error("Please select a dataset and at least two columns!");
       return;
     }
 
     const requestData = {
-      dataset_id: datasetId, 
-      feature_1: xColumn,
-      feature_2: yColumn,
+      dataset_id: datasetId,
+      features: selectedColumns, // multiple
       method: method,
     };
+
+    setLoading(true); //
 
     try {
       const result = await fetch("http://127.0.0.1:8000/api/correlation/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+          "X-CSRFToken": getCSRFToken(), //  CSRF Token
         },
         body: JSON.stringify(requestData),
-        credentials: "include", // allow to include Cookie
+        credentials: "include", // Cookie
       });
-  
-      const resultData = await result.json(); 
-      setCorrelation(resultData.correlation);
-      message.success("correlation calculation started!");
+
+      const resultData = await result.json();
+      setCorrelationMatrix(resultData.correlation_matrix); // ✅ 存储相关性矩阵
+      message.success("Correlation matrix generated!");
     } catch (error) {
       message.error(`Error: ${error.message}`);
+    } finally {
+      setLoading(false); //
     }
   };
 
   return (
-    <Modal title="Correlation" open={visible} onCancel={onCancel} footer={null}>
+    <Modal title="Correlation Matrix" open={visible} onCancel={onCancel} footer={null} width={700}>
       <Select
         style={{ width: "100%" }}
         placeholder="Choose a dataset"
@@ -87,21 +90,11 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
       </Select>
 
       <Select
+        mode="multiple" // allow multiple
         style={{ width: "100%", marginTop: "10px" }}
-        placeholder="Select X Column"
+        placeholder="Select Columns"
         disabled={!datasetId}
-        onChange={setXColumn}
-      >
-        {columns.map((col) => (
-          <Select.Option key={col} value={col}>{col}</Select.Option>
-        ))}
-      </Select>
-
-      <Select
-        style={{ width: "100%", marginTop: "10px" }}
-        placeholder="Select Y Column"
-        disabled={!datasetId}
-        onChange={setYColumn}
+        onChange={setSelectedColumns}
       >
         {columns.map((col) => (
           <Select.Option key={col} value={col}>{col}</Select.Option>
@@ -118,15 +111,29 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
         Run Correlation
       </Button>
 
-      {/* Display correlation result if available */}
-      {correlation !== null && (
+      {/* Display correlation result */}
+      {loading && <Spin size="large" style={{ display: "block", margin: "20px auto" }} />}
+
+      {/* heatmap */}
+      {correlationMatrix && (
         <div style={{ marginTop: "20px" }}>
-          <Typography.Title level={4}>Correlation Result</Typography.Title>
-          <Typography.Text>
-            The correlation coefficient between <strong>{xColumn}</strong> and{" "}
-            <strong>{yColumn}</strong> using <strong>{method}</strong> method is:{" "}
-            <strong>{correlation}</strong>
-          </Typography.Text>
+          <Typography.Title level={4}>Correlation Heatmap</Typography.Title>
+          <Plot
+            data={[
+              {
+                z: correlationMatrix.values, //
+                x: correlationMatrix.columns, // X
+                y: correlationMatrix.columns, // Y
+                type: "heatmap",
+                colorscale: "Viridis", // color
+              },
+            ]}
+            layout={{
+              title: "Feature Correlation Heatmap",
+              width: 600,
+              height: 500,
+            }}
+          />
         </div>
       )}
     </Modal>

@@ -144,7 +144,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
       />
 
 
-        {/* data copy manage Modal */}
+        {/* replication manage Modal */}
         <ReplicaManagerModal
             visible={replicasModalVisible}
             onClose={() => setReplicasModalVisible(false)}

@@ -16,10 +16,10 @@ const ReplicaManagerModal = ({ visible, onClose, uiController, datasetId }) => {
 
   // Getting parsed data and copy list
   useEffect(() => {
-    if (visible && datasetId) {
+    if (visible) {
       fetchOptions();
     }
-  }, [visible, datasetId]);
+  }, [visible]);
 
 
   const fetchOptions = async () => {
