@@ -1,22 +1,25 @@
 class GraphStyle {
   constructor() {
-    this.colorScheme = "blue";
-    this.markerStyle = { size: 8, color: "blue" };
-    this.layoutSize = { width: 300, height: 150 };
-    this.margin = { t: 20, b: 20, l: 20, r: 20 };
+    this.colorScheme = 'blue';
+    this.markerStyle = { size: 8, color: 'blue' };
+    this.lineStyle = { width: 2, dash: 'solid' };
+    this.layoutSize = { width: 600, height: 400 };
   }
 
   getLayout() {
     return {
       width: this.layoutSize.width,
       height: this.layoutSize.height,
-      title: "Graph Visualization",
-      margin: this.margin,
+      title: 'Graph Visualization',
     };
   }
 
   getMarkerStyle() {
     return this.markerStyle;
+  }
+
+  getLineStyle() {
+    return this.lineStyle;
   }
 
   setColorScheme(colorScheme) {
@@ -28,13 +31,20 @@ class GraphStyle {
     this.markerStyle = { ...this.markerStyle, ...style };
   }
 
+  updateLineStyle(style) {
+    this.lineStyle = { ...this.lineStyle, ...style };
+  }
+
   resizeLayout(width, height) {
     this.layoutSize = { width, height };
   }
 
-  setMargins(t, b, l, r) {
-    this.margin = { t, b, l, r }; // Allow dynamic margin adjustments
+
+  applyToGraph(graph) {
+    graph.style = { ...graph.style, ...this };
   }
+
+
 }
 
 export default GraphStyle;

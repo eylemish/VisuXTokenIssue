@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Card, Typography, Row, Col, Tag, Spin, Divider, List } from "antd";
+import { Card, Typography, Row, Col, Tag, Spin, Divider, List, Button } from "antd";
 import Plot from "react-plotly.js";
 import VisualizationManager from "./VisualizationManager";
-import GraphManager from "./GraphManager"; // Directly importing the instance
+import GraphManager from "./GraphManager";
+import EditGraphModal from "../modal/EditGraphModal";
 
 const { Title, Paragraph } = Typography;
 
@@ -12,6 +13,8 @@ const GraphSection = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleGraphs, setVisibleGraphs] = useState({}); // Tracks visibility of graphs by their IDs
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedGraph, setSelectedGraph] = useState(null);
 
   useEffect(() => {
     const graphs = GraphManager.getAllGraphs(); // Singleton GraphManager used
@@ -42,6 +45,26 @@ const GraphSection = () => {
       ...prevState,
       [graphId]: !prevState[graphId], // Toggle the visibility of the graph
     }));
+  };
+
+  const handleEditGraph = (graphId) => {
+    const graphToEdit = graphDetails.find((graph) => graph.graphId === graphId);
+    setSelectedGraph(graphToEdit);
+    setIsModalVisible(true); // Open the modal
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false); // Close modal
+  };
+
+  const handleModalSave = (updatedGraph) => {
+    // Update graph data on save, and optionally re-render
+    setGraphDetails((prevState) =>
+      prevState.map((graph) =>
+        graph.graphId === updatedGraph.graphId ? updatedGraph : graph
+      )
+    );
+    setIsModalVisible(false); // Close modal
   };
 
   return (
@@ -116,6 +139,15 @@ const GraphSection = () => {
                         ) : (
                           <p>Graph data could not be visualized.</p>
                         )}
+
+                        {/* Edit Graph Button */}
+                        <Button
+                          type="primary"
+                          style={{ marginTop: "10px" }}
+                          onClick={() => handleEditGraph(graphId)}
+                        >
+                          Edit Graph
+                        </Button>
                       </Card>
                     )}
                   </Col>
@@ -126,6 +158,17 @@ const GraphSection = () => {
             <p>No Graphs Available</p>
           )}
         </div>
+      )}
+
+      {/* Edit Graph Modal */}
+      {selectedGraph && (
+        <EditGraphModal
+          visible={isModalVisible}
+          onCancel={handleModalCancel}
+          onSave={handleModalSave}
+          graphId={selectedGraph.graphId}
+          graphDetails={selectedGraph}
+        />
       )}
     </Card>
   );
