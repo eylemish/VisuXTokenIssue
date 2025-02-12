@@ -26,9 +26,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   const [loading, setLoading] = useState(false);
 
 
-
-  //这个部分是因为前端部分完全不存数据集了，为了能调用列
-  const [columns, setColumns] = useState([]); // 存储列名
+  const [columns, setColumns] = useState([]); 
   const [originalData, setOriginalData] = useState([]);
   const [fittedData, setFittedData] = useState([]);
   const [params, setParams] = useState([]);
@@ -37,7 +35,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
 
-  // **当用户选择数据集时，获取列名**
+  // **Get column names when the user selects a dataset**
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
@@ -50,7 +48,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
     };
 
     fetchColumns();
-  }, [datasetId]); // 依赖 `datasetId`，变更时触发
+  }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
 
 
@@ -61,7 +59,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
     }
   
     const requestData = {
-      dataset_id: datasetId,  // 确保 datasetId 是有效的
+      dataset_id: datasetId,  // ensure valid datasetID
       params: {
         xColumn: xColumn,
         yColumn: yColumn,
@@ -76,21 +74,21 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken()  // 确保发送 CSRF Token
+        "X-CSRFToken": getCSRFToken()  // make sure send CSRF Token
       },
       body: JSON.stringify(requestData),
       credentials: "include", // allow to include Cookie
       });
   
-      const resultData = await result.json(); // 解析为JSON格式
-
+      const resultData = await result.json(); // to JSON
+      print("resultData")
       if (resultData.error) {
         message.error(`Curve fitting failed: ${resultData.error}`);
         return;
       }
 
       
-      setOriginalData(resultData.original_data); // 存储原始数据
+      setOriginalData(resultData.original_data); // store original data
       setFittedData(resultData.generated_data);
       setParams(resultData.params);
       setCovariance(resultData.covariance);
@@ -166,7 +164,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
 
         <div style={{ marginTop: "20px" }}>
         <h4>Fitting Parameters</h4>
-        <pre>{JSON.stringify(params, null, 2)}</pre> {/* 以 JSON 格式显示 params */}
+        <pre>{JSON.stringify(params, null, 2)}</pre> {/* show params in JSON format */}
         </div>
       </div>
     )}

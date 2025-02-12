@@ -600,11 +600,11 @@ class OversampleDataView(APIView):
             body = json.loads(request.body)
             
             # Extract the relevant fields from the request
-            dataset_id = body.get("dataset_id")  # Dataset ID to locate the file in the database
+            dataset_id = body.get("datasetId")  # Dataset ID to locate the file in the database
             params = body.get("params", {})
             x_feature = params.get("xColumn")  # get x column from params
             y_feature = params.get("yColumn")  # get y column from params
-            method = params.get("method", "smote")  # Interpolation method (default: smote)
+            method = params.get("method", "smote")  # Oversample method (default: smote)
             oversample_factor = params.get("num_samples", 1)  # Oversampling factor (default: 1)
 
             # Ensure dataset_id is provided
