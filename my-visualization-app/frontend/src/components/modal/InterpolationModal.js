@@ -86,9 +86,14 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
     }
 
     const dataset = {
-      records: interpolatedData,
       features: [xColumn, yColumn],
+      records: interpolatedData.map(dataPoint => ({
+        [xColumn]: dataPoint.x,
+        [yColumn]: dataPoint.y,
+      })),
     };
+
+    console.log(dataset);
 
     const graphInfo = {
       graphName: "Interpolation Graph",
