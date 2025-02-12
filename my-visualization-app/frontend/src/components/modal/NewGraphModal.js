@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Modal, Tabs, Card, Row, Col, Button, Checkbox, message } from "antd";
+import { Modal, Tabs, Card, Row, Col, Button, Checkbox, message, Input } from "antd";
 import {
   BarChartOutlined,
   LineChartOutlined,
@@ -34,6 +34,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
   const [features, setFeatures] = useState([]); // 特征列
   const [selectedGraphType, setSelectedGraphType] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [selectedName, setSelectedName] = useState("");
   const [numFeatures, setNumFeatures] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -90,6 +91,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
   // Make sure `graphType` is passed correctly in `handleConfirm`.
   const handleConfirm = async () => {
     console.log("Creating graph with info:", {
+      graphName: selectedName,
       graphType: selectedGraphType,
       datasetId: datasetManager.getCurrentDatasetId(),
       selectedFeatures,
@@ -113,7 +115,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
     }
 
     const graphInfo = {
-      graphName: `New ${selectedGraphType} Chart`,
+      graphName: selectedName,
       graphType: selectedGraphType, // Ensure that graphType is passed correctly
       dataset,
       selectedFeatures,
@@ -152,6 +154,15 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
         <p>Loading dataset features...</p>
       ) : (
         <>
+         <div style={{ marginBottom: '16px' }}>
+            <h4>Graph Name:</h4>
+            <Input 
+              placeholder="Enter a name for your graph" 
+              value={selectedName} 
+              onChange={(e) => setSelectedName(e.target.value)} 
+            />
+          </div>
+
           <Tabs defaultActiveKey="1">
             {Object.entries(chartCategories).map(([category, charts]) => (
               <TabPane tab={category} key={category}>

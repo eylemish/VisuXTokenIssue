@@ -61,6 +61,7 @@ class GraphManager {
     {}
   );
 
+  console.log(`Graph name ${newGraph.name}:`);
   this.addGraphToMap(newGraph);
   this.notify({ type: "graphUpdated" });
 
