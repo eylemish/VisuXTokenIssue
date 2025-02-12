@@ -1,28 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { Card, Typography, Row, Col, Tag, Spin, Divider, List, Button } from "antd";
+import {
+  Card,
+  Typography,
+  Row,
+  Col,
+  Tag,
+  Spin,
+  Divider,
+  List,
+  Button,
+  Dropdown,
+  Menu,
+  Select,
+} from "antd";
 import Plot from "react-plotly.js";
 import VisualizationManager from "./VisualizationManager";
 import GraphManager from "./GraphManager";
-import EditGraphModal from "../modal/EditGraphModal";
 
 const { Title, Paragraph } = Typography;
-
 const visualizationManager = new VisualizationManager();
 
 const GraphSection = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleGraphs, setVisibleGraphs] = useState({});
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedGraph, setSelectedGraph] = useState(null);
+  // Edit Graph bölümünde seçilen grafik ve renk için state'ler
+  const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
+  const [editColor, setEditColor] = useState("");
+
+  // Kullanılabilecek renk seçenekleri
+  const colorOptions = ["blue", "red", "green", "orange", "purple"];
 
   useEffect(() => {
     const handleGraphChange = (data) => {
-      if (data.type === 'graphColorChanged') {
+      if (data.type === "graphUpdated") {
         setGraphDetails((prevState) =>
           prevState.map((graph) =>
             graph.graphId === data.graphId
-              ? { ...graph, graphScript: visualizationManager.visualize(graph) }
+              ? {
+                  ...graph,
+                  graphScript: visualizationManager.visualize(graph),
+                }
               : graph
           )
         );
@@ -41,7 +59,9 @@ const GraphSection = () => {
             graphType: graph.type,
             selectedFeatures: graph.selectedFeatures,
             graphScript: graphScript,
-            visible: graph.visible, 
+            visible: graph.visible,
+            color: graph.style?.colorScheme || "blue",
+            style: graph.style,
           };
         }
         return null;
@@ -58,7 +78,7 @@ const GraphSection = () => {
     setLoading(false);
 
     return () => {
-      GraphManager.onChange(() => {}); 
+      GraphManager.onChange(() => {});
     };
   }, []);
 
@@ -69,135 +89,196 @@ const GraphSection = () => {
     }));
   };
 
-  const handleEditGraph = (graphId) => {
-    const graphToEdit = graphDetails.find((graph) => graph.graphId === graphId);
-    setSelectedGraph(graphToEdit);
-    setIsModalVisible(true);
+  // Handler: Seçilen grafiğin ID'sini state'e aktarır ve o grafiğin mevcut rengini alır.
+  const handleGraphSelect = (graphId) => {
+    setSelectedGraphForEdit(graphId);
+    const graph = graphDetails.find((g) => g.graphId === graphId);
+    if (graph) {
+      setEditColor(graph.color);
+    } else {
+      setEditColor("");
+    }
   };
 
-  const handleModalCancel = () => {
-    setIsModalVisible(false);
+  // Handler: Seçilen renk bilgisini state'e aktarır.
+  const handleColorChange = (color) => {
+    setEditColor(color);
   };
 
-  const handleModalSave = (updatedGraph) => {
+  // Handler: "Update Graph" butonuna basıldığında ilgili grafik için rengi günceller.
+  const handleEditGraphSubmit = () => {
+    if (!selectedGraphForEdit) return;
+    // GraphManager üzerinden grafiğin rengini değiştiriyoruz.
+    GraphManager.changeGraphColor(selectedGraphForEdit, editColor);
+    // Yerel state'te de güncelleme yapıyoruz.
     setGraphDetails((prevState) =>
       prevState.map((graph) =>
-        graph.graphId === updatedGraph.graphId ? updatedGraph : graph
+        graph.graphId === selectedGraphForEdit
+          ? {
+              ...graph,
+              color: editColor,
+              style: { ...graph.style, colorScheme: editColor },
+              graphScript: visualizationManager.visualize({
+                ...graph,
+                style: { ...graph.style, colorScheme: editColor },
+              }),
+            }
+          : graph
       )
     );
-
-    setGraphDetails((prevState) =>
-      prevState.map((graph) => {
-        if (graph.graphId === updatedGraph.graphId) {
-          const updatedGraphScript = visualizationManager.visualize(updatedGraph);
-          return { ...graph, graphScript: updatedGraphScript };
-        }
-        return graph;
-      })
-    );
-
-    setIsModalVisible(false);
   };
 
   return (
     <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Title level={4} style={{ textAlign: "left" }}>Graphs</Title>
+      <Title level={4} style={{ textAlign: "left" }}>
+        Graphs
+      </Title>
 
       {loading ? (
         <Spin size="large" />
       ) : (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           {graphDetails.length > 0 ? (
-            <Row style={{ width: "100%" }}>
-              <Col span={24}>
-                <List
-                  size="large"
-                  bordered
-                  dataSource={graphDetails}
-                  renderItem={(graph) => (
-                    <List.Item>
-                      <span style={{ cursor: "pointer" }} onClick={() => toggleGraphVisibility(graph.graphId)}>
-                        {`Graph ID: ${graph.graphId} - ${graph.graphType}`}
-                      </span>
-                      <Button onClick={() => toggleGraphVisibility(graph.graphId)} style={{ marginLeft: "auto" }}>
-                        {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
-                      </Button>
-                    </List.Item>
-                  )}
-                />
-              </Col>
-
-              {graphDetails.map((graph) => {
-                const { graphScript, graphId } = graph;
-                const { data, layout } = graphScript || {};
-
-                return (
-                  <Col span={24} key={graphId} style={{ marginTop: "20px" }}>
-                    {visibleGraphs[graphId] && (
-                      <Card
-                        style={{ width: "100%", padding: "10px" }}
-                        title={`Graph ID: ${graph.graphId}`}
-                        bordered={true}
+            <>
+              <Row style={{ width: "100%" }}>
+                <Col span={24}>
+                  <List
+                    size="large"
+                    bordered
+                    dataSource={graphDetails}
+                    renderItem={(graph) => (
+                      <List.Item
+                        style={{ display: "flex", alignItems: "center" }}
                       >
-                        <Paragraph strong>Type: {graph.graphType}</Paragraph>
-
-                        <div>
-                          <Paragraph strong>Selected Features:</Paragraph>
-                          {graph.selectedFeatures && graph.selectedFeatures.length > 0 ? (
-                            <Row gutter={[8, 8]}>
-                              {graph.selectedFeatures.map((feature, featureIndex) => (
-                                <Col span={8} key={featureIndex}>
-                                  <Tag color="blue">{feature}</Tag>
-                                </Col>
-                              ))}
-                            </Row>
-                          ) : (
-                            <Tag color="red">No features selected</Tag>
-                          )}
-                        </div>
-
-                        <Divider />
-
-                        {data && layout ? (
-                          <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-                            <Plot
-                              data={data}
-                              layout={layout}
-                              config={{ responsive: true }}
-                              style={{ width: "100%", height: "300px" }}
-                            />
-                          </div>
-                        ) : (
-                          <p>Graph data could not be visualized.</p>
-                        )}
-
-                        <Button
-                          type="primary"
-                          style={{ marginTop: "10px" }}
-                          onClick={() => handleEditGraph(graphId)}
+                        <span
+                          style={{ cursor: "pointer" }}
+                          onClick={() => toggleGraphVisibility(graph.graphId)}
                         >
-                          Edit Graph
+                          {`Graph ID: ${graph.graphId} - ${graph.graphType}`}
+                        </span>
+                        {/* Bu örnekte inline renk seçme kısmı kaldırılmıştır.
+                            Artık "Edit Graph" bölümünde düzenleme yapılacaktır. */}
+                        <Button
+                          onClick={() => toggleGraphVisibility(graph.graphId)}
+                          style={{ marginLeft: "auto" }}
+                        >
+                          {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
                         </Button>
-                      </Card>
+                      </List.Item>
                     )}
-                  </Col>
-                );
-              })}
-            </Row>
+                  />
+                </Col>
+
+                {graphDetails.map((graph) => {
+                  const { graphScript, graphId } = graph;
+                  const { data, layout } = graphScript || {};
+                  return (
+                    <Col span={24} key={graphId} style={{ marginTop: "20px" }}>
+                      {visibleGraphs[graphId] && (
+                        <Card
+                          style={{ width: "100%", padding: "10px" }}
+                          title={`Graph ID: ${graph.graphId}`}
+                          bordered={true}
+                        >
+                          <Paragraph strong>
+                            Type: {graph.graphType}
+                          </Paragraph>
+                          <div>
+                            <Paragraph strong>
+                              Selected Features:
+                            </Paragraph>
+                            {graph.selectedFeatures &&
+                            graph.selectedFeatures.length > 0 ? (
+                              <Row gutter={[8, 8]}>
+                                {graph.selectedFeatures.map(
+                                  (feature, featureIndex) => (
+                                    <Col span={8} key={featureIndex}>
+                                      <Tag color="blue">{feature}</Tag>
+                                    </Col>
+                                  )
+                                )}
+                              </Row>
+                            ) : (
+                              <Tag color="red">No features selected</Tag>
+                            )}
+                          </div>
+
+                          <Divider />
+
+                          {data && layout ? (
+                            <div
+                              style={{
+                                maxWidth: "600px",
+                                margin: "0 auto",
+                              }}
+                            >
+                              <Plot
+                                data={data}
+                                layout={layout}
+                                config={{ responsive: true }}
+                                style={{ width: "100%", height: "300px" }}
+                              />
+                            </div>
+                          ) : (
+                            <p>Graph data could not be visualized.</p>
+                          )}
+                        </Card>
+                      )}
+                    </Col>
+                  );
+                })}
+              </Row>
+
+              {/* Edit Graph Bölümü */}
+              <div style={{ marginTop: "20px", width: "100%" }}>
+                <Card title="Edit Graph">
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ marginRight: "8px" }}>Graph: </label>
+                    <Select
+                      style={{ width: 250 }}
+                      placeholder="Select a graph"
+                      value={selectedGraphForEdit}
+                      onChange={handleGraphSelect}
+                    >
+                      {graphDetails.map((graph) => (
+                        <Select.Option key={graph.graphId} value={graph.graphId}>
+                          {`Graph ${graph.graphId} - ${graph.graphType}`}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ marginRight: "8px" }}>Color: </label>
+                    <Select
+                      style={{ width: 250 }}
+                      placeholder="Select color"
+                      value={editColor}
+                      onChange={handleColorChange}
+                    >
+                      {colorOptions.map((color) => (
+                        <Select.Option key={color} value={color}>
+                          {color}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </div>
+                  <Button type="primary" onClick={handleEditGraphSubmit}>
+                    Update Graph
+                  </Button>
+                </Card>
+              </div>
+            </>
           ) : (
             <p>No Graphs Available</p>
           )}
         </div>
-      )}
-
-      {selectedGraph && (
-        <EditGraphModal
-          visible={isModalVisible}
-          onCancel={handleModalCancel}
-          onSave={handleModalSave}
-          graphId={selectedGraph.graphId}
-          graphDetails={selectedGraph}
-        />
       )}
     </Card>
   );
