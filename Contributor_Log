@@ -1,0 +1,56 @@
+============================================================
+                   Project Team Contribution Document
+============================================================
+
+Project Name:  Visux
+Repository URL:  https://github.com/WangJing3383/VisuX.git
+Last Updated:  [2025-02-12]
+Maintainers:  Jing Wang,
+
+------------------------------------------------------------
+1. Team Members & Responsibilities
+------------------------------------------------------------
+
+(Although we initially assigned roles, we don't have such a strict division of labour,
+and we execute agile development with a strong focus on collaboration.)
+
+- Jing Wang - Frontend Developer with Backend Integration
+  Email: wjing8088@gmail.com
+  GitHub: WangJing3383
+  Responsibilities: Frontend, API Integration
+
+- [Member 2] - Backend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+- [Member 3] - Backend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+- [Member 4] - Frontend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+- [Member 5] - Frontend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+------------------------------------------------------------
+2. Implemented Features
+------------------------------------------------------------
+
+- [Feature 1] - [Short description] (Implemented by: [Member Name])
+- [Feature 2] - [Short description] (Implemented by: [Member Name])
+- [Feature 3] - [Short description] (Implemented by: [Member Name])
+
+------------------------------------------------------------
+3. Pending Features (To-Do List)
+------------------------------------------------------------
+
+- [Feature 4] - [Short description] (Assigned to: [Member Name])
+- [Feature 5] - [Short description] (Assigned to: [Member Name])
+- [Feature 6] - [Short description] (Assigned to: [Member Name])
