@@ -79,9 +79,36 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
     setShowResultModal(false);
   };
 
+  const handleCreateGraph = () => {
+    if (!xColumn || !yColumn || interpolatedData.length === 0) {
+      message.error("Please select X and Y columns before creating a graph!");
+      return;
+    }
+
+    const dataset = {
+      records: interpolatedData,
+      features: [xColumn, yColumn],
+    };
+
+    const graphInfo = {
+      graphName: "Interpolation Graph",
+      graphType: "line",
+      dataset: dataset,
+      selectedFeatures: [xColumn, yColumn],
+    };
+
+    uiController.handleUserAction({
+      type: "CREATE_GRAPH",
+      graphInfo,
+    });
+
+    message.success("Graph created successfully!");
+  };
   const resultColumns = [
     { title: "X Value", dataIndex: "x", key: "x" },
     { title: "Y Value", dataIndex: "y", key: "y" },
+
+
   ];
 
   return (
@@ -144,6 +171,9 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
           pagination={false}
           size="small"
         />
+        <Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
+          See results a Graph
+        </Button>
       </Modal>
     </>
   );
