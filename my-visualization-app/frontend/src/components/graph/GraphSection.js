@@ -45,6 +45,7 @@ const GraphSection = () => {
             graphType: graph.type,
             selectedFeatures: graph.selectedFeatures,
             graphScript: graphScript,
+            visible: graph.visible, // Add visible state from Graph
           };
         }
         return null;
@@ -52,6 +53,12 @@ const GraphSection = () => {
       .filter((graph) => graph !== null);
 
     setGraphDetails(validGraphDetails);
+    // Set initial visibility based on the `visible` attribute of each graph
+    const initialVisibleGraphs = validGraphDetails.reduce((acc, graph) => {
+      acc[graph.graphId] = graph.visible; // Set visibility based on the graph's visible property
+      return acc;
+    }, {});
+    setVisibleGraphs(initialVisibleGraphs);
     setLoading(false);
 
     // Cleanup event listener on component unmount
