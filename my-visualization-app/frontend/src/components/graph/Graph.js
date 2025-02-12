@@ -1,12 +1,13 @@
+import GraphStyle from "./GraphStyle";
 
 class Graph {
-  constructor(id, name, dataset, type, selectedFeatures, style = {}) {
+  constructor(id, name, dataset, type, selectedFeatures, style = new GraphStyle()) {
     this.id = id;
     this.name = name;
     this.dataset = dataset; // { x: [...], y: [...] }
     this.type = type; // 'scatter', 'bar', 'line', etc.
     this.selectedFeatures = selectedFeatures;
-    this.style = style;
+    this.style = style instanceof GraphStyle ? style : new GraphStyle();
     this.metadata = {};
     this.createdAt = new Date();
     this.updatedAt = new Date();
@@ -18,7 +19,11 @@ class Graph {
   }
 
   updateStyle(newStyle) {
-    this.style = { ...this.style, ...newStyle };
+    if (newStyle instanceof GraphStyle) {
+      this.style = newStyle;
+    } else {
+      Object.assign(this.style, newStyle);
+    }
     this.updatedAt = new Date();
   }
 

@@ -55,6 +55,9 @@ class VisualizationManager {
       return null;
     }
 
+    // Get the latest GraphStyle from the graph
+    const graphStyle = graph.style instanceof GraphStyle ? graph.style : new GraphStyle();
+
     // Generate Plotly data
     let plotData;
     if (type === "pie") {
@@ -67,7 +70,10 @@ class VisualizationManager {
       plotData = {
         type: type === "scatter3d" ? "scatter3d" : type, // 3D Scatterplot
         mode: type === "scatter" || type === "scatter3d" ? "markers" : undefined,
-        marker: { color: style?.color || "blue" },
+        marker: { 
+          color: graphStyle.getMarkerStyle()?.color || "blue", 
+          size: graphStyle.getMarkerStyle()?.size || 8 
+        },
       };
 
       if (requiredFeatures >= 1) plotData.x = featureData[0]; // X-axis
@@ -80,7 +86,7 @@ class VisualizationManager {
       title: name,
       xaxis: { title: selectedFeatures[0] || "X" },
       yaxis: { title: selectedFeatures[1] || "Y" },
-      ...this.graphStyle.getLayout(),
+      ...graphStyle.getLayout(), // Use the updated GraphStyle layout
     };
 
     // 3D chart layout
@@ -91,9 +97,9 @@ class VisualizationManager {
         zaxis: { title: selectedFeatures[2] || "Z" },
       };
     }
-
     return { data: [plotData], layout };
-  }
+}
+
 
   /**
    * Rendering Plotly Charts
