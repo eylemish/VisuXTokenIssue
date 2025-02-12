@@ -18,6 +18,11 @@ class Graph {
     this.updatedAt = new Date();
   }
 
+  changeColor(newColor) {
+    this.style.setColorScheme(newColor);
+    this.updatedAt = new Date();
+  }
+
   updateStyle(newStyle) {
     if (newStyle instanceof GraphStyle) {
       this.style = newStyle;

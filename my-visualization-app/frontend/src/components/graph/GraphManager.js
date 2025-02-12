@@ -31,15 +31,6 @@ class GraphManager {
     }
   }
 
-  // createGraph(name, type, dataset, style) {
-  //   const graphId = `graph_${Date.now()}`;
-  //   const newGraph = { id: graphId, name, type, dataset, style };
-  //   this.graphs.set(graphId, newGraph);
-  //   this.currentGraph = newGraph;
-  //   console.log(`Created Graph: ${name} (ID: ${graphId})`);
-  //   return newGraph;
-  // }
-
   createGraph(graphInfo) {
   const graphId = `graph_${Date.now()}`;
 
@@ -178,6 +169,18 @@ class GraphManager {
       GraphManager.instance = new GraphManager();
     }
     return GraphManager.instance;
+  }
+
+  changeGraphColor(graphId, newColor) {
+    const graph = this.graphs.get(graphId);
+    if (graph) {
+      graph.changeColor(newColor);
+      console.log(`Graph (ID: ${graphId}) color changed to ${newColor}`);
+      return true;
+    } else {
+      console.warn(`GraphManager: Graph ID ${graphId} not found.`);
+      return false;
+    }
   }
   
 }

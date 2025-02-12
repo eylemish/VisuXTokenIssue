@@ -1,27 +1,22 @@
 import React, { useState } from "react";
-import { Modal, Form, Input, Button, Select, Row, Col, Tag } from "antd";
+import { Modal, Form, Button, Select } from "antd";
 import GraphManager from "../graph/GraphManager";
 
 const { Option } = Select;
 
 const EditGraphModal = ({ visible, onCancel, onSave, graphId, graphDetails }) => {
   const [form] = Form.useForm();
-  const [selectedFeatures, setSelectedFeatures] = useState(graphDetails.selectedFeatures || []);
   const [graphType, setGraphType] = useState(graphDetails.graphType || "scatter");
+  const [color, setColor] = useState(graphDetails.style?.colorScheme || "blue");
 
   const handleSave = () => {
     form.validateFields().then((values) => {
-      // You would save the updated graph details here
-      const updatedGraph = {
-        ...graphDetails,
-        selectedFeatures: values.selectedFeatures,
-        type: values.graphType,
-      };
+      // Grafiğin rengini güncelle
+      GraphManager.changeGraphColor(graphId, values.color);
 
-      GraphManager.updateGraph(graphId, updatedGraph); // Assuming GraphManager has a method to update a graph
-
-      onSave(updatedGraph); // Notify parent of the saved graph details
-      onCancel(); // Close the modal
+      // Üst bileşene bildir
+      onSave({ ...graphDetails, type: values.graphType });
+      onCancel(); // Modalı kapat
     });
   };
 
@@ -39,42 +34,24 @@ const EditGraphModal = ({ visible, onCancel, onSave, graphId, graphDetails }) =>
         </Button>,
       ]}
     >
-      <Form form={form} layout="vertical" initialValues={graphDetails}>
+      <Form form={form} layout="vertical" initialValues={{ graphType, color }}>
         <Form.Item name="graphType" label="Graph Type">
           <Select value={graphType} onChange={setGraphType}>
             <Option value="scatter">Scatter</Option>
             <Option value="pie">Pie</Option>
             <Option value="scatter3d">3D Scatter</Option>
-            {/* Add other types if necessary */}
           </Select>
         </Form.Item>
 
-        <Form.Item name="selectedFeatures" label="Selected Features">
-          <Select
-            mode="multiple"
-            value={selectedFeatures}
-            onChange={(value) => setSelectedFeatures(value)}
-            placeholder="Select features"
-          >
-            {/* Replace these with actual feature names from your dataset */}
-            <Option value="feature1">Feature 1</Option>
-            <Option value="feature2">Feature 2</Option>
-            <Option value="feature3">Feature 3</Option>
+        <Form.Item name="color" label="Graph Color">
+          <Select value={color} onChange={setColor}>
+            <Option value="blue">Blue</Option>
+            <Option value="red">Red</Option>
+            <Option value="green">Green</Option>
+            <Option value="orange">Orange</Option>
+            <Option value="purple">Purple</Option>
           </Select>
         </Form.Item>
-
-        <Row gutter={8}>
-          <Col span={24}>
-            <strong>Current Features:</strong>
-            {selectedFeatures.length > 0 ? (
-              selectedFeatures.map((feature, index) => (
-                <Tag color="blue" key={index}>{feature}</Tag>
-              ))
-            ) : (
-              <Tag color="red">No features selected</Tag>
-            )}
-          </Col>
-        </Row>
       </Form>
     </Modal>
   );

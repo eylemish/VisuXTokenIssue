@@ -14,6 +14,15 @@ class GraphStyle {
     };
   }
 
+  setColorScheme(colorScheme) {
+    this.colorScheme = colorScheme;
+    this.markerStyle.color = colorScheme;
+  }
+
+  changeColor(newColor) {
+    this.setColorScheme(newColor);
+  }
+
   getMarkerStyle() {
     return this.markerStyle;
   }
