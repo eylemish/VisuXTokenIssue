@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Modal, Radio, InputNumber, Button, message } from "antd";
+import { Modal, Radio, InputNumber, Button, message, Table } from "antd";
 import axios from "axios";
-import datasetManager from "../file/DatasetManager"; //  ensure the path
+import datasetManager from "../file/DatasetManager";
 
-// get CSRF Token（for Django ）
 const getCSRFToken = () => {
   let cookieValue = null;
   if (document.cookie) {
@@ -18,10 +17,10 @@ const getCSRFToken = () => {
 };
 
 const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datasetId }) => {
-  const [method, setMethod] = useState("pca"); // default: PCA
-  const [nComponents, setNComponents] = useState(2); // target dimension
-  const [isProcessing, setIsProcessing] = useState(false); // process state
-  const [reducedData, setReducedData] = useState(null); // store the data after reduction
+  const [method, setMethod] = useState("pca");
+  const [nComponents, setNComponents] = useState(2);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [reducedData, setReducedData] = useState([]);
 
   const handleReduce = async () => {
     if (!nComponents || nComponents <= 0) {
@@ -29,7 +28,6 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       return;
     }
 
-    // get latest datasetId
     const currentDatasetId = datasetId || datasetManager.getCurrentDatasetId();
     if (!currentDatasetId) {
       message.error("No valid dataset ID found. Please upload a dataset first.");
@@ -41,28 +39,30 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
       const response = await axios.post(
         "http://127.0.0.1:8000/api/dimensional_reduction/",
         {
-          dataset_id: currentDatasetId, // pass dataset_id
+          dataset_id: currentDatasetId,
           method,
           n_components: nComponents,
         },
         {
           headers: {
-            "X-CSRFToken": getCSRFToken(), // add CSRF toekn
+            "X-CSRFToken": getCSRFToken(),
             "Content-Type": "application/json",
           },
-          withCredentials: true, // ensure that the request contains Cookie
+          withCredentials: true,
         }
       );
 
-      // update frontend data
-      setReducedData(response.data.reduced_data); // store the result
-      onUpdateDataset(response.data.reduced_data); //  update the dataset
+      const receivedData = response.data.reduced_data;
+      if (Array.isArray(receivedData)) {
+        setReducedData(receivedData);
+      } else {
+        setReducedData([]);
+      }
 
-      // log
+      onUpdateDataset(receivedData);
       logAction(
         `Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions on dataset ID ${currentDatasetId}.`
       );
-
       message.success("Dimensionality reduction successful!");
     } catch (error) {
       console.error("Error during dimensionality reduction:", error.response?.data || error.message);
@@ -72,15 +72,22 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
     }
   };
 
+  const renderTable = () => {
+    if (!reducedData.length) return <p style={{ textAlign: "center" }}>No data available</p>;
+
+    const columns = Object.keys(reducedData[0] || {}).map((key) => ({
+      title: key,
+      dataIndex: key,
+      key: key,
+    }));
+
+    const dataSource = reducedData.map((row, index) => ({ key: index, ...row }));
+
+    return <Table dataSource={dataSource} columns={columns} pagination={{ pageSize: 10 }} />;
+  };
+
   return (
-    <Modal
-      title="Dimensionality Reduction"
-      visible={visible}
-      onCancel={onClose}
-      footer={null}
-      width={500}
-    >
-      {/* choose dimensionality reduction methods */}
+    <Modal title="Dimensionality Reduction" visible={visible} onCancel={onClose} footer={null} width={600}>
       <div style={{ marginBottom: "15px" }}>
         <Radio.Group onChange={(e) => setMethod(e.target.value)} value={method}>
           <Radio value="pca">PCA</Radio>
@@ -89,37 +96,17 @@ const DimReductionModal = ({ visible, onClose, onUpdateDataset, logAction, datas
         </Radio.Group>
       </div>
 
-      {/* number of components */}
       <div style={{ marginBottom: "15px" }}>
         <label>Number of Components:</label>
-        <InputNumber
-          min={1}
-          max={10}
-          value={nComponents}
-          onChange={(value) => setNComponents(value)}
-          style={{ marginLeft: "10px", width: "80px" }}
-        />
+        <InputNumber min={1} max={10} value={nComponents} onChange={(value) => setNComponents(value)} style={{ marginLeft: "10px", width: "80px" }} />
       </div>
 
-      {/* comfirmation button */}
       <div style={{ textAlign: "right", marginBottom: "15px" }}>
-        <Button onClick={onClose} style={{ marginRight: 10 }}>
-          Cancel
-        </Button>
-        <Button type="primary" onClick={handleReduce} loading={isProcessing}>
-          Confirm
-        </Button>
+        <Button onClick={onClose} style={{ marginRight: 10 }}>Cancel</Button>
+        <Button type="primary" onClick={handleReduce} loading={isProcessing}>Confirm</Button>
       </div>
 
-      {/* show the result */}
-      {reducedData && (
-        <div style={{ marginTop: "20px", padding: "10px", background: "#f7f7f7", borderRadius: "5px" }}>
-          <h3>Reduced Data:</h3>
-          <pre style={{ maxHeight: "200px", overflowY: "auto" }}>
-            {JSON.stringify(reducedData, null, 2)}
-          </pre>
-        </div>
-      )}
+      {renderTable()}
     </Modal>
   );
 };
