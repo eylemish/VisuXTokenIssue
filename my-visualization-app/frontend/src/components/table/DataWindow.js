@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Card, Select, Spin, message } from "antd";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import React, { useState, useEffect, useRef } from "react";
+import { Card, Select, Spin, message, Button } from "antd";
+import { FullscreenOutlined, FullscreenExitOutlined } from "@ant-design/icons";
+import screenfull from "screenfull";
+import {
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from "recharts";
 import datasetManager from "../file/DatasetManager"; // Import the singleton instance of DatasetManager
 
 const { Option } = Select;
@@ -11,6 +15,8 @@ const DataWindow = () => {
     const [selectedFeatures, setSelectedFeatures] = useState([]); // Stores selected features for visualization
     const [loading, setLoading] = useState(true); // Loading state indicator
     const [datasetId, setDatasetId] = useState(null); // Stores current dataset ID
+    const [isFullscreen, setIsFullscreen] = useState(false); // Fullscreen state
+    const chartRef = useRef(null); // Reference for the chart container
 
     // Fetch the current dataset ID from DatasetManager on component mount
     useEffect(() => {
@@ -60,8 +66,34 @@ const DataWindow = () => {
         setSelectedFeatures(values);
     };
 
+    // Toggle full-screen mode
+    const toggleFullscreen = () => {
+        if (screenfull.isEnabled) {
+            if (screenfull.isFullscreen) {
+                screenfull.exit();
+            } else {
+                screenfull.request(chartRef.current);
+            }
+        }
+    };
+
+    // Listen to full-screen change events
+    useEffect(() => {
+        if (screenfull.isEnabled) {
+            screenfull.on("change", () => {
+                setIsFullscreen(screenfull.isFullscreen);
+            });
+            return () => {
+                screenfull.off("change");
+            };
+        }
+    }, []);
+
     return (
-        <Card title="Data Preview" style={{ width: "100%", minHeight: "400px" }}>
+        <Card
+            title="Data Preview"
+            style={{ width: "100%", minHeight: "400px", position: "relative" }}
+        >
             {loading ? (
                 <Spin tip="Loading data..." />
             ) : (
@@ -69,7 +101,7 @@ const DataWindow = () => {
                     {features.length === 0 ? (
                         <p>No data available.</p>
                     ) : (
-                        <>
+                        <div ref={chartRef} style={{ position: "relative" }}>
                             <Select
                                 mode="multiple"
                                 placeholder="Select features"
@@ -97,7 +129,20 @@ const DataWindow = () => {
                                     )}
                                 </LineChart>
                             </ResponsiveContainer>
-                        </>
+                            {/* Fullscreen Button */}
+                            <Button
+                                type="primary"
+                                shape="circle"
+                                icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                                onClick={toggleFullscreen}
+                                style={{
+                                    position: "absolute",
+                                    bottom: "10px",
+                                    right: "10px",
+                                    zIndex: 1000
+                                }}
+                            />
+                        </div>
                     )}
                 </>
             )}
