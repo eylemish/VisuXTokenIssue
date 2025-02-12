@@ -61,7 +61,10 @@ class GraphManager {
     {}
   );
 
+  console.log(`Graph name ${newGraph.name}:`);
   this.addGraphToMap(newGraph);
+  this.notify({ type: "graphUpdated" });
+
   return newGraph;
 }
 
@@ -156,6 +159,7 @@ class GraphManager {
       graph.dataset = dataset;
       graph.style = style;
       console.log(`Updated Graph (ID: ${graphId})`);
+      this.notify({ type: "graphUpdated" });
       return true;
     }
     return false;
@@ -177,7 +181,7 @@ class GraphManager {
     if (graph) {
       graph.changeColor(newColor);
       console.log(`Graph (ID: ${graphId}) color changed to ${newColor}`);
-      this.notify({ type: 'graphColorChanged', graphId, newColor });
+      this.notify({ type: "graphUpdated" });
       return true;
     } else {
       console.warn(`GraphManager: Graph ID ${graphId} not found.`);
@@ -186,6 +190,7 @@ class GraphManager {
   }
 
   notify(data) {
+    console.log("GraphManager triggered", data)
     this.eventListeners.forEach(callback => callback(data));
   }
 

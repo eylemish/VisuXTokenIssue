@@ -29,7 +29,7 @@ class VisualizationManager {
     const { dataset, type, selectedFeatures = [], name, style } = graph;
 
     if (!type) {
-      console.error("❌ Graph type is undefined!");
+      console.error("Graph type is undefined!");
       return null;
     }
 
@@ -37,21 +37,21 @@ class VisualizationManager {
     const requiredFeatures = this.getRequiredFeatures(type);
     if (selectedFeatures.length !== requiredFeatures) {
       console.error(
-        `❌ Error: ${type} requires ${requiredFeatures} features, but received ${selectedFeatures.length}.`
+        `Error: ${type} requires ${requiredFeatures} features, but received ${selectedFeatures.length}.`
       );
       return null;
     }
 
     // Make sure the dataset exists
     if (!dataset || typeof dataset !== "object") {
-      console.error(`❌ Error: Invalid dataset format`, dataset);
+      console.error(`Error: Invalid dataset format`, dataset);
       return null;
     }
 
     // parsing data
     const featureData = selectedFeatures.map((feature) => dataset?.[feature] || []);
     if (!featureData.every(Array.isArray) || featureData.some((arr) => arr.length === 0)) {
-      console.error(`❌ Error: One or more selected features are not valid arrays.`, featureData);
+      console.error(`Error: One or more selected features are not valid arrays.`, featureData);
       return null;
     }
 

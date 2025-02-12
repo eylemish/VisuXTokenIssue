@@ -1,0 +1,63 @@
+============================================================
+                   Project Team Contribution Document
+============================================================
+
+Project Name:  Visux
+Repository URL:  https://github.com/WangJing3383/VisuX.git
+Last Updated:  [2025-02-12]
+Maintainers:  Jing Wang,
+
+------------------------------------------------------------
+1. Team Members & Responsibilities
+------------------------------------------------------------
+
+(Although we initially assigned roles, we don't have such a strict division of labour,
+and we execute agile development with a strong focus on collaboration.)
+
+- Jing Wang - Frontend Developer with Backend Integration
+  Email: wjing8088@gmail.com
+  GitHub: WangJing3383
+  Responsibilities: Frontend, API Integration
+
+- [Member 2] - Backend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+- [Member 3] - Backend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+- [Ezgi Yircali] - Frontend Developer
+  Email: eylemish@gmail.com
+  GitHub: @slaymyway
+  Responsibilities: Frontend (adding functions to the not working components)
+
+- [Member 5] - Frontend Developer
+  Email: [email@example.com]
+  GitHub: [@GitHubUsername]
+  Responsibilities: [Short description of tasks]
+
+------------------------------------------------------------
+2. Implemented Features
+------------------------------------------------------------
+
+- framework setup - Build react and django, front and back-end separation structure (Implemented by: Jing)
+- [Feature 2] - [Short description] (Implemented by: [Member Name])
+- connect file uploading - upload and store the user uploaded file (Implemented by: Jing)
+- [Feature 3] - [Short description] (Implemented by: [Member Name])
+- dataset passing- Implementing method to let frontend get data from backend (Implemented by: Jing)
+- connect dim reduction - dim reduction works on frontend and show text result (Implemented by: Jing)
+- connect visualization- show plotly visualization of dataset on frontend(Implemented by: Jing)
+- data preview chart- show data preview by features(Implemented by: Jing)
+- [Feature 2] - [Short description] (Implemented by: [Member Name])
+- [Feature 3] - [Short description] (Implemented by: [Member Name])
+
+------------------------------------------------------------
+3. Pending Features (To-Do List)
+------------------------------------------------------------
+
+- feature selection/edit graph menu -  (Assigned to: Ezgi)
+- [Feature 5] - [Short description] (Assigned to: [Member Name])
+- [Feature 6] - [Short description] (Assigned to: [Member Name])

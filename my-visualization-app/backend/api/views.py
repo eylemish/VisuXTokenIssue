@@ -461,40 +461,44 @@ class ExtrapolateView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class CorrelationView(APIView):
     def post(self, request):
         try:
-            # Parse the request body
+            # 解析请求 JSON
             body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")  # Get the ID of the uploaded file
-            feature_1 = body.get("feature_1")  # The first feature/column to compare
-            feature_2 = body.get("feature_2")  # The second feature/column to compare
-            method = body.get("method", "pearson")  # The type of correlation ("pearson", "spearman", "kendall")
+            dataset_id = body.get("dataset_id")  # 获取数据集 ID
+            selected_features = body.get("features", [])  # 获取用户选择的列
+            method = body.get("method", "pearson")  # 相关性计算方法（默认 Pearson）
 
-            # Ensure dataset_id is provided
+            # 确保 `dataset_id` 存在
             if not dataset_id:
                 return JsonResponse({"error": "Dataset ID is required"}, status=400)
 
-            # Get the dataset object
-            dataset = get_object_or_404(Dataset, id=dataset_id)
+            # 获取数据集对象
+            dataset = get_object_or_404(Dataset, id=dataset_id)  # 用 `id` 代替 `dataset_id`
 
-            # Convert dataset to Pandas DataFrame
-            dataset_df = dataset.get_dataframe()
-            
-            # Compute correlation
-            correlation_value = Engine.compute_correlation(
-                dataset_df, 
-                feature_1=feature_1, 
-                feature_2=feature_2, 
-                method=method
-            )
-            
-            # Return the correlation result as JSON
-            return JsonResponse({"correlation": correlation_value})
+            # 将数据集转换为 Pandas DataFrame
+            df = dataset.get_dataframe()
+
+            # 确保选中的列在 DataFrame 中
+            if not all(feature in df.columns for feature in selected_features):
+                return JsonResponse({"error": "One or more selected features are missing from the dataset"}, status=400)
+
+            # 计算相关性矩阵
+            correlation_matrix = df[selected_features].corr(method=method)
+
+            # 将相关性矩阵转换为 JSON 格式
+            result = {
+                "columns": correlation_matrix.columns.tolist(),  # X/Y 轴的列名
+                "values": correlation_matrix.values.tolist(),  # 相关性矩阵的值
+            }
+
+            return JsonResponse({"correlation_matrix": result})
 
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            return JsonResponse({"error": str(e)}, status=500)
 
 # @method_decorator(csrf_exempt, name="dispatch")
 # class DimensionalReductionView(APIView):

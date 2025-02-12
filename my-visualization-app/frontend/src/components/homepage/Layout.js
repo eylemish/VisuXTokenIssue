@@ -138,21 +138,6 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
   }, []);
 
 
-  useEffect(() => {
-  const style = document.createElement("style");
-  style.innerHTML = `
-    .react-grid-placeholder {
-      display: none !important;
-    }
-  `;
-  document.head.appendChild(style);
-  return () => {
-    document.head.removeChild(style);
-  };
-}, []);
-
-
-
   return (
     <div>
       <GridLayout

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout, Menu, message } from "antd";
 import {
   BarChartOutlined,
@@ -15,6 +15,7 @@ import ExtrapolationModal from "../modal/ExtrapolationModal";
 import OversampleModal from "../modal/OversampleModal";
 import CorrelationModal from "../modal/CorrelationModal";
 import ReplicaManagerModal from "../modal/ReplicaManagerModal";
+import GraphManager from "../graph/GraphManager";
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -31,6 +32,18 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
   const [correlationModalVisible, setCorrelationModalVisible] = useState(false);
   const [replicasModalVisible, setReplicasModalVisible] = useState(false);
 
+  useEffect(() => {
+    const handleGraphUpdate = (event) => {
+      if (event.type === "graphUpdated") {
+        setShowGraph(true); // Open it when event in GraphManager
+      }
+    };
+
+    GraphManager.onChange(handleGraphUpdate);
+    return () => {
+      GraphManager.eventListeners = GraphManager.eventListeners.filter(cb => cb !== handleGraphUpdate);
+    };
+  }, [setShowGraph]);
 
   // 处理菜单展开
   const handleOpenChange = (keys) => {
@@ -131,7 +144,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
       />
 
 
-        {/* data copy manage Modal */}
+        {/* replication manage Modal */}
         <ReplicaManagerModal
             visible={replicasModalVisible}
             onClose={() => setReplicasModalVisible(false)}
