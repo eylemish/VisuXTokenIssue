@@ -11,12 +11,11 @@ const EditGraphModal = ({ visible, onCancel, onSave, graphId, graphDetails }) =>
 
   const handleSave = () => {
     form.validateFields().then((values) => {
-      // Grafiğin rengini güncelle
+    
       GraphManager.changeGraphColor(graphId, values.color);
 
-      // Üst bileşene bildir
       onSave({ ...graphDetails, type: values.graphType });
-      onCancel(); // Modalı kapat
+      onCancel(); 
     });
   };
 

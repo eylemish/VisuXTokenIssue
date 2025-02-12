@@ -9,6 +9,7 @@ class GraphManager {
       this.currentGraph = null;
       this.visualizationManager = new VisualizationManager();
       this.loadGraphs();
+      this.eventListeners = [];
       GraphManager.instance = this; // Saving the only instance
     }
     return GraphManager.instance;
@@ -176,11 +177,21 @@ class GraphManager {
     if (graph) {
       graph.changeColor(newColor);
       console.log(`Graph (ID: ${graphId}) color changed to ${newColor}`);
+      this.notify({ type: 'graphColorChanged', graphId, newColor });
       return true;
     } else {
       console.warn(`GraphManager: Graph ID ${graphId} not found.`);
       return false;
     }
+  }
+
+  notify(data) {
+    this.eventListeners.forEach(callback => callback(data));
+  }
+
+  // Subscribe to changes
+  onChange(callback) {
+    this.eventListeners.push(callback);
   }
   
 }

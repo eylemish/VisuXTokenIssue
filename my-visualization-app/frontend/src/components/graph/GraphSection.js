@@ -12,58 +12,91 @@ const visualizationManager = new VisualizationManager();
 const GraphSection = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [visibleGraphs, setVisibleGraphs] = useState({}); // Tracks visibility of graphs by their IDs
+  const [visibleGraphs, setVisibleGraphs] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedGraph, setSelectedGraph] = useState(null);
 
   useEffect(() => {
-    const graphs = GraphManager.getAllGraphs(); // Singleton GraphManager used
+    // Handle changes from the GraphManager
+    const handleGraphChange = (data) => {
+      if (data.type === 'graphColorChanged') {
+        // If color changed, find the corresponding graph and update visualization
+        setGraphDetails((prevState) =>
+          prevState.map((graph) =>
+            graph.graphId === data.graphId
+              ? { ...graph, graphScript: visualizationManager.visualize(graph) }
+              : graph
+          )
+        );
+      }
+    };
+
+    // Subscribe to GraphManager changes
+    GraphManager.onChange(handleGraphChange);
+
+    // Load the initial set of graphs
+    const graphs = GraphManager.getAllGraphs();
     const validGraphDetails = graphs
       .map((graph) => {
-        // Generate graph details and attempt to visualize
         const graphScript = visualizationManager.visualize(graph);
-
-        // Only include graphs with valid visualization data
         if (graphScript) {
           return {
             graphId: graph.id,
             graphType: graph.type,
             selectedFeatures: graph.selectedFeatures,
-            graphScript: graphScript, // Store the valid graph script
+            graphScript: graphScript,
           };
         }
-        return null; // Skip invalid graphs
+        return null;
       })
-      .filter((graph) => graph !== null); // Remove any null values (invalid graphs)
+      .filter((graph) => graph !== null);
 
     setGraphDetails(validGraphDetails);
     setLoading(false);
-  }, []); // Empty dependency array means this will only run once after mount
+
+    // Cleanup event listener on component unmount
+    return () => {
+      // Unsubscribe from events when the component unmounts
+      GraphManager.onChange(() => {}); // This removes the listener
+    };
+  }, []);
 
   const toggleGraphVisibility = (graphId) => {
     setVisibleGraphs((prevState) => ({
       ...prevState,
-      [graphId]: !prevState[graphId], // Toggle the visibility of the graph
+      [graphId]: !prevState[graphId],
     }));
   };
 
   const handleEditGraph = (graphId) => {
     const graphToEdit = graphDetails.find((graph) => graph.graphId === graphId);
     setSelectedGraph(graphToEdit);
-    setIsModalVisible(true); // Open the modal
+    setIsModalVisible(true);
   };
 
   const handleModalCancel = () => {
-    setIsModalVisible(false); // Close modal
+    setIsModalVisible(false);
   };
 
   const handleModalSave = (updatedGraph) => {
-    // Update graph data on save, and optionally re-render
+    // Update graph details after the modal save
     setGraphDetails((prevState) =>
       prevState.map((graph) =>
         graph.graphId === updatedGraph.graphId ? updatedGraph : graph
       )
     );
+    
+    // Re-visualize the updated graph
+    setGraphDetails((prevState) =>
+      prevState.map((graph) => {
+        if (graph.graphId === updatedGraph.graphId) {
+          const updatedGraphScript = visualizationManager.visualize(updatedGraph);
+          return { ...graph, graphScript: updatedGraphScript }; // Re-visualize
+        }
+        return graph;
+      })
+    );
+
     setIsModalVisible(false); // Close modal
   };
 
@@ -77,7 +110,6 @@ const GraphSection = () => {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           {graphDetails.length > 0 ? (
             <Row style={{ width: "100%" }}>
-              {/* List of graph names */}
               <Col span={24}>
                 <List
                   size="large"
@@ -94,14 +126,13 @@ const GraphSection = () => {
                 />
               </Col>
 
-              {/* Render graph images if visible */}
               {graphDetails.map((graph, index) => {
                 const { graphScript, graphId } = graph;
-                const { data, layout } = graphScript || {}; // Destructure the data and layout from visualization
+                const { data, layout } = graphScript || {};
 
                 return (
                   <Col span={24} key={graphId} style={{ marginTop: "20px" }}>
-                    {visibleGraphs[graphId] && ( // Check visibility state
+                    {visibleGraphs[graphId] && (
                       <Card
                         style={{ width: "100%", padding: "10px" }}
                         title={`Graph ID: ${graph.graphId}`}
@@ -126,7 +157,6 @@ const GraphSection = () => {
 
                         <Divider />
 
-                        {/* Render the Plotly graph here */}
                         {data && layout ? (
                           <div style={{ maxWidth: "600px", margin: "0 auto" }}>
                             <Plot
@@ -140,7 +170,6 @@ const GraphSection = () => {
                           <p>Graph data could not be visualized.</p>
                         )}
 
-                        {/* Edit Graph Button */}
                         <Button
                           type="primary"
                           style={{ marginTop: "10px" }}
@@ -160,7 +189,6 @@ const GraphSection = () => {
         </div>
       )}
 
-      {/* Edit Graph Modal */}
       {selectedGraph && (
         <EditGraphModal
           visible={isModalVisible}
