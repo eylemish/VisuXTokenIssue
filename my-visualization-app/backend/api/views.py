@@ -1,3 +1,4 @@
+import io
 import os
 from pathlib import Path
 
@@ -19,14 +20,15 @@ import json
 import pandas as pd
 import sqlite3
 
-
 # Define BASE_DIR to point to the project root directory.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 
 class GetCsrfTokenView(APIView):
     """
     Provide CSRF token
     """
+
     def get(self, request):
         csrf_token = get_token(request)  # Get CSRF Token
         print(f"Returning CSRF Token: {csrf_token}")
@@ -47,7 +49,7 @@ class HandleUserActionView(APIView):
 
             if not action:
                 return JsonResponse({"error": "No action provided"}, status=400)
-                
+
             if action == "fetch_summary":
                 summary = {
                     "message": "Summary fetched successfully",
@@ -72,6 +74,7 @@ class HandleUserActionView(APIView):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
 
 class DataVisualizationView(APIView):
     def post(self, request):
@@ -98,10 +101,11 @@ class DataVisualizationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadView(APIView):
     """
-    上传文件并解析成数据集，存入 Dataset 数据库
+    Uploading files and parsing them into datasets for storage in the Dataset database
     """
     parser_classes = [MultiPartParser]
 
@@ -110,19 +114,19 @@ class UploadView(APIView):
         if not file:
             return Response({"error": "No file received"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 确保上传目录存在
+        # Make sure the upload directory exists
         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         file_path = os.path.join(UPLOAD_DIR, file.name)
 
         try:
-            # ✅ 保存文件到后端
+            # Saving files to the backend
             with open(file_path, "wb") as f:
                 for chunk in file.chunks():
                     f.write(chunk)
 
-            # ✅ 解析 CSV / Excel 文件
+            # Parsing CSV / Excel files
             if file.name.lower().endswith(".csv"):
                 df = pd.read_csv(file_path)
                 file_type = "csv"
@@ -132,18 +136,18 @@ class UploadView(APIView):
             else:
                 return Response({"error": "Only CSV and XLSX files are supported"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # ✅ 提取列名 & 数据记录
+            # Extract Column Names & Data Records
             features = list(df.columns)
             records = df.to_dict(orient="records")
 
-            # ✅ 存入数据库 Dataset
+            # Stored in database Dataset
             dataset = Dataset.objects.create(
                 name=file.name,
                 features=features,
                 records=records
             )
 
-            # ✅ 可选：存入 UploadedFile 记录
+            # Optional: Deposit to UploadedFile record
             file_instance = UploadedFile.objects.create(
                 file_path=file_path, name=file.name, file_type=file_type
             )
@@ -157,15 +161,16 @@ class UploadView(APIView):
             print("error:", str(e))
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DownloadView(APIView):
     def get(self, request, dataset_id, file_format, *args, **kwargs):
         print(f"Received dataset_id={dataset_id}, file_format={file_format}")  # 调试信息
 
-        # 获取指定数据集
+        # Get the specified dataset
         dataset = get_object_or_404(Dataset, id=dataset_id)
 
-        # 确保 `features` 和 `records` 存在
+        # Ensure that `features` and `records` exist.
         features = dataset.features if hasattr(dataset, "features") else []
         records = dataset.records if hasattr(dataset, "records") else []
 
@@ -179,10 +184,23 @@ class DownloadView(APIView):
             response = HttpResponse(json.dumps(records, indent=2), content_type='application/json')
             response['Content-Disposition'] = f'attachment; filename="{dataset.name}.json"'
         elif file_format == "xlsx":
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename="{dataset.name}.xlsx"'
-            with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
-                df.to_excel(writer, index=False, sheet_name="Data")
+            try:
+                # Use `BytesIO()` as Excel file buffer
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+                    df.to_excel(writer, index=False, sheet_name="Data")
+
+                # Returning the stream to its starting position
+                output.seek(0)
+
+                # Generate HttpResponse
+                response = HttpResponse(output.getvalue(),
+                                        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = f'attachment; filename="{dataset.name}.xlsx"'
+                return response
+            except Exception as e:
+                print(f"Excel generation error: {e}")  # 服务器终端打印错误
+                return JsonResponse({"error": f"Failed to generate Excel file: {str(e)}"}, status=500)
         else:
             return JsonResponse({"error": "Unsupported format"}, status=400)
 
@@ -194,6 +212,7 @@ class DatasetDetailView(APIView):
     """
     Get full dataset (data + column names)
     """
+
     def get(self, request, dataset_id):
         try:
             dataset = Dataset.objects.get(id=dataset_id)
@@ -202,11 +221,13 @@ class DatasetDetailView(APIView):
         except Dataset.DoesNotExist:
             return Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DatasetColumnsView(APIView):
     """
     Get only the column names of the dataset
     """
+
     def get(self, request, dataset_id):
         try:
             dataset = Dataset.objects.get(id=dataset_id)
@@ -214,11 +235,13 @@ class DatasetColumnsView(APIView):
         except Dataset.DoesNotExist:
             return Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadDatasetView(APIView):
     """
     Uploading data sets and storing them in the database
     """
+
     def post(self, request):
         serializer = DatasetSerializer(data=request.data)
 
@@ -230,6 +253,7 @@ class UploadDatasetView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChangeDataView(APIView):
@@ -267,10 +291,11 @@ class ChangeDataView(APIView):
             "records": new_dataset.records
         })
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DeleteFeatureView(APIView):
     def post(self, request):
-            # Parse JSON request body
+        # Parse JSON request body
         data = json.loads(request.body)
         dataset_id = data.get("dataset_id")
         features_to_remove = data.get("features_to_remove", [])
@@ -328,6 +353,7 @@ class AddDataView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+
 class ExportLogView(APIView):
     def post(self, request):
         # Get uploaded_file_id from request data
@@ -335,8 +361,9 @@ class ExportLogView(APIView):
 
         if not uploaded_file_id:
             return Response({"error": "uploaded_file_id is required"}, status=400)
-            
+
         export_logs(uploaded_file_id)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FitCurveView(APIView):
@@ -362,15 +389,16 @@ class FitCurveView(APIView):
                 return JsonResponse({"error": "Specified features not found in dataset"}, status=400)
             # Perform curve fitting using Engine
             params, covariance, fitted_data = Engine.fit_curve(
-                dataset_df, 
-                x_feature, 
-                y_feature, 
-                method=method, 
-                degree=degree, 
+                dataset_df,
+                x_feature,
+                y_feature,
+                method=method,
+                degree=degree,
                 initial_params=initial_params
             )
             # Create original data array with x_feature and y_feature values
-            original_data = dataset_df[[x_feature, y_feature]].rename(columns={x_feature: 'x', y_feature: 'y'}).to_dict(orient='records')
+            original_data = dataset_df[[x_feature, y_feature]].rename(columns={x_feature: 'x', y_feature: 'y'}).to_dict(
+                orient='records')
             return JsonResponse({
                 "params": params.tolist(),
                 "covariance": covariance.tolist() if covariance is not None else None,
@@ -406,12 +434,12 @@ class InterpolateView(APIView):
             dataset_df = dataset.get_dataframe()
             # Perform interpolation
             interpolated_data = Engine.interpolate(
-                dataset_df, 
-                x_feature=x_feature, 
-                y_feature=y_feature, 
-                kind=kind, 
-                num_points=num_points, 
-                min_value=min_value, 
+                dataset_df,
+                x_feature=x_feature,
+                y_feature=y_feature,
+                kind=kind,
+                num_points=num_points,
+                min_value=min_value,
                 max_value=max_value
             )
             print(interpolated_data)
@@ -420,6 +448,7 @@ class InterpolateView(APIView):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ExtrapolateView(APIView):
@@ -500,6 +529,7 @@ class CorrelationView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class DimensionalReductionView(APIView):
     def post(self, request):
@@ -513,7 +543,8 @@ class DimensionalReductionView(APIView):
             # 允许的降维方法
             valid_methods = ["pca", "tsne", "umap"]
             if method not in valid_methods:
-                return JsonResponse({"error": f"Invalid dimensionality reduction method. Choose from {valid_methods}."}, status=400)
+                return JsonResponse({"error": f"Invalid dimensionality reduction method. Choose from {valid_methods}."},
+                                    status=400)
 
             # 确保 dataset_id 存在
             if not dataset_id:
@@ -554,7 +585,7 @@ class OversampleDataView(APIView):
         try:
             # Parse the incoming JSON body
             body = json.loads(request.body)
-            
+
             # Extract the relevant fields from the request
             dataset_id = body.get("datasetId")  # Dataset ID to locate the file in the database
             params = body.get("params", {})
@@ -572,19 +603,19 @@ class OversampleDataView(APIView):
 
             # Convert dataset to Pandas DataFrame
             dataset_df = dataset.get_dataframe()
-            
+
             # Perform oversampling (data interpolation)
             oversampled_data = Engine.oversample_data(
-                dataset_df, 
-                x_feature=x_feature, 
-                y_feature=y_feature, 
-                method=method, 
-                oversample_factor = oversample_factor
+                dataset_df,
+                x_feature=x_feature,
+                y_feature=y_feature,
+                method=method,
+                oversample_factor=oversample_factor
             )
-            
+
             # Convert the oversampled data to a dictionary for easy JSON response
             oversampled_data_json = oversampled_data.to_dict(orient="records")
-            
+
             # Return the oversampled data as a JSON response
             return JsonResponse({"oversampled_data": oversampled_data_json})
 
@@ -592,8 +623,9 @@ class OversampleDataView(APIView):
             # If any error occurs, return an error response with the exception message
             return JsonResponse({"error": str(e)}, status=400)
 
+
 class ApplyPcaView(APIView):
-    def post(self,request):
+    def post(self, request):
         try:
             body = json.loads(request.body)
             dataset = body.get("dataset", [])
@@ -612,11 +644,12 @@ class ApplyPcaView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+
 class SuggestFeatureDroppingView(APIView):
     def post(self, request):
         try:
             body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")  
+            dataset_id = body.get("dataset_id")
             correlation_threshold = float(body.get("correlation_threshold", 0.95))
             variance_threshold = float(body.get("variance_threshold", 0.01))
 
@@ -627,8 +660,8 @@ class SuggestFeatureDroppingView(APIView):
             df = Engine.data_to_panda(uploaded_file)
 
             features_to_drop = Engine.suggest_feature_dropping(
-                df, 
-                correlation_threshold=correlation_threshold, 
+                df,
+                correlation_threshold=correlation_threshold,
                 variance_threshold=variance_threshold
             )
 
@@ -640,6 +673,7 @@ class SuggestFeatureDroppingView(APIView):
             return JsonResponse({"error": f"Invalid parameter: {str(ve)}"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
 
 class SuggestFeatureCombiningView(APIView):
     def post(self, request):
