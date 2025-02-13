@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from backend.api.serializers import DatasetSerializer
 from backend.server_handler.engine import Engine
 from backend.server_handler.log_manager import export_logs
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from backend.api.models import UploadedFile, Dataset
 from django.middleware.csrf import get_token
 from rest_framework.views import APIView
@@ -98,54 +98,6 @@ class DataVisualizationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
-# @method_decorator(csrf_exempt, name='dispatch')
-# class UploadView(APIView):
-#     parser_classes = [MultiPartParser]
-#
-#     def post(self, request, *args, **kwargs):
-#         file = request.FILES.get("file")
-#         if not file:
-#             return Response({"error": "No file received"}, status=400)
-#
-#         # Ensure that the upload directory exists
-#         UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
-#         os.makedirs(UPLOAD_DIR, exist_ok=True)
-#
-#         file_path = os.path.join(UPLOAD_DIR, file.name)
-#
-#         try:
-#             # Save files to the back-end
-#             with open(file_path, "wb") as f:
-#                 for chunk in file.chunks():
-#                     f.write(chunk)
-#
-#             # Processed according to document type
-#             if file.name.lower().endswith(".csv"):
-#                 file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
-#                 df = pd.read_csv(file)
-#                 file_instance.features = list(df.columns)
-#                 file_instance.records = df.to_dict(orient="records")
-#                 file_instance.save()
-#             elif file.name.lower().endswith(".xlsx"):
-#                 file_instance = Dataset.objects.create(name=file.name, features=[], records=[])
-#                 df = pd.read_excel(file)
-#                 file_instance.features = list(df.columns)
-#                 file_instance.records = df.to_dict(orient="records")
-#                 file_instance.save()
-#             else:
-#                 return Response({"error": "Only CSV and XLSX files are supported"}, status=400)
-#
-#             # Return dataset_id
-#             return_data = {
-#                 "message": f"File '{file.name}' uploaded successfully.",
-#                 "dataset_id": file_instance.id
-#             }
-#             return Response(return_data, status=201)
-#
-#         except Exception as e:
-#             print("error:", str(e))
-#             return Response({"error": str(e)}, status=500)
-
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadView(APIView):
     """
@@ -204,6 +156,38 @@ class UploadView(APIView):
         except Exception as e:
             print("error:", str(e))
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DownloadView(APIView):
+    def get(self, request, dataset_id, file_format, *args, **kwargs):
+        print(f"Received dataset_id={dataset_id}, file_format={file_format}")  # 调试信息
+
+        # 获取指定数据集
+        dataset = get_object_or_404(Dataset, id=dataset_id)
+
+        # 确保 `features` 和 `records` 存在
+        features = dataset.features if hasattr(dataset, "features") else []
+        records = dataset.records if hasattr(dataset, "records") else []
+
+        df = pd.DataFrame(records, columns=features)
+
+        if file_format == "csv":
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{dataset.name}.csv"'
+            df.to_csv(response, index=False)
+        elif file_format == "json":
+            response = HttpResponse(json.dumps(records, indent=2), content_type='application/json')
+            response['Content-Disposition'] = f'attachment; filename="{dataset.name}.json"'
+        elif file_format == "xlsx":
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="{dataset.name}.xlsx"'
+            with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name="Data")
+        else:
+            return JsonResponse({"error": "Unsupported format"}, status=400)
+
+        return response
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DatasetDetailView(APIView):
@@ -316,29 +300,7 @@ class ExportLogView(APIView):
             return Response({"error": "uploaded_file_id is required"}, status=400)
             
         export_logs(uploaded_file_id)
-"""
-Code for frontend
 
-const ExportLogsButton = () => {
-  const handleExport = () => {
-    //  GET for download CSV 
-    const url = '/export_logs/';
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'audit_logs.csv';  // download name
-    a.click();  // 
-  };
-
-  return (
-    <button onClick={handleExport}>
-      Export Logs
-    </button>
-  );
-};
-
-export default ExportLogsButton;
-"""
 @method_decorator(csrf_exempt, name='dispatch')
 class FitCurveView(APIView):
     def post(self, request):
@@ -500,50 +462,6 @@ class CorrelationView(APIView):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-
-# @method_decorator(csrf_exempt, name="dispatch")
-# class DimensionalReductionView(APIView):
-#     def post(self, request):
-#         try:
-#             # Parsing the request body
-#             body = json.loads(request.body)
-#             dataset_id = body.get("dataset_id")
-#             method = body.get("method", "pca").lower()  # Unified lowercase to prevent case mismatch
-#             n_components = body.get("n_components", 2)
-#
-#             # Allow only supported methods
-#             valid_methods = ["pca", "tsne", "umap"]
-#             if method not in valid_methods:
-#                 return JsonResponse({"error": f"Invalid dimensional reduction method. Choose from {valid_methods}."}, status=400)
-#
-#             # Ensure dataset_id exists
-#             if not dataset_id:
-#                 return JsonResponse({"error": "Missing dataset_id."}, status=400)
-#
-#             try:
-#                 dataset = UploadedFile.objects.get(id=dataset_id)
-#             except UploadedFile.DoesNotExist:
-#                 return JsonResponse({"error": f"Dataset with ID {dataset_id} not found."}, status=404)
-#
-#             # Converting data
-#             dataset_df = Engine.data_to_panda(dataset_id)
-#
-#             # Perform dim reduction
-#             reduced_data = Engine.dimensional_reduction(
-#                 dataset_df,
-#                 method=method,
-#                 n_components=n_components
-#             )
-#
-#             # return
-#             reduced_data_json = reduced_data.to_dict(orient="records")
-#             return JsonResponse({"reduced_data": reduced_data_json}, status=200)
-#
-#         except json.JSONDecodeError:
-#             return JsonResponse({"error": "Invalid JSON format."}, status=400)
-#
-#         except Exception as e:
-#             return JsonResponse({"error": str(e)}, status=500)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DimensionalReductionView(APIView):
