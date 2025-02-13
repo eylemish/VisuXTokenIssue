@@ -15,7 +15,7 @@ import Plot from "react-plotly.js";
 import VisualizationManager from "./VisualizationManager";
 import GraphManager from "./GraphManager";
 
-// react-color kütüphanesini import et
+
 import { ChromePicker } from "react-color";
 
 const { Title, Paragraph } = Typography;
@@ -25,9 +25,9 @@ const GraphSection = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleGraphs, setVisibleGraphs] = useState({});
-  // Edit Graph bölümünde seçilen grafik ve renk için state'ler
+  
   const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
-  const [editColor, setEditColor] = useState("#ffffff"); // Başlangıçta beyaz
+  const [editColor, setEditColor] = useState("#ffffff"); 
 
   useEffect(() => {
     const handleGraphChange = (data) => {
@@ -54,11 +54,12 @@ const GraphSection = () => {
         if (graphScript) {
           return {
             graphId: graph.id,
+            graphName: graph.name,
             graphType: graph.type,
             selectedFeatures: graph.selectedFeatures,
             graphScript: graphScript,
             visible: graph.visible,
-            color: graph.style?.colorScheme || "#ffffff", // Varsayılan renk (beyaz)
+            color: graph.style?.colorScheme || "#ffffff", 
             style: graph.style,
           };
         }
@@ -87,7 +88,7 @@ const GraphSection = () => {
     }));
   };
 
-  // Handler: Seçilen grafiğin ID'sini state'e aktarır ve o grafiğin mevcut rengini alır.
+  
   const handleGraphSelect = (graphId) => {
     setSelectedGraphForEdit(graphId);
     const graph = graphDetails.find((g) => g.graphId === graphId);
@@ -98,17 +99,17 @@ const GraphSection = () => {
     }
   };
 
-  // Handler: Seçilen renk bilgisini state'e aktarır.
+  
   const handleColorChange = (color) => {
     setEditColor(color.hex);
   };
 
-  // Handler: "Update Graph" butonuna basıldığında ilgili grafik için rengi günceller.
+  
   const handleEditGraphSubmit = () => {
     if (!selectedGraphForEdit) return;
-    // GraphManager üzerinden grafiğin rengini değiştiriyoruz.
+    
     GraphManager.changeGraphColor(selectedGraphForEdit, editColor);
-    // Yerel state'te de güncelleme yapıyoruz.
+    
     setGraphDetails((prevState) =>
       prevState.map((graph) =>
         graph.graphId === selectedGraphForEdit
@@ -159,7 +160,7 @@ const GraphSection = () => {
                           style={{ cursor: "pointer" }}
                           onClick={() => toggleGraphVisibility(graph.graphId)}
                         >
-                          {`Graph ID: ${graph.graphId} - ${graph.graphType}`}
+                          {`Graph ID: ${graph.graphName} - ${graph.graphType}`}
                         </span>
                         <Button
                           onClick={() => toggleGraphVisibility(graph.graphId)}
@@ -173,14 +174,14 @@ const GraphSection = () => {
                 </Col>
 
                 {graphDetails.map((graph) => {
-                  const { graphScript, graphId } = graph;
+                  const { graphScript, graphId, graphName } = graph;
                   const { data, layout } = graphScript || {};
                   return (
                     <Col span={24} key={graphId} style={{ marginTop: "20px" }}>
                       {visibleGraphs[graphId] && (
                         <Card
                           style={{ width: "100%", padding: "10px" }}
-                          title={`Graph ID: ${graph.graphId}`}
+                          title={`Graph ID: ${graphName}`}
                           bordered={true}
                         >
                           <Paragraph strong>
@@ -232,7 +233,7 @@ const GraphSection = () => {
                 })}
               </Row>
 
-              {/* Edit Graph Bölümü */}
+              {/* Edit Graph Part */}
               <div style={{ marginTop: "20px", width: "100%" }}>
                 <Card title="Edit Graph">
                   <div style={{ marginBottom: "10px" }}>
@@ -245,7 +246,7 @@ const GraphSection = () => {
                     >
                       {graphDetails.map((graph) => (
                         <Select.Option key={graph.graphId} value={graph.graphId}>
-                          {`Graph ${graph.graphId} - ${graph.graphType}`}
+                          {`Graph ${graph.graphName} - ${graph.graphType}`}
                         </Select.Option>
                       ))}
                     </Select>
