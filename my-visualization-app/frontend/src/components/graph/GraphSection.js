@@ -29,6 +29,10 @@ const GraphSection = () => {
   const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
   const [editColor, setEditColor] = useState("#ffffff"); 
 
+  const [xAxis, setXAxis] = useState(null);
+  const [yAxis, setYAxis] = useState(null);
+  const [zAxis, setZAxis] = useState(null);
+
   useEffect(() => {
     const handleGraphChange = (data) => {
       if (data.type === "graphUpdated") {

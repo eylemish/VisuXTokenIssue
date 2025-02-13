@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { Modal, Button, Input, Select, message, Table } from "antd";
+import { Modal, Button, Input, Select, message, Table, InputNumber, Radio } from "antd";
 import Action from "../Action";
 import { ConsoleSqlOutlined } from "@ant-design/icons";
 
@@ -27,6 +27,10 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
   const [originalData, setOriginalData] = useState([]);
   const [columns, setColumns] = useState([]); // Store column names
   const [showResultModal, setShowResultModal] = useState(false); // Control result modal visibility
+  const [inputMode, setInputMode] = useState("dots"); // "dots" or "range"
+  const [numPoints, setNumPoints] = useState(null);
+  const [minValue, setMinValue] = useState(null);
+  const [maxValue, setMaxValue] = useState(null);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -45,6 +49,14 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
 
     fetchColumns();
   }, [datasetId]); // Dependent on `datasetId`, triggered on change
+
+  useEffect(() => {
+    if (inputMode === "range" && minValue !== null && maxValue !== null && numPoints) {
+      const step = (maxValue - minValue) / (numPoints - 1);
+      const rangeValues = Array.from({ length: numPoints }, (_, i) => (minValue + i * step).toFixed(2));
+      setExtrapolateRange(rangeValues.join(", "));
+    }
+  }, [inputMode, minValue, maxValue, numPoints]);
 
   const handleExtrapolate = async () => {
     if (!datasetId || !xColumn || !yColumn || !extrapolateRange) {
@@ -168,13 +180,53 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
         <Select.Option value="exponential">Exponential</Select.Option>
       </Select>
 
-      <Input
-        type="text"
-        placeholder="Enter X values for extrapolation (comma-separated)"
-        value={extrapolateRange}
-        onChange={(e) => setExtrapolateRange(e.target.value)}
-        style={{ marginTop: "10px" }}
-      />
+      {/* Input Mode Selection */}
+      <Radio.Group
+          value={inputMode}
+          onChange={(e) => setInputMode(e.target.value)}
+          style={{ marginTop: "10px", width: "100%" }}
+        >
+          <Radio.Button value="dots">Dots</Radio.Button>
+          <Radio.Button value="range">Range</Radio.Button>
+        </Radio.Group>
+
+        {/* Manual Input Fields */}
+        {inputMode === "range" && (
+          <>
+            <InputNumber
+              style={{ width: "100%", marginTop: "10px" }}
+              placeholder="Number of Points"
+              min={1}
+              value={numPoints}
+              onChange={setNumPoints}
+            />
+            <InputNumber
+              style={{ width: "100%", marginTop: "10px" }}
+              placeholder="Min Value"
+              value={minValue}
+              onChange={setMinValue}
+            />
+            <InputNumber
+              style={{ width: "100%", marginTop: "10px" }}
+              placeholder="Max Value"
+              value={maxValue}
+              onChange={setMaxValue}
+            />
+          </>
+        )}
+        {inputMode === "dots" && (
+          <>
+            <Input
+              type="text"
+              placeholder="Enter X values for extrapolation (comma-separated)"
+              value={extrapolateRange}
+              onChange={(e) => setExtrapolateRange(e.target.value)}
+              style={{ marginTop: "10px" }}
+              />
+          </>
+        )}
+
+      
 
       <Button type="primary" onClick={handleExtrapolate} block style={{ marginTop: "10px" }}>
         Run Extrapolation

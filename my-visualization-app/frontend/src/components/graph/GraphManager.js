@@ -189,6 +189,36 @@ class GraphManager {
     }
   }
 
+  changeAxis(graphId, selectedAxis, newFeature) {
+    const graph = this.graphs.get(graphId);
+    let changedAxis;
+
+    if (graph) {
+      switch (selectedAxis) {
+        case "x": 
+          changedAxis = graph.setXAxis(newFeature);
+          break;
+        case "y":
+          changedAxis = graph.setYAxis(newFeature);
+          break;
+        case "z":
+          changedAxis = graph.setZAxis(newFeature);
+          break;
+        default:
+          console.log("ERROR WITH AXIS");
+          return false;
+      }
+      
+      console.log(`Graph (ID: ${graphId}) changed feature of ${selectedAxis} to ${newFeature}`);
+      this.notify({ type: "graphUpdated" });
+      return true;
+    } else {
+      console.warn(`GraphManager: Graph ID ${graphId} not found.`);
+      return false;
+    }
+}
+
+
   notify(data) {
     console.log("GraphManager triggered", data)
     this.eventListeners.forEach(callback => callback(data));

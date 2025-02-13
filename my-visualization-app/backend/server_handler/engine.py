@@ -166,7 +166,7 @@ class Engine:
 
             # Generate new x values for interpolation
             x_new = np.linspace(min_value, max_value, num_points)
-
+            
             # Linear interpolation
             if kind == "linear":
                 interpolator = interp1d(x, y, kind="linear", fill_value="extrapolate")

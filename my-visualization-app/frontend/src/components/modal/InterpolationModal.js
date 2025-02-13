@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Select, message, Table } from "antd";
+import { Modal, Button, Select, message, Table, Input, Checkbox, InputNumber, Radio } from "antd";
 import Action from "../Action";
 
 // Get CSRF Token（fit Django）
@@ -22,6 +22,10 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
   const [interpolatedData, setInterpolatedData] = useState([]);
+  const [numPoints, setNumPoints] = useState(null);
+  const [minValue, setMinValue] = useState(null);
+  const [maxValue, setMaxValue] = useState(null);
+  const [inputMode, setInputMode] = useState("auto"); // "auto" or "manual"
 
   const [columns, setColumns] = useState([]); // Store column names
   const [showResultModal, setShowResultModal] = useState(false); // Control result modal visibility
@@ -54,6 +58,9 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
       x_feature: xColumn,
       y_feature: yColumn,
       kind: method,
+      numPoints: numPoints,
+      minValue: minValue,
+      maxValue: maxValue,
     };
     try {
       const result = await fetch("http://127.0.0.1:8000/api/interpolate/", {
@@ -154,6 +161,42 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
           <Select.Option value="polynomial">Polynomial</Select.Option>
           <Select.Option value="spline">Spline</Select.Option>
         </Select>
+
+        {/* Input Mode Selection */}
+        <Radio.Group
+          value={inputMode}
+          onChange={(e) => setInputMode(e.target.value)}
+          style={{ marginTop: "10px", width: "100%" }}
+        >
+          <Radio.Button value="auto">Auto(100 points based on dataset)</Radio.Button>
+          <Radio.Button value="manual">Manual Input</Radio.Button>
+        </Radio.Group>
+
+        {/* Manual Input Fields */}
+        {inputMode === "manual" && (
+          <>
+            <InputNumber
+              style={{ width: "100%", marginTop: "10px" }}
+              placeholder="Number of Points"
+              min={1}
+              value={numPoints}
+              onChange={setNumPoints}
+            />
+            <InputNumber
+              style={{ width: "100%", marginTop: "10px" }}
+              placeholder="Min Value"
+              value={minValue}
+              onChange={setMinValue}
+            />
+            <InputNumber
+              style={{ width: "100%", marginTop: "10px" }}
+              placeholder="Max Value"
+              value={maxValue}
+              onChange={setMaxValue}
+            />
+          </>
+        )}
+
 
         <Button type="primary" onClick={handleInterpolate} block style={{ marginTop: "10px" }}>
           Run Interpolation

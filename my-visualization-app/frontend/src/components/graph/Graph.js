@@ -7,6 +7,9 @@ class Graph {
     this.dataset = dataset; // { x: [...], y: [...] }
     this.type = type; // 'scatter', 'bar', 'line', etc.
     this.selectedFeatures = selectedFeatures;
+    this.xAxis = selectedFeatures[0];
+    this.yAxis = selectedFeatures[1];
+    this.zAxis = selectedFeatures[2];
     this.style = style instanceof GraphStyle ? style : new GraphStyle();
     this.metadata = {};
     this.createdAt = new Date();
@@ -49,6 +52,30 @@ class Graph {
   toggleVisibility() {
     this.visible = !this.visible;
     this.updatedAt = new Date();
+  }
+
+  getXAxis() {
+    return this.xAxis;
+  }
+
+  setXAxis(xAxis) {
+    this.xAxis = xAxis;
+  }
+
+  getYAxis() {
+    return this.yAxis;
+  }
+
+  setYAxis(yAxis) {
+    this.yAxis = yAxis;
+  }
+
+  getZAxis() {
+    return this.zAxis;
+  }
+
+  setZAxis(zAxis) {
+    this.zAxis = zAxis;
   }
 
   // needs update

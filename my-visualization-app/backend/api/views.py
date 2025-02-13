@@ -267,6 +267,43 @@ class ChangeDataView(APIView):
             "records": new_dataset.records
         })
 
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteFeatureView(APIView):
+    def post(self, request):
+            # Parse JSON request body
+        data = json.loads(request.body)
+        dataset_id = data.get("dataset_id")
+        features_to_remove = data.get("features_to_remove", [])
+
+        if not dataset_id or not features_to_remove:
+            return JsonResponse({"error": "Missing dataset_id or features_to_remove"}, status=400)
+
+        # Retrieve the original Dataset
+        original_dataset = Dataset.objects.get(id=dataset_id)
+
+        # Copy the dataset to maintain modification history
+        new_dataset = original_dataset.copy_dataset(new_name=f"{original_dataset.name}_modified")
+
+        # Keep only the features that are not being removed
+        new_features = [f for f in new_dataset.features if f not in features_to_remove]
+
+        # Remove the corresponding feature values from records
+        new_records = [
+            {k: v for k, v in record.items() if k in new_features}  # Keep only the remaining features
+            for record in new_dataset.records
+        ]
+
+        # Update the new dataset with modified features and records
+        new_dataset.features = new_features
+        new_dataset.records = new_records
+        new_dataset.save()
+
+        return JsonResponse({
+            "message": "Feature(s) removed successfully",
+            "new_dataset_id": new_dataset.id
+        })
+
+
 class AddDataView(APIView):
     def post(self, request):
         table_name = "uploaded_data"
@@ -354,9 +391,9 @@ class InterpolateView(APIView):
             x_feature = body.get("x_feature")  # The column name for the x-axis
             y_feature = body.get("y_feature")  # The column name for the y-axis
             kind = body.get("kind", "linear")  # The type of interpolation (linear, polynomial, spline, exponential)
-            num_points = body.get("num_points", 100)  # Number of data points to generate
-            min_value = body.get("min_value", None)  # Minimum x value for interpolation (optional)
-            max_value = body.get("max_value", None)  # Maximum x value for interpolation (optional)
+            num_points = body.get("numPoints") or 100  # Default to 100 if null
+            min_value = body.get("minValue", None)  # Minimum x value for interpolation (optional)
+            max_value = body.get("maxValue", None)  # Maximum x value for interpolation (optional)
 
             # Ensure dataset_id is provided
             if not dataset_id:
