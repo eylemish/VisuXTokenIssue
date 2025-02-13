@@ -204,9 +204,10 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
           pagination={false}
           size="small"
         />
-        <Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
+        {/*<Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
           See results a Graph
         </Button>
+        */}
       </Modal>
     </>
     
