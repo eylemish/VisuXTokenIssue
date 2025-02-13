@@ -31,7 +31,7 @@ const chartCategories = {
 };
 
 const GraphModal = ({ visible, onCancel, uiController }) => {
-  const [features, setFeatures] = useState([]); // 特征列
+  const [features, setFeatures] = useState([]);
   const [selectedGraphType, setSelectedGraphType] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [selectedName, setSelectedName] = useState("");
@@ -168,11 +168,13 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
               <TabPane tab={category} key={category}>
                 <Row gutter={[16, 16]}>
                   {charts.map((chart) => (
-                    <Col span={6} key={chart.type}>
+                    <Col span={8} key={chart.type}>
                       <Card
                         hoverable
                         style={{
                           textAlign: "center",
+                          width: "100%",
+                          minHeight: "140px",
                           border: selectedGraphType === chart.type ? "2px solid #1890ff" : "1px solid #ccc",
                         }}
                         onClick={() => handleGraphSelection(chart.type)}
@@ -188,14 +190,15 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
           </Tabs>
 
           {selectedGraphType && (
-            <div>
-              <h3>Select {numFeatures} Features:</h3>
-              <Checkbox.Group
-                options={features.map((feature) => ({ label: feature, value: feature }))}
-                value={selectedFeatures}
-                onChange={handleFeatureSelect}
-              />
-            </div>
+              <div>
+                <br/>
+                <h3>Select {numFeatures} Features:</h3>
+                <Checkbox.Group
+                    options={features.map((feature) => ({label: feature, value: feature}))}
+                    value={selectedFeatures}
+                    onChange={handleFeatureSelect}
+                />
+              </div>
           )}
         </>
       )}
