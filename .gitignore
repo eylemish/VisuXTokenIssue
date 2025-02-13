@@ -23,3 +23,13 @@ dbsqlite3
 
 /my-visualization-app/db.sqlite3
 
+# Ignoring Django Migration Cache Files
+migrations/*.pyc
+
+# Ignore all migration files, but keep `0001_initial.py`.
+migrations/[0-9][0-9][0-9][0-9]_*.py
+
+# Allow `__init__.py` to maintain `migrations/` directory structure
+!migrations/__init__.py
+
+
