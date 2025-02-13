@@ -429,9 +429,9 @@ class InterpolateView(APIView):
             x_feature = body.get("x_feature")  # The column name for the x-axis
             y_feature = body.get("y_feature")  # The column name for the y-axis
             kind = body.get("kind", "linear")  # The type of interpolation (linear, polynomial, spline, exponential)
-            num_points = body.get("num_points", 100)  # Number of data points to generate
-            min_value = body.get("min_value", None)  # Minimum x value for interpolation (optional)
-            max_value = body.get("max_value", None)  # Maximum x value for interpolation (optional)
+            num_points = body.get("numPoints", 100)  # Number of data points to generate
+            min_value = body.get("minValue", None)  # Minimum x value for interpolation (optional)
+            max_value = body.get("maxValue", None)  # Maximum x value for interpolation (optional)
 
             # Ensure dataset_id is provided
             if not dataset_id:
