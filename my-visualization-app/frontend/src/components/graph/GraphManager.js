@@ -54,7 +54,7 @@ class GraphManager {
 
   const newGraph = new Graph(
     graphId,
-    graphInfo.graphName || "Untitled Graph",
+    graphInfo.graphName || graphId,
     transformedDataset,
     graphInfo.graphType, // Ensure that types are passed correctly
     graphInfo.selectedFeatures || [],
