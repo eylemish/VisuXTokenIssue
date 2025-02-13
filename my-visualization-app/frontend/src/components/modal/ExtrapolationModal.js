@@ -1,6 +1,21 @@
 import React, {useEffect, useState} from "react";
-import { Modal, Button, Input, Select, message } from "antd";
+import { Modal, Button, Input, Select, message, Table } from "antd";
 import Action from "../Action";
+import { ConsoleSqlOutlined } from "@ant-design/icons";
+
+// Get CSRF Token（fit Django）
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie) {
+    document.cookie.split(";").forEach((cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "csrftoken") {
+        cookieValue = decodeURIComponent(value);
+      }
+    });
+  }
+  return cookieValue;
+}
 
 const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
   const [method, setMethod] = useState("linear");
@@ -8,8 +23,10 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
   const [extrapolateRange, setExtrapolateRange] = useState("");
-
+  const [extrapolatedData, setExtrapolatedData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
   const [columns, setColumns] = useState([]); // Store column names
+  const [showResultModal, setShowResultModal] = useState(false); // Control result modal visibility
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -29,27 +46,89 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
     fetchColumns();
   }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
-  const handleExtrapolate = () => {
+  const handleExtrapolate = async () => {
     if (!datasetId || !xColumn || !yColumn || !extrapolateRange) {
       message.error("Please select a dataset, two columns, and enter extrapolation range!");
       return;
     }
 
-    const action = new Action("EXECUTE_TOOL", "user", {
-      toolName: "Extrapolation",
-      datasetId,
-      xColumn,
-      yColumn,
-      method,
-      params: { extrapolateRange: extrapolateRange.split(",").map(val => parseFloat(val.trim())) }
-    });
+    const requestData = {
+      dataset_id: datasetId, 
+      x_feature: xColumn,
+      y_feature: yColumn,
+      kind: method,
+      params: {
+        extrapolateRange: extrapolateRange
+          .split(",")                       // 按逗号分割
+          .map(val => val.trim())            // 去除每个值的前后空格
+          .map(val => parseFloat(val))       // 转换为数字
+          .filter(val => !isNaN(val))        // 过滤掉不是数字的值
+      }
+    };
+    try {
+      const result = await fetch("http://127.0.0.1:8000/api/extrapolate/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+        },
+        body: JSON.stringify(requestData),
+        credentials: "include", // allow to include Cookie
+      });
+  
 
-    uiController.handleUserAction(action);
-    message.success("Extrapolation started!");
-    onCancel();
+      const resultData = await result.json(); 
+      setExtrapolatedData(resultData.extrapolated_data);
+      console.log(extrapolatedData);
+      setOriginalData(resultData.original_data);
+      message.success("Extrapolation started!");
+      setShowResultModal(true); // Display result modal when data is ready
+    } catch (error) {
+      message.error(`Error: ${error.message}`);
+    }
   };
 
+  const handleCloseResultModal = () => {
+    setShowResultModal(false);
+  };
+
+  const handleCreateGraph = () => {
+    if (!xColumn || !yColumn || extrapolatedData.length === 0) {
+      message.error("Please select X and Y columns before creating a graph!");
+      return;
+    }
+
+    const dataset = {
+      features: [xColumn, yColumn],
+      records: extrapolatedData.map(dataPoint => ({
+        [xColumn]: dataPoint.x,
+        [yColumn]: dataPoint.y,
+      })),
+    };
+
+    console.log(dataset);
+
+    const graphInfo = {
+      graphName: "Extrapolation Graph",
+      graphType: "line",
+      dataset: dataset,
+      selectedFeatures: [xColumn, yColumn],
+    };
+
+    uiController.handleUserAction({
+      type: "CREATE_GRAPH",
+      graphInfo,
+    });
+
+    message.success("Graph created successfully!");
+  };
+  const resultColumns = [
+    { title: xColumn || "X Value", dataIndex: xColumn, key: xColumn },
+    { title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn },
+  ];
+
   return (
+    <>
     <Modal title="Extrapolation" open={visible} onCancel={onCancel} footer={null}>
       <Select
         style={{ width: "100%" }}
@@ -101,6 +180,26 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
         Run Extrapolation
       </Button>
     </Modal>
+
+    {/* Modal to display interpolation result */}
+    <Modal
+        title="Extrapolation Results"
+        visible={showResultModal}
+        onCancel={handleCloseResultModal}
+        footer={null}
+      >
+        <Table
+          columns={resultColumns}
+          dataSource={extrapolatedData}
+          rowKey="x"
+          pagination={false}
+          size="small"
+        />
+        <Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
+          See results a Graph
+        </Button>
+      </Modal>
+    </>
   );
 };
 

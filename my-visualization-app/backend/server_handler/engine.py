@@ -203,7 +203,7 @@ class Engine:
                 raise ValueError("Unsupported interpolation method. Choose from 'linear', 'polynomial', or 'spline'.")
 
             # Return the interpolated DataFrame
-            return pd.DataFrame({'x': x_new, 'y': y_new})
+            return pd.DataFrame({x_feature: x_new, y_feature: y_new})
 
         except Exception as e:
             raise ValueError(f"Error in interpolation: {e}")
