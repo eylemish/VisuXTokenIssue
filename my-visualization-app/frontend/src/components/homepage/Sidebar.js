@@ -35,16 +35,17 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
   useEffect(() => {
     const handleGraphUpdate = (event) => {
       if (event.type === "graphUpdated") {
-        setShowGraph(true); // Open it when event in GraphManager
+        setShowGraph(false);
+        setTimeout(() => setShowGraph(true), 100);
       }
     };
-
+  
     GraphManager.onChange(handleGraphUpdate);
     return () => {
       GraphManager.eventListeners = GraphManager.eventListeners.filter(cb => cb !== handleGraphUpdate);
     };
-  }, [setShowGraph]);
-
+  }, []);
+  
   // 处理菜单展开
   const handleOpenChange = (keys) => {
     setOpenKeys(keys);
