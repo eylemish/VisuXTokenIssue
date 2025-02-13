@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Modal, Select, message } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
-import datasetManager from "../file/DatasetManager"; // 导入 DatasetManager
+import datasetManager from "../file/DatasetManager";
 
 const FileDownload = () => {
   const [downloadFormat, setDownloadFormat] = useState("csv");
@@ -11,7 +11,7 @@ const FileDownload = () => {
   const handleDownload = async () => {
     console.log("handleDownload triggered");
 
-    // 在点击下载时获取最新 datasetId
+    // Get the latest datasetId when clicking download.
     const datasetId = datasetManager.getCurrentDatasetId();
     console.log("Fetched dataset ID in handleDownload:", datasetId);
 
@@ -21,7 +21,7 @@ const FileDownload = () => {
     }
 
     const downloadUrl = `http://127.0.0.1:8000/api/download/${datasetId}/${downloadFormat}/`;
-    console.log("Fetching:", downloadUrl); // 调试信息
+    console.log("Fetching:", downloadUrl);
 
     setLoading(true);
     try {
@@ -44,7 +44,7 @@ const FileDownload = () => {
       setIsModalOpen(false);
     } catch (error) {
       message.error("Error downloading file: " + error.message);
-      console.error("Download error:", error); // 调试信息
+      console.error("Download error:", error);
     } finally {
       setLoading(false);
     }
