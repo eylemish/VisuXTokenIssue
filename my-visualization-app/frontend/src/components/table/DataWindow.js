@@ -91,7 +91,7 @@ const DataWindow = () => {
 
     return (
         <Card
-            title="Data Preview"
+            title="Data Plot"
             style={{ width: "100%", minHeight: "400px", position: "relative" }}
         >
             {loading ? (

@@ -76,7 +76,7 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         </Menu.Item>
 
         <Menu.Item key="toggleDataTable" icon={<TableOutlined />} onClick={() => setShowData(!showData)}>
-          {showData ? "Close Data Table" : "Open Data Table"}
+          {showData ? "Close Data Plot" : "Open Data Plot"}
         </Menu.Item>
 
         <Menu.Item key="toggleLog" icon={<FileTextOutlined />} onClick={() => setShowLog(!showLog)}>
