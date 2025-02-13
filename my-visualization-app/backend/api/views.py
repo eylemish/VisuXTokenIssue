@@ -426,40 +426,41 @@ class InterpolateView(APIView):
 class ExtrapolateView(APIView):
     def post(self, request):
         try:
-            # Parse the request body
-            body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")  # Get the ID of the uploaded file
-            x_feature = body.get("x_feature")  # The column name for the x-axis
-            y_feature = body.get("y_feature")  # The column name for the y-axis
-            target_x = body.get("target_x")  # List of x values for extrapolation
-            method = body.get("method", "linear")  # The type of extrapolation (linear, polynomial, exponential, spline)
-            degree = body.get("degree", 2)  # Degree of polynomial for polynomial method
+            # Parse the JSON data sent from the frontend
+            request_data = json.loads(request.body)
+            # Extract fields from the request data
+            dataset_id = request_data.get('dataset_id')
+            x_feature = request_data.get('x_feature')
+            y_feature = request_data.get('y_feature')
+            method = request_data.get('kind')
+            extrapolate_range = request_data.get('params', {}).get('extrapolateRange', [])
 
-            # Ensure dataset_id is provided
-            if not dataset_id:
-                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+            # Ensure that the request data is valid
+            if not dataset_id or not x_feature or not y_feature or not method or not extrapolate_range:
+                return JsonResponse({"error": "Missing required parameters"}, status=400)
 
-            # Get the dataset object
-            dataset = get_object_or_404(Dataset, id=dataset_id)
-
+            # Retrieve the dataset
+            dataset = Dataset.objects.get(id=dataset_id)
             # Convert dataset to Pandas DataFrame
             dataset_df = dataset.get_dataframe()
-            
-            # Perform extrapolation
+
+            # Call the extrapolate function to perform extrapolation
             extrapolated_data = Engine.extrapolate(
-                dataset_df, 
-                x_feature=x_feature, 
-                y_feature=y_feature, 
-                target_x=target_x, 
-                method=method, 
-                degree=degree
+                data=dataset_df,
+                x_feature=x_feature,
+                y_feature=y_feature,
+                target_x=extrapolate_range,
+                method=method
             )
-            
-            # Return the extrapolated data in JSON format
-            return JsonResponse({"extrapolated_data": extrapolated_data.to_dict(orient='records')})
+
+            # Convert the DataFrame to a dictionary and return it to the frontend
+            result = extrapolated_data.to_dict(orient='records')
+
+            return JsonResponse({"original_data": dataset_df.to_dict(orient='records'), "extrapolated_data": result})
 
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            # Catch exceptions and return an error message
+            return JsonResponse({"error": str(e)}, status=500)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

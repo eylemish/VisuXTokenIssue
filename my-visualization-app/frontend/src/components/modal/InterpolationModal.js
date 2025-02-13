@@ -110,10 +110,8 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
     message.success("Graph created successfully!");
   };
   const resultColumns = [
-    { title: "X Value", dataIndex: "x", key: "x" },
-    { title: "Y Value", dataIndex: "y", key: "y" },
-
-
+    { title: xColumn || "X Value", dataIndex: xColumn, key: xColumn },
+    { title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn },
   ];
 
   return (
