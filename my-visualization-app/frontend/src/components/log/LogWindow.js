@@ -53,11 +53,14 @@ const LogWindow = ({ logs }) => {
               />
           </div>
               {/* Buttons are placed below the form */}
+              {/*
               <div style={{marginTop: "10px", textAlign: "center", borderTop: "1px solid #ddd", padding: "10px"}}>
                   <Button style={{margin: "0 5px"}}>Undo</Button>
                   <Button style={{margin: "0 5px"}}>Redo</Button>
                   <Button style={{margin: "0 5px"}}>Rollback</Button>
               </div>
+              As we don't need redo and undo, these buttons can be deleted.
+              */}
       </Card>
 );
 };
