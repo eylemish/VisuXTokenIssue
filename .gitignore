@@ -21,3 +21,5 @@ dbsqlite3
 *.iml
 *.idea/
 
+/my-visualization-app/db.sqlite3
+
