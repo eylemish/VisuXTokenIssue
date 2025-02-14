@@ -19,7 +19,7 @@ import GraphManager from "../graph/GraphManager";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
-const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGraph, showData, showLog }) => {
+const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, setShowTable, showGraph, showData, showLog, showTable}) => {
   // 控制工具窗口
   const [openKeys, setOpenKeys] = useState([]);
   const [newGraphModalVisible, setNewGraphModalVisible] = useState(false);
@@ -68,12 +68,16 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         defaultSelectedKeys={["graphOverview"]}
         style={{ height: "100%", borderRight: 0 }}
       >
-        {/* Open/Close a window（Graph / DataTable / Log） */}
+        {/* Open/Close a window（Graph / DataTable / Log /preview plot） */}
+        <Menu.Item key="toggleDataTable" icon={<TableOutlined />} onClick={() => setShowTable(!showTable)}>
+          {showTable ? "Close Data Table" : "Open Data Table"}
+        </Menu.Item>
+
         <Menu.Item key="toggleGraph" icon={<BarChartOutlined />} onClick={() => setShowGraph(!showGraph)}>
           {showGraph ? "Close Graph Window" : "Open Graph Window"}
         </Menu.Item>
 
-        <Menu.Item key="toggleDataTable" icon={<TableOutlined />} onClick={() => setShowData(!showData)}>
+        <Menu.Item key="toggleDataPlot" icon={<TableOutlined />} onClick={() => setShowData(!showData)}>
           {showData ? "Close Data Plot" : "Open Data Plot"}
         </Menu.Item>
 

@@ -37,6 +37,7 @@ const App = () => {
   const [showGraph, setShowGraph] = useState(false);
   const [showData, setShowData] = useState(false);
   const [showLog, setShowLog] = useState(false);
+  const [showTable, setShowTable] = useState(false);
 
   return (
     <Layout style={{ minHeight: '100vh', overflow: 'hidden' }}>
@@ -51,7 +52,9 @@ const App = () => {
           <Sidebar uiController={uiController}
             showGraph={showGraph} setShowGraph={setShowGraph}
             showData={showData} setShowData={setShowData}
-            showLog={showLog} setShowLog={setShowLog}/>
+            showLog={showLog} setShowLog={setShowLog}
+            showTable={showTable} setShowTable={setShowTable}
+          />
         </Sider>
 
         {/* Content scrollable */}
@@ -66,7 +69,10 @@ const App = () => {
             <LayoutContainer uiController={uiController}
                              showGraph={showGraph}
                              showData={showData}
-                             showLog={showLog} />
+                             showLog={showLog}
+                             showTable={showTable}
+
+            />
           </Content>
         </Layout>
       </Layout>

@@ -18,6 +18,7 @@ const gridConfig = {
 
 const defaultLayout = [
   { i: "dataTable", x: 0, y: 0, w: 6, h: 5, minW: 5, minH: 5, maxW: 8, maxH: 8 },
+  { i: "data", x: 0, y: 0, w: 6, h: 5, minW: 5, minH: 5, maxW: 8, maxH: 8 },
   { i: "graphSection", x: 0, y: 0, w: 6, h: 4, minW: 4, minH: 2 },
   { i: "logWindow", x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
 
@@ -25,7 +26,7 @@ const defaultLayout = [
 ];
 
 //This function is for layout, the normal layout is downwards, this ensures that when there is space on the right side, it will be aligned to the right.
-const getDefaultLayout = ({ showGraph, showData, showLog }) => {
+const getDefaultLayout = ({ showGraph, showData, showLog, showTable }) => {
   const layout = [];
   let lastX = 0, lastY = 0; // Record the positions of the right-most and bottom-most windows in the current layout.
 
@@ -43,16 +44,18 @@ const getDefaultLayout = ({ showGraph, showData, showLog }) => {
     }
   };
 
-  if (showData) addWindow("dataTable", 6, 5);
+  if (showTable) addWindow("dataTable", 6, 5);
+  if (showData) addWindow("data", 6, 5);
   if (showGraph) addWindow("graphSection", 6, 4);
   if (showLog) addWindow("logWindow", 6, 5);
+
 
   return layout;
 };
 
 
 
-const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
+const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable}) => {
   const [layout, setLayout] = useState(defaultLayout);
   const [gridWidth, setGridWidth] = useState(gridConfig.width);
 
@@ -76,10 +79,10 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
     console.log("Updated Layout:", newLayout);
   };
 
-  // Update the layout when `showGraph`, `showData`, `showLog` change.
+  // Update the layout when `showGraph`, `showData`, `showLog` 'showTable' change.
   useEffect(() => {
-    setLayout(getDefaultLayout({ showGraph, showData, showLog }));
-  }, [showGraph, showData, showLog]);
+    setLayout(getDefaultLayout({ showGraph, showData, showLog, showTable }));
+  }, [showGraph, showData, showLog, showTable]);
 
 
 
@@ -153,8 +156,15 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog}) => {
       >
 
         {/* Render DataWindow only if showData is true */}
-        {showData && (
+        {showTable && (
           <div key="dataTable" className="drag-handle" style={{ height: "100%", width: "100%", display:"flex", minWidth: "400px", minHeight: "300px" }}>
+            <DataWindow style={{ flex: 1 }} isVisible={true} />
+          </div>
+        )}
+
+
+        {showData && (
+          <div key="data" className="drag-handle" style={{ height: "100%", width: "100%", display:"flex", minWidth: "400px", minHeight: "300px" }}>
             <DataWindow style={{ flex: 1 }} isVisible={true} />
           </div>
         )}
