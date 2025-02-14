@@ -104,30 +104,6 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable}
 
 
   useEffect(() => {
-  setLogs([...logManager.getLogs()]);
-  }, [logManager]
-  );
-
-  const handleUndo = (index) => {
-    logManager.undo();
-    setLogs([...logManager.getLogs()]);
-  };
-
-  const handleRedo = (index) => {
-    logManager.redo();
-    setLogs([...logManager.getLogs()]);
-  };
-
-  const handleRollback = (index) => {
-    const dataset = logManager.rollbackToVersion(index);
-    if (dataset) {
-      console.log("Rollback to version:", dataset);
-    } else {
-      console.error("Invalid rollback version.");
-    }
-  };
-
-  useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
       .react-grid-placeholder {
@@ -187,7 +163,7 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable}
                  minWidth: "400px",
                  display:"flex",
           }}>
-            <LogWindow style={{ flex: 1 }} logs={logs} onUndo={handleUndo} onRedo={handleRedo} onRollback={handleRollback} />
+            <LogWindow style={{ flex: 1 }} logs={logs} />
           </div>
         )}
 
