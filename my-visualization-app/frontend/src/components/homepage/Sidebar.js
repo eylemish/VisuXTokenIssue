@@ -14,7 +14,6 @@ import InterpolationModal from "../modal/InterpolationModal";
 import ExtrapolationModal from "../modal/ExtrapolationModal";
 import OversampleModal from "../modal/OversampleModal";
 import CorrelationModal from "../modal/CorrelationModal";
-import ReplicaManagerModal from "../modal/ReplicaManagerModal";
 import GraphManager from "../graph/GraphManager";
 
 const { Sider } = Layout;
@@ -30,7 +29,6 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
   const [extrapolationModalVisible, setExtrapolationModalVisible] = useState(false);
   const [oversampleModalVisible, setOversampleModalVisible] = useState(false);
   const [correlationModalVisible, setCorrelationModalVisible] = useState(false);
-  const [replicasModalVisible, setReplicasModalVisible] = useState(false);
 
   useEffect(() => {
     const handleGraphUpdate = (event) => {
@@ -84,14 +82,6 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         </Menu.Item>
 
 
-        <Menu.Item
-          key="dataCopyManagement"
-          icon={<SettingOutlined />}
-          onClick={() => setReplicasModalVisible(true)}
-        >
-          Replication Manager
-        </Menu.Item>
-
         {/* Graph Manager */}
         <SubMenu key="graphManager" icon={<BarChartOutlined />} title="Graph Manager">
           <Menu.Item key="newGraph" onClick={() => setNewGraphModalVisible(true)}>New Graph</Menu.Item>
@@ -144,14 +134,6 @@ const Sidebar = ({ uiController, setShowGraph, setShowData, setShowLog, showGrap
         logAction={(log) => console.log("Log:", log)}
       />
 
-
-        {/* replication manage Modal */}
-        <ReplicaManagerModal
-            visible={replicasModalVisible}
-            onClose={() => setReplicasModalVisible(false)}
-            uiController={uiController}
-            datasetId={null}// don't need it because data structure changed
-        />
 
     </Sider>
   );
