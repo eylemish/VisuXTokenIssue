@@ -12,21 +12,6 @@ class UploadedFile(models.Model):
     def __str__(self):
         return self.name
 
-###
-###需要加上id之后才能找得到 dataset_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-###然后last_dataset移到log部分
-###这里需要有的是表明父子关系的parent
-###parent= models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="child")
-###is_deleted = models.BooleanField(default=False) 删掉之后改成true
-###def get_all_replicas(self):
-        ###"""✅ 获取所有子副本"""
-        ###return self.child_replicas.filter(is_deleted=False)
-    ###def get_all_descendant_replicas(self):
-        ###"""✅ 递归获取所有子孙副本"""
-        ###descendants = list(self.child_replicas.filter(is_deleted=False))
-        ###for child in self.child_replicas.filter(is_deleted=False):
-            ###descendants.extend(child.get_all_descendant_replicas())
-        ###return descendants
 
 ### **Parsed dataset (store table headers & data)**
 class Dataset(models.Model):
@@ -93,9 +78,6 @@ class AnalysisResult(models.Model):
     mean_values = models.JSONField()  # Mean value statistics
     created_at = models.DateTimeField(auto_now_add=True)  # Record analysis time
 
-###log也需要加上id
-###log_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-###last next 移到这里
 
 ### **operating log**
 class AuditLog(models.Model):
