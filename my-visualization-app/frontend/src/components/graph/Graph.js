@@ -59,6 +59,7 @@ class Graph {
   }
 
   setXAxis(xAxis) {
+    this.selectedFeatures[0] = xAxis;
     this.xAxis = xAxis;
   }
 
@@ -67,6 +68,7 @@ class Graph {
   }
 
   setYAxis(yAxis) {
+    this.selectedFeatures[1] = yAxis;
     this.yAxis = yAxis;
   }
 
@@ -75,6 +77,7 @@ class Graph {
   }
 
   setZAxis(zAxis) {
+    this.selectedFeatures[2] = zAxis;
     this.zAxis = zAxis;
   }
 
