@@ -534,43 +534,55 @@ class CorrelationView(APIView):
 class DimensionalReductionView(APIView):
     def post(self, request):
         try:
-            # 解析请求体
+            # Parsing the request body
             body = json.loads(request.body)
             dataset_id = body.get("dataset_id")
-            method = body.get("method", "pca").lower()  # 统一小写，避免大小写不匹配
+            method = body.get("method", "pca").lower()
             n_components = body.get("n_components", 2)
+            new_dataset_name = body.get("new_dataset_name", "Reduced Dataset")
 
-            # 允许的降维方法
-            valid_methods = ["pca", "tsne", "umap"]
-            if method not in valid_methods:
-                return JsonResponse({"error": f"Invalid dimensionality reduction method. Choose from {valid_methods}."},
-                                    status=400)
-
-            # 确保 dataset_id 存在
+            # Ensure dataset_id exists
             if not dataset_id:
                 return JsonResponse({"error": "Missing dataset_id."}, status=400)
 
             try:
-                # **✅ 从 `Dataset` 获取数据，而不是 `UploadedFile`**
                 dataset = Dataset.objects.get(id=int(dataset_id))
             except (Dataset.DoesNotExist, ValueError):
                 return JsonResponse({"error": f"Dataset with ID {dataset_id} not found or invalid."}, status=404)
 
-            # **✅ 获取 DataFrame**
-            dataset_df = dataset.get_dataframe()
-            if dataset_df.empty:
+            # Get DataFrame
+            if not dataset.features or not dataset.records:
                 return JsonResponse({"error": "Dataset is empty or invalid."}, status=400)
 
-            # **✅ 进行降维**
+            dataset_df = pd.DataFrame(dataset.records, columns=dataset.features)
+
+            # do dim reduction
             reduced_data = Engine.dimensional_reduction(
                 dataset_df,
                 method=method,
                 n_components=n_components
             )
 
-            # 返回数据
-            reduced_data_json = reduced_data.to_dict(orient="records")
-            return JsonResponse({"reduced_data": reduced_data_json}, status=200)
+            # Generate new features and records
+            reduced_features = [f"dim{i+1}" for i in range(n_components)]
+            reduced_records = reduced_data.to_dict(orient="records")
+
+            # Create a new Dataset and associate it with last_dataset
+            new_dataset = Dataset.objects.create(
+                name=new_dataset_name,
+                features=reduced_features,
+                records=reduced_records,
+                last_dataset=dataset  # Linked original dataset
+            )
+
+            new_dataset.id = dataset_id + 1
+
+            return JsonResponse({
+                "message": "Dimensionality reduction successful.",
+                "new_dataset_id": new_dataset.id,
+                "reduced_features": reduced_features,
+                "reduced_records": reduced_records
+            }, status=200)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format."}, status=400)
