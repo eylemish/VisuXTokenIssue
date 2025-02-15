@@ -38,6 +38,7 @@ const App = () => {
   const [showData, setShowData] = useState(false);
   const [showLog, setShowLog] = useState(false);
   const [showTable, setShowTable] = useState(false);
+  const [showGraphEdit, setShowGraphEdit] = useState(false);
 
   return (
     <Layout style={{ minHeight: '100vh', overflow: 'hidden' }}>
@@ -54,6 +55,7 @@ const App = () => {
             showData={showData} setShowData={setShowData}
             showLog={showLog} setShowLog={setShowLog}
             showTable={showTable} setShowTable={setShowTable}
+            showGraphEdit={showGraphEdit} setShowGraphEdit={setShowGraphEdit}
           />
         </Sider>
 
@@ -71,6 +73,7 @@ const App = () => {
                              showData={showData}
                              showLog={showLog}
                              showTable={showTable}
+                             showGraphEdit={showGraphEdit}
 
             />
           </Content>

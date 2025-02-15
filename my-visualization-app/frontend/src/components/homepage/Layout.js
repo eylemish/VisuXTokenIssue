@@ -9,6 +9,7 @@ import GraphComponent from "../graph/GraphComponent";
 import GraphWindow from "../graph/GraphWindow";
 import LogManager from "../log/LogManager";
 import LogWindow from "../log/LogWindow";
+import EditGraphPanel from "../graph/EditGraphPanel";
 
 const gridConfig = {
   cols: 12,
@@ -23,10 +24,11 @@ const defaultLayout = [
   { i: "logWindow", x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
 
   { i: "graphWindow", x: 0, y: 5, w: 6, h: 5, minW: 6, minH: 4 },
+  { i: "editWindow", x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
 ];
 
 //This function is for layout, the normal layout is downwards, this ensures that when there is space on the right side, it will be aligned to the right.
-const getDefaultLayout = ({ showGraph, showData, showLog, showTable }) => {
+const getDefaultLayout = ({ showGraph, showData, showLog, showTable, showGraphEdit }) => {
   const layout = [];
   let lastX = 0, lastY = 0; // Record the positions of the right-most and bottom-most windows in the current layout.
 
@@ -48,6 +50,8 @@ const getDefaultLayout = ({ showGraph, showData, showLog, showTable }) => {
   if (showData) addWindow("data", 6, 5);
   if (showGraph) addWindow("graphSection", 6, 4);
   if (showLog) addWindow("logWindow", 6, 5);
+  if (showGraphEdit) addWindow("editWindow", 6, 5);
+
 
 
   return layout;
@@ -55,7 +59,7 @@ const getDefaultLayout = ({ showGraph, showData, showLog, showTable }) => {
 
 
 
-const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable}) => {
+const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,showGraphEdit}) => {
   const [layout, setLayout] = useState(defaultLayout);
   const [gridWidth, setGridWidth] = useState(gridConfig.width);
 
@@ -79,10 +83,10 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable}
     console.log("Updated Layout:", newLayout);
   };
 
-  // Update the layout when `showGraph`, `showData`, `showLog` 'showTable' change.
+  // Update the layout when `showGraph`, `showData`, `showLog` 'showTable' 'showgraphedit' change.
   useEffect(() => {
-    setLayout(getDefaultLayout({ showGraph, showData, showLog, showTable }));
-  }, [showGraph, showData, showLog, showTable]);
+    setLayout(getDefaultLayout({ showGraph, showData, showLog, showTable, showGraphEdit }));
+  }, [showGraph, showData, showLog, showTable, showGraphEdit]);
 
 
 
@@ -149,6 +153,14 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable}
         {showGraph && (
           <div key="graphSection" className="drag-handle" style={{ height: "100%", width: "100%" }}>
             <GraphSection style={{ flex: 1 }} />
+          </div>
+        )}
+
+
+        {/* new graph edit */}
+        {showGraphEdit && (
+          <div key="editWindow" className="drag-handle" style={{ height: "100%", width: "100%" }}>
+            <EditGraphPanel style={{ flex: 1 }} />
           </div>
         )}
 

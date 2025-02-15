@@ -1,4 +1,4 @@
-export const enableMock = true; // Set to false to disable mockData.
+export const enableMock = false; // Set to false to disable mockData.
 
 export const mockGraphs = Array.from({ length: 50 }, (_, index) => ({
   id: `graph_${index + 1}`,

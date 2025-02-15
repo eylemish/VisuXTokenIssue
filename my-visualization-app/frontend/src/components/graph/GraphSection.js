@@ -237,7 +237,11 @@ const GraphSection = () => {
                 })}
               </Row>
 
+
+
               {/* Edit Graph Part */}
+
+              {/*
               <div style={{ marginTop: "20px", width: "100%" }}>
                 <Card title="Edit Graph">
                   <div style={{ marginBottom: "10px" }}>
@@ -257,17 +261,19 @@ const GraphSection = () => {
                   </div>
                   <div style={{ marginBottom: "10px" }}>
                     <label style={{ marginRight: "8px" }}>Color: </label>
-                    {/* Renk seçici */}
                     <ChromePicker
                       color={editColor}
                       onChange={handleColorChange}
                     />
-                  </div>
+                   </div>
                   <Button type="primary" onClick={handleEditGraphSubmit}>
                     Update Graph
                   </Button>
                 </Card>
               </div>
+
+              */}
+
             </>
           ) : (
             <p>No Graphs Available</p>

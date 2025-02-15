@@ -25,10 +25,12 @@ const Sidebar = ({
                      setShowData,
                      setShowLog,
                      setShowTable,
+                     setShowGraphEdit,
                      showGraph,
                      showData,
                      showLog,
-                     showTable
+                     showTable,
+                     showGraphEdit
                  }) => {
     // 控制工具窗口
     const [openKeys, setOpenKeys] = useState([]);
@@ -99,6 +101,12 @@ const Sidebar = ({
                 {/* Graph Manager */}
                 <SubMenu key="graphManager" icon={<BarChartOutlined/>} title="Graph Manager">
                     <Menu.Item key="newGraph" onClick={() => setNewGraphModalVisible(true)}>New Graph</Menu.Item>
+                    <Menu.Item //new graph edit
+                        key="editGraph"
+                        onClick={() => setShowGraphEdit(!showGraphEdit)}>
+                        {showGraphEdit ? "Close Graph Edit" : "Edit Graph"}
+                    </Menu.Item>
+
                 </SubMenu>
 
                 {/* Data Processing */}

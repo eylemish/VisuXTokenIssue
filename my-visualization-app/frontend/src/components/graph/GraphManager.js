@@ -15,8 +15,8 @@ class GraphManager {
     return GraphManager.instance;
   }
 
-  //dont need this now
-  async loadGraphs() {
+//dont need this now
+ async loadGraphs() {
     if (enableMock) {
       console.log("Using Mock Data");
       mockGraphs.forEach((graph) => this.graphs.set(graph.id, graph));
@@ -227,6 +227,12 @@ class GraphManager {
   // Subscribe to changes
   onChange(callback) {
     this.eventListeners.push(callback);
+  }
+
+
+  // offChange()
+  offChange(callback) {
+    this.eventListeners = this.eventListeners.filter(fn => fn !== callback);
   }
   
 }
