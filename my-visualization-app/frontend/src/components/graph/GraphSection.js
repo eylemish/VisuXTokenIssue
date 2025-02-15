@@ -9,14 +9,11 @@ import {
   Divider,
   List,
   Button,
-  Select,
 } from "antd";
 import Plot from "react-plotly.js";
 import VisualizationManager from "./VisualizationManager";
 import GraphManager from "./GraphManager";
 
-
-import { ChromePicker } from "react-color";
 
 const { Title, Paragraph } = Typography;
 const visualizationManager = new VisualizationManager();
@@ -25,13 +22,7 @@ const GraphSection = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleGraphs, setVisibleGraphs] = useState({});
-  
-  const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
-  const [editColor, setEditColor] = useState("#ffffff"); 
 
-  const [xAxis, setXAxis] = useState(null);
-  const [yAxis, setYAxis] = useState(null);
-  const [zAxis, setZAxis] = useState(null);
 
   useEffect(() => {
     const handleGraphChange = (data) => {
@@ -92,44 +83,7 @@ const GraphSection = () => {
     }));
   };
 
-  
-  const handleGraphSelect = (graphId) => {
-    setSelectedGraphForEdit(graphId);
-    const graph = graphDetails.find((g) => g.graphId === graphId);
-    if (graph) {
-      setEditColor(graph.color);
-    } else {
-      setEditColor("#ffffff");
-    }
-  };
 
-  
-  const handleColorChange = (color) => {
-    setEditColor(color.hex);
-  };
-
-  
-  const handleEditGraphSubmit = () => {
-    if (!selectedGraphForEdit) return;
-    
-    GraphManager.changeGraphColor(selectedGraphForEdit, editColor);
-    
-    setGraphDetails((prevState) =>
-      prevState.map((graph) =>
-        graph.graphId === selectedGraphForEdit
-          ? {
-              ...graph,
-              color: editColor,
-              style: { ...graph.style, colorScheme: editColor },
-              graphScript: visualizationManager.visualize({
-                ...graph,
-                style: { ...graph.style, colorScheme: editColor },
-              }),
-            }
-          : graph
-      )
-    );
-  };
 
   return (
     <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -236,43 +190,6 @@ const GraphSection = () => {
                   );
                 })}
               </Row>
-
-
-
-              {/* Edit Graph Part */}
-
-              {/*
-              <div style={{ marginTop: "20px", width: "100%" }}>
-                <Card title="Edit Graph">
-                  <div style={{ marginBottom: "10px" }}>
-                    <label style={{ marginRight: "8px" }}>Graph: </label>
-                    <Select
-                      style={{ width: 250 }}
-                      placeholder="Select a graph"
-                      value={selectedGraphForEdit}
-                      onChange={handleGraphSelect}
-                    >
-                      {graphDetails.map((graph) => (
-                        <Select.Option key={graph.graphId} value={graph.graphId}>
-                          {`Graph ${graph.graphName} - ${graph.graphType}`}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </div>
-                  <div style={{ marginBottom: "10px" }}>
-                    <label style={{ marginRight: "8px" }}>Color: </label>
-                    <ChromePicker
-                      color={editColor}
-                      onChange={handleColorChange}
-                    />
-                   </div>
-                  <Button type="primary" onClick={handleEditGraphSubmit}>
-                    Update Graph
-                  </Button>
-                </Card>
-              </div>
-
-              */}
 
             </>
           ) : (
