@@ -32,4 +32,7 @@ migrations/[0-9][0-9][0-9][0-9]_*.py
 # Allow `__init__.py` to maintain `migrations/` directory structure
 !migrations/__init__.py
 
+# Ignore all .pyc files
+*.pyc
+__pycache__/
 
