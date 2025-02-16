@@ -4,6 +4,7 @@ import GraphManager from "../graph/GraphManager";
 
 const { Option } = Select;
 
+//this class is useless rn -ezgi
 const EditGraphModal = ({ visible, onCancel, onSave, graphId, graphDetails }) => {
   const [form] = Form.useForm();
   const [graphType, setGraphType] = useState(graphDetails.graphType || "scatter");

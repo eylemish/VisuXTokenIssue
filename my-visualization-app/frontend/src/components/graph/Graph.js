@@ -81,6 +81,14 @@ class Graph {
     this.zAxis = zAxis;
   }
 
+  getDataset() {
+    return this.dataset;
+  }
+
+  setDataset(newDataset) {
+    this.dataset = newDataset
+  }
+
   // needs update
   // getGraphInfo() { 
   //   return {
