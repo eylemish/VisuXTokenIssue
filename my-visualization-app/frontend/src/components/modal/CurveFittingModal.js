@@ -17,24 +17,25 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const CurveFittingModal = ({ visible, onCancel, uiController }) => {
+const CurveFittingModal = ({ visible, onCancel, uiController, xColumn, yColumn }) => {
   const [degree, setDegree] = useState(2);
   const [fitType, setFitType] = useState("polynomial");
-  const [datasetId, setDatasetId] = useState(null);
-  const [xColumn, setXColumn] = useState(null);
-  const [yColumn, setYColumn] = useState(null);
+  //const [datasetId, setDatasetId] = useState(null);
+  //const [xColumn, setXColumn] = useState(null);
+  //const [yColumn, setYColumn] = useState(null);
   const [loading, setLoading] = useState(false);
 
 
-  const [columns, setColumns] = useState([]); 
+  //const [columns, setColumns] = useState([]); 
   const [originalData, setOriginalData] = useState([]);
   const [fittedData, setFittedData] = useState([]);
   const [params, setParams] = useState([]);
   const [covariance, setCovariance] = useState([]);
 
-  const datasetManager = uiController.getDatasetManager();
-  const availableDatasets = datasetManager.getAllDatasetsId();
+  //const datasetManager = uiController.getDatasetManager();
+  //const availableDatasets = datasetManager.getAllDatasetsId();
 
+  /**
   // **Get column names when the user selects a dataset**
   useEffect(() => {
     if (!datasetId) {
@@ -49,20 +50,21 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
 
     fetchColumns();
   }, [datasetId]); // Dependent on `datasetId`, triggered on change
-
+ */
 
 
   const handleFit = async () => {
-    if (!datasetId || !xColumn || !yColumn) {
-      message.error("Please select a dataset and two columns!");
-      return;
-    }
+    //if (!datasetId || !xColumn || !yColumn) {
+    //  message.error("Please select a dataset and two columns!");
+     // return;
+    //}
   
+    console.log(xColumn);
     const requestData = {
-      dataset_id: datasetId,  // ensure valid datasetID
+      //dataset_id: datasetId,  // ensure valid datasetID
       params: {
-        xColumn: xColumn,
-        yColumn: yColumn,
+        xColumn,
+        yColumn,
         type: fitType,
         degree: degree
       }
@@ -102,37 +104,8 @@ const CurveFittingModal = ({ visible, onCancel, uiController }) => {
   
   return (
     <Modal title="Curve Fitting" open={visible} onCancel={onCancel} footer={null}>
-      <Select
-        style={{ width: "100%" }}
-        placeholder="Choose a dataset"
-        onChange={(value) => setDatasetId(value)}
-      >
-        {availableDatasets.map((id) => (
-          <Select.Option key={id} value={id}>{id}</Select.Option>
-        ))}
-      </Select>
-
-      <Select
-        style={{ width: "100%", marginTop: "10px" }}
-        placeholder="Select X Column"
-        disabled={!datasetId}
-        onChange={setXColumn}
-      >
-        {columns.map((col) => (
-          <Select.Option key={col} value={col}>{col}</Select.Option>
-        ))}
-      </Select>
-
-      <Select
-        style={{ width: "100%", marginTop: "10px" }}
-        placeholder="Select Y Column"
-        disabled={!datasetId}
-        onChange={setYColumn}
-      >
-        {columns.map((col) => (
-          <Select.Option key={col} value={col}>{col}</Select.Option>
-        ))}
-      </Select>
+      <p><strong>X Column:</strong> {xColumn}</p>
+      <p><strong>Y Column:</strong> {yColumn}</p>
 
       <Select defaultValue="polynomial" onChange={setFitType} style={{ width: "100%", marginTop: "10px" }}>
         <Select.Option value="linear">Linear</Select.Option>

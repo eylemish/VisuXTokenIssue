@@ -3,6 +3,7 @@ import { Card, Select, Button } from "antd";
 import { ChromePicker } from "react-color";
 import GraphManager from "./GraphManager";
 import VisualizationManager from "./VisualizationManager";
+import CurveFittingModal from "../modal/CurveFittingModal";
 
 const visualizationManager = new VisualizationManager();
 
@@ -10,6 +11,7 @@ const EditGraphPanel = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
   const [editColor, setEditColor] = useState("#ffffff");
+  const [curveFitVisible, setCurveFitVisible] = useState(false);
 
   useEffect(() => {
     const fetchGraphs = () => {
@@ -17,6 +19,8 @@ const EditGraphPanel = () => {
         graphId: graph.id,
         graphName: graph.name,
         graphType: graph.type,
+        xColumn: graph.xAxis,
+        yColumn: graph.yAxis,
         color: graph.style?.colorScheme || "#ffffff",
         style: graph.style,
       }));
@@ -63,6 +67,8 @@ const EditGraphPanel = () => {
     );
   };
 
+  const selectedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
+
   return (
     <Card title="Edit Graph" style={{ width: "100%" }}>
       <div style={{ marginBottom: "10px" }}>
@@ -89,6 +95,20 @@ const EditGraphPanel = () => {
       <Button type="primary" onClick={handleEditGraphSubmit}>
         Update Graph
       </Button>
+      <Button type="default" onClick={() => setCurveFitVisible(true)}>
+        Fit Curve
+      </Button>
+
+      {/* CurveFittingModal */}
+      {curveFitVisible && (
+        <CurveFittingModal
+          visible={curveFitVisible}
+          onCancel={() => setCurveFitVisible(false)}
+          xColumn={selectedGraph.xColumn} 
+          yColumn={selectedGraph.yColumn}
+          
+        />
+      )}
     </Card>
   );
 };

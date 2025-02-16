@@ -13,7 +13,7 @@ class FitCurveView(APIView):
     def post(self, request):
         try:
             body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")
+            #dataset_id = body.get("dataset_id")
             params = body.get("params", {})
             x_feature = params.get("xColumn")  # 从 params 读取 x 特征
             y_feature = params.get("yColumn")  # 从 params 读取 y 特征
@@ -21,10 +21,11 @@ class FitCurveView(APIView):
             degree = params.get("degree", 2)  # 从 params 读取 degree，默认 2
             initial_params = params.get("initial_params", None)
             # Ensure dataset_id is provided
-            if not dataset_id:
-                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+            #if not dataset_id:
+                #return JsonResponse({"error": "Dataset ID is required"}, status=400)
             # Get the dataset object
-            dataset = get_object_or_404(Dataset, id=dataset_id)
+            #dataset = get_object_or_404(Dataset, id=dataset_id)
+            dataset = Dataset.objects.order_by("-id").first()
             # Convert dataset to Pandas DataFrame
             dataset_df = dataset.get_dataframe()
             # Ensure required features exist in the dataset
