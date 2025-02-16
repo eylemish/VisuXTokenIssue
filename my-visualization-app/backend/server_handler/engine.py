@@ -53,7 +53,7 @@ class Engine:
         try:
             pca = PCA(n_components=n_components)
             transformed_data = pca.fit_transform(data)
-            columns = [f'PC{i + 1}' for i in range(n_components)]
+            columns = [f'dim{i + 1}' for i in range(n_components)]
             return pd.DataFrame(transformed_data, columns=columns)
         except Exception as e:
             raise ValueError(f"Error in PCA processing: {e}")
@@ -66,7 +66,7 @@ class Engine:
         try:
             tsne = TSNE(n_components=n_components)
             transformed_data = tsne.fit_transform(data)
-            columns = [f'TSNE{i + 1}' for i in range(n_components)]
+            columns = [f'dim{i + 1}' for i in range(n_components)]
             return pd.DataFrame(transformed_data, columns=columns)
         except Exception as e:
             raise ValueError(f"Error in t-SNE processing: {e}")
@@ -79,7 +79,7 @@ class Engine:
         try:
             reducer = umap.UMAP(n_components=n_components)
             transformed_data = reducer.fit_transform(data)
-            columns = [f'UMAP{i + 1}' for i in range(n_components)]
+            columns = [f'dim{i + 1}' for i in range(n_components)]
             return pd.DataFrame(transformed_data, columns=columns)
         except Exception as e:
             raise ValueError(f"Error in UMAP processing: {e}")
