@@ -47,7 +47,7 @@ const App = () => {
         <HeaderNav uiController={uiController}/>
       </Header>
 
-      <Layout style={{ marginTop: 64 }}>
+      <Layout style={{ marginTop: 54 }}>
         {/* Fixed Sidebar */}
         <Sider width={220} style={{ background: '#fff', position: 'fixed', height: '100vh', left: 0, top: 64, zIndex: 999, boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)' }}>
           <Sidebar uiController={uiController}
@@ -65,7 +65,7 @@ const App = () => {
               overflowX: "hidden",
               overflowY: 'auto',
               height: 'calc(100vh - 64px)',
-              padding: 0,
+              padding: 10,
               display: 'flex',
               flexDirection: 'column' }}>
             <LayoutContainer uiController={uiController}

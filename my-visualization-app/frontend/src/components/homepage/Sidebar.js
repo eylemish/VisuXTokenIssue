@@ -3,8 +3,7 @@ import {Layout, Menu, message} from "antd";
 import {
     BarChartOutlined,
     TableOutlined,
-    FileTextOutlined,
-    SettingOutlined,
+    FileTextOutlined, SlidersOutlined, FundOutlined, LineChartOutlined, BuildOutlined,
 } from "@ant-design/icons";
 import datasetManager from "../file/DatasetManager"; // ✅ 使用单例 DatasetManager
 import DimReductionModal from "../modal/DimReductionModal";
@@ -89,7 +88,7 @@ const Sidebar = ({
                     {showGraph ? "Close Graph Window" : "Open Graph Window"}
                 </Menu.Item>
 
-                <Menu.Item key="toggleDataPlot" icon={<TableOutlined/>} onClick={() => setShowData(!showData)}>
+                <Menu.Item key="toggleDataPlot" icon={<LineChartOutlined/>} onClick={() => setShowData(!showData)}>
                     {showData ? "Close Data Plot" : "Open Data Plot"}
                 </Menu.Item>
 
@@ -99,7 +98,7 @@ const Sidebar = ({
 
 
                 {/* Graph Manager */}
-                <SubMenu key="graphManager" icon={<BarChartOutlined/>} title="Graph Manager">
+                <SubMenu key="graphManager" icon={<FundOutlined/>} title="Graph Manager">
                     <Menu.Item key="newGraph" onClick={() => setNewGraphModalVisible(true)}>New Graph</Menu.Item>
                     <Menu.Item //new graph edit
                         key="editGraph"
@@ -110,14 +109,14 @@ const Sidebar = ({
                 </SubMenu>
 
                 {/* Data Processing */}
-                <SubMenu key="dataProcessing" icon={<SettingOutlined/>} title="Data Processing">
+                <SubMenu key="dataProcessing" icon={<SlidersOutlined/>} title="Data Processing">
                     <Menu.Item key="dimReduction" onClick={handleDimensionalityReduction}>
                         Dimensionality Reduction
                     </Menu.Item>
                 </SubMenu>
 
                 {/* Data Analysis */}
-                <SubMenu key="dataAnalysis" icon={<SettingOutlined/>} title="Data Analysis">
+                <SubMenu key="dataAnalysis" icon={<BuildOutlined/>} title="Data Analysis">
                     <Menu.Item key="Curve Fitting" onClick={() => setCurveFittingModalVisible(true)}>Curve
                         Fitting</Menu.Item>
                     <Menu.Item key="Interpolate Data" onClick={() => setInterpolationModalVisible(true)}>Interpolate
