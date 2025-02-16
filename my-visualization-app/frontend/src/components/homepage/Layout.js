@@ -70,17 +70,6 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
 
   const logManager = uiController.getLogManager(); // Access to the log manager via UIController
   const [logs, setLogs] = useState(logManager.getLogs());
-
-/*  const logAction = (message) => {
-    const newLog = {
-      timestamp: new Date().toLocaleTimeString(), // Get current time
-      tool: "tool", // 记录是哪个功能产生的日志
-      params: message, // 记录日志内容
-    };
-
-    setLogs((prevLogs) => [newLog, ...prevLogs]); // 把新日志插入到最前面
-  };
-*/
   useEffect(() => {
     const handleResize = () => {
       setGridWidth(window.innerWidth - 200);
