@@ -6,7 +6,7 @@ from django.utils.timezone import now
 from sklearn.decomposition import PCA
 from scipy.interpolate import interp1d
 from sklearn.linear_model import LinearRegression
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, OptimizeWarning
 from imblearn.over_sampling import SMOTE,RandomOverSampler
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
@@ -15,6 +15,7 @@ from scipy.interpolate import interp1d, UnivariateSpline
 from itertools import combinations
 from backend.api.models import UploadedFile, AuditLog
 import umap.umap_ as umap
+import warnings
 
 class Engine:
     def __init__(self):
@@ -283,6 +284,12 @@ class Engine:
 
             x = dataset[x_feature].values
             y = dataset[y_feature].values
+            x = np.asarray(x, dtype=np.float64)
+            y = np.asarray(y, dtype=np.float64)
+            try:
+                degree = int(degree)
+            except ValueError:
+                raise ValueError("degree must be a int")
 
             # generate x
             x_fit = np.linspace(np.min(x), np.max(x), 100)
@@ -295,7 +302,11 @@ class Engine:
                 y_fit_curve = linear_func(x_fit, *params)
 
             elif method == "polynomial":
-                poly_coeffs = np.polyfit(x, y, degree)
+                try:
+                    poly_coeffs = np.polyfit(x, y, degree)
+                except Exception as e:
+                    print(f"拟合过程中出现错误: {e}")
+                    return None, None, None
                 poly_func = np.poly1d(poly_coeffs)
                 y_fit_curve = poly_func(x_fit)
                 params, covariance = poly_coeffs, None  # no covariance for polynomial
@@ -303,12 +314,28 @@ class Engine:
             elif method == "exponential":
                 def exp_func(x, a, b, c):
                     return a * np.exp(b * x) + c
+                if x.size == 0 or y.size == 0:
+                    raise ValueError("Input x or y is empty!")
+
+                if np.any(np.isnan(x)) or np.any(np.isnan(y)) or np.any(np.isinf(x)) or np.any(np.isinf(y)):
+                    raise ValueError("Input data contains NaN or Inf!")
+
+                if np.any(y < 0):
+                    print("Warning: Some y values are negative, which may affect exponential fitting.")
 
                 if initial_params is None:
-                    initial_params = [1.0, 0.1, 1.0]  # default params
+                    initial_params = [max(y), 0.01, min(y)]  # 根据数据调整初始值
 
-                params, covariance = curve_fit(exp_func, x, y, p0=initial_params)
-                y_fit_curve = exp_func(x_fit, *params)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error", OptimizeWarning)
+                    try:
+                        params, covariance = curve_fit(exp_func, x, y, p0=initial_params, 
+                                           bounds=([0, -1, -np.inf], [np.inf, 1, np.inf]), 
+                                           maxfev=5000)
+                        y_fit_curve = exp_func(x_fit, *params)
+                    except (RuntimeError, OptimizeWarning) as e:
+                        raise ValueError(f"Curve fitting failed: {e}")
+
 
             else:
                 raise ValueError("Unsupported method. Choose from 'linear', 'polynomial', or 'exponential'.")
