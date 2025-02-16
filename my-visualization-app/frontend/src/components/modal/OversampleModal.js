@@ -16,7 +16,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const OversampleModal = ({ visible, onCancel, uiController }) => {
+const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
   const [method, setMethod] = useState("smote"); // Select oversampling method
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
@@ -87,6 +87,7 @@ const OversampleModal = ({ visible, onCancel, uiController }) => {
       console.log(resultData.oversampledData);  // Output generated data
 
       message.success("Oversampling completed!");
+      logAction(`Oversampling performed using ${requestData.kind} on dataset ID ${requestData.datasetId}.`, method.toUpperCase())
       setShowResultModal(true);
       } catch (error) {
           message.error(`Error: ${error.message}`);

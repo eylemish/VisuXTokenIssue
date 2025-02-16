@@ -17,7 +17,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
+const ExtrapolationModal = ({ visible, onCancel, uiController, logAction }) => {
   const [method, setMethod] = useState("linear");
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
@@ -71,10 +71,10 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
       kind: method,
       params: {
         extrapolateRange: extrapolateRange
-          .split(",")                       // 按逗号分割
-          .map(val => val.trim())            // 去除每个值的前后空格
-          .map(val => parseFloat(val))       // 转换为数字
-          .filter(val => !isNaN(val))        // 过滤掉不是数字的值
+          .split(",")
+          .map(val => val.trim()) 
+          .map(val => parseFloat(val))
+          .filter(val => !isNaN(val))
       }
     };
     try {
@@ -95,6 +95,7 @@ const ExtrapolationModal = ({ visible, onCancel, uiController }) => {
       setOriginalData(resultData.original_data);
       message.success("Extrapolation started!");
       setShowResultModal(true); // Display result modal when data is ready
+      logAction(`Extrapolation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Extrapolate")
     } catch (error) {
       message.error(`Error: ${error.message}`);
     }

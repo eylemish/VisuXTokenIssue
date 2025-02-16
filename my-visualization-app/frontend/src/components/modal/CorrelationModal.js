@@ -15,7 +15,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const CorrelationModal = ({ visible, onCancel, uiController }) => {
+const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
   const [method, setMethod] = useState("pearson");
   const [datasetId, setDatasetId] = useState(null);
   const [selectedColumns, setSelectedColumns] = useState([]); // multiple
@@ -70,6 +70,7 @@ const CorrelationModal = ({ visible, onCancel, uiController }) => {
       const resultData = await result.json();
       setCorrelationMatrix(resultData.correlation_matrix); // ✅ 存储相关性矩阵
       message.success("Correlation matrix generated!");
+      logAction(`Correlation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Correlate")
     } catch (error) {
       message.error(`Error: ${error.message}`);
     } finally {

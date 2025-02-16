@@ -16,7 +16,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const InterpolationModal = ({ visible, onCancel, uiController }) => {
+const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
   const [method, setMethod] = useState("linear");
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
@@ -77,6 +77,7 @@ const InterpolationModal = ({ visible, onCancel, uiController }) => {
       setInterpolatedData(resultData.interpolated_data);
       message.success("Interpolation started!");
       setShowResultModal(true); // Display result modal when data is ready
+      logAction(`Interpolation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Interpolate")
     } catch (error) {
       message.error(`Error: ${error.message}`);
     }

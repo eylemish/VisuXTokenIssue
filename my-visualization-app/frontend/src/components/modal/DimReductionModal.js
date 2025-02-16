@@ -75,8 +75,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
             } else {
                 setReducedData(null);
             }
-
-            logAction(`Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions on dataset ID ${currentDatasetId}.`);
+            logAction(`Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions on dataset ID ${currentDatasetId}.`, method.toUpperCase())
             message.success("Dimensionality reduction successful!");
         } catch (error) {
             console.error("Error during dimensionality reduction:", error.response?.data || error.message);
@@ -98,7 +97,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
         onUpdateDataset(reducedData.records, newDatasetId);
         message.success("Dimensionality reduction applied successfully!");
 
-        logAction(`Applied reduced dataset ID ${newDatasetId} as the new active dataset.`);
+        logAction(`Applied reduced dataset ID ${newDatasetId} as the new active dataset.`,method.toUpperCase());
         onClose();
     };
 

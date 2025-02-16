@@ -29,7 +29,7 @@ const Sidebar = ({
                      showData,
                      showLog,
                      showTable,
-                     showGraphEdit
+                     showGraphEdit,
                  }) => {
     // 控制工具窗口
     const [openKeys, setOpenKeys] = useState([]);
@@ -40,6 +40,18 @@ const Sidebar = ({
     const [extrapolationModalVisible, setExtrapolationModalVisible] = useState(false);
     const [oversampleModalVisible, setOversampleModalVisible] = useState(false);
     const [correlationModalVisible, setCorrelationModalVisible] = useState(false);
+    
+    const [logAction, setLogAction] = useState(() => {
+        const logManager = uiController.getLogManager();
+        return (message, method) => {
+          const newLog = {
+            timestamp: new Date().toLocaleTimeString(),
+            tool: method, // which method type is used
+            params: message, // detailed information
+          };
+          logManager.addLog(newLog);
+        };
+      });
 
     useEffect(() => {
         const handleGraphUpdate = (event) => {
@@ -138,27 +150,33 @@ const Sidebar = ({
 
             {/* curve fitting Modal */}
             <CurveFittingModal visible={curveFittingModalVisible} onCancel={() => setCurveFittingModalVisible(false)}
-                               uiController={uiController}/>
+                               uiController={uiController}
+                               logAction={logAction}/>
 
             {/* interpolation Modal */}
             <InterpolationModal visible={interpolationModalVisible} onCancel={() => setInterpolationModalVisible(false)}
-                                uiController={uiController}/>
+                                uiController={uiController}
+                                logAction={logAction}/>
 
             {/* extrapolation Modal */}
             <ExtrapolationModal visible={extrapolationModalVisible} onCancel={() => setExtrapolationModalVisible(false)}
-                                uiController={uiController}/>
+                                uiController={uiController}
+                                logAction={logAction}/>
 
             {/* oversample data Modal */}
             <OversampleModal visible={oversampleModalVisible} onCancel={() => setOversampleModalVisible(false)}
-                             uiController={uiController}/>
+                             uiController={uiController}
+                             logAction={logAction}/>
 
             {/* correlate data 的 Modal */}
             <CorrelationModal visible={correlationModalVisible} onCancel={() => setCorrelationModalVisible(false)}
-                              uiController={uiController}/>
+                              uiController={uiController}
+                              logAction={logAction}/>
 
             {/* dimensionality reduction Modal */}
             <DimReductionModal
                 visible={dimReductionModalVisible}
+                logAction={logAction}
                 onClose={() => setDimReductionModalVisible(false)}
                 onUpdateDataset={(newData, newDatasetId) => {
                     if (newDatasetId) {
@@ -167,7 +185,6 @@ const Sidebar = ({
                     }
                     console.log("Dimensionality reduction result received:", newData);
                 }}
-                logAction={(log) => console.log("Log:", log)}
             />
 
 

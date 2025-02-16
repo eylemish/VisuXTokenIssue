@@ -17,7 +17,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const CurveFittingModal = ({ visible, onCancel, uiController, xColumn, yColumn }) => {
+const CurveFittingModal = ({ visible, onCancel, uiController, xColumn, yColumn, logAction }) => {
   const [degree, setDegree] = useState(2);
   const [fitType, setFitType] = useState("polynomial");
   //const [datasetId, setDatasetId] = useState(null);
@@ -94,6 +94,7 @@ const CurveFittingModal = ({ visible, onCancel, uiController, xColumn, yColumn }
       setParams(resultData.params);
       setCovariance(resultData.covariance);
       message.success("Curve fitting completed!");
+      logAction(`Curve fitting performed using ${requestData.kind}.`, "Curve fitting")
     } catch (error) {
       message.error(`Error: ${error.message}`);
     } finally {
