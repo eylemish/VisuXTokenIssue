@@ -18,7 +18,6 @@ const EditGraphPanel = () => {
   const [selectedType, setSelectedType] = useState(null);
   const [curveFitVisible, setCurveFitVisible] = useState(false);
 
-  // Fetch and update graph details on component mount and when graphs change
   useEffect(() => {
     const fetchGraphs = () => {
       const graphs = GraphManager.getAllGraphs().map((graph) => ({
@@ -42,7 +41,6 @@ const EditGraphPanel = () => {
     return () => GraphManager.offChange(fetchGraphs);
   }, []);
 
-  // Handle graph selection and update related properties
   const handleGraphSelect = (graphId) => {
     setSelectedGraphForEdit(graphId);
     const graph = graphDetails.find((g) => g.graphId === graphId);
@@ -52,12 +50,10 @@ const EditGraphPanel = () => {
     setSelectedZ(graph?.graphFeatures[2] || null);
   };
 
-  // Handle color selection change
   const handleColorChange = (color) => {
     setEditColor(color.hex);
   };
 
-  // Submit color changes to the graph
   const handleEditGraphSubmit = () => {
     if (!selectedGraphForEdit) return;
     GraphManager.changeGraphColor(selectedGraphForEdit, editColor);
@@ -72,17 +68,65 @@ const EditGraphPanel = () => {
 
   const selectedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
 
+  const handleAxisChange = (axis, newFeature) => {
+    if (!selectedGraphForEdit) return;
+    if (axis === "x") setSelectedX(newFeature);
+    if (axis === "y") setSelectedY(newFeature);
+    if (axis === "z") setSelectedZ(newFeature);
+    GraphManager.changeAxis(selectedGraphForEdit, axis, newFeature);
+  };
+
+  const renderFeatureMenu = (axis) => {
+    const dataset = selectedGraph?.graphObject?.getDataset?.() || {};
+    return (
+      <Menu>
+        {Object.keys(dataset).length > 0 ? (
+          Object.keys(dataset).map((feature) => (
+            <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
+              {feature}
+            </Menu.Item>
+          ))
+        ) : (
+          <Menu.Item disabled>No Features Available</Menu.Item>
+        )}
+      </Menu>
+    );
+  };
+
+  const handleTypeChange = (newType) => {
+    if (!selectedGraphForEdit) return;
+    setSelectedType(newType);
+    GraphManager.changeType(selectedGraphForEdit, newType);
+
+    const updatedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
+    if (updatedGraph) {
+      setSelectedX(updatedGraph.graphFeatures[0] || null);
+      setSelectedY(updatedGraph.graphFeatures[1] || null);
+      setSelectedZ(updatedGraph.graphFeatures[2] || null);
+    }
+  };
+
+  const renderChartCategories = () => (
+    <Menu>
+      {Object.entries(chartCategories).map(([category, charts]) => (
+        <Menu.SubMenu key={category} title={category}>
+          {charts.map((chart) => (
+            <Menu.Item key={chart.type} onClick={() => handleTypeChange(chart.type)}>
+              <Space>
+                {chart.icon} {chart.name}
+              </Space>
+            </Menu.Item>
+          ))}
+        </Menu.SubMenu>
+      ))}
+    </Menu>
+  );
+
   return (
     <Card title="Edit Graph" style={{ width: "100%" }}>
-      {/* Graph selection dropdown */}
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Graph: </label>
-        <Select
-          style={{ width: 250 }}
-          placeholder="Select a graph"
-          value={selectedGraphForEdit}
-          onChange={handleGraphSelect}
-        >
+        <Select style={{ width: 250 }} placeholder="Select a graph" value={selectedGraphForEdit} onChange={handleGraphSelect}>
           {graphDetails.map((graph) => (
             <Select.Option key={graph.graphId} value={graph.graphId}>
               {`Graph ${graph.graphName} - ${graph.graphType}`}
@@ -91,25 +135,34 @@ const EditGraphPanel = () => {
         </Select>
       </div>
 
-      {/* Color selection using ChromePicker */}
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Color: </label>
         <ChromePicker color={editColor} onChange={handleColorChange} />
       </div>
 
-      {/* Button to update graph color */}
       <Button type="primary" onClick={handleEditGraphSubmit}>Update Graph</Button>
+      <Button type="default" onClick={() => setCurveFitVisible(true)}>Fit Curve</Button>
 
-      {/* Button to open curve fitting modal */}
-      <Button type="default" onClick={() => setCurveFitVisible(true)} style={{ marginLeft: "10px" }}>Fit Curve</Button>
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>Select Chart Type: </label>
+        <Dropdown overlay={renderChartCategories}><Button>Select Chart Type</Button></Dropdown>
+      </div>
 
-      {/* Curve fitting modal popup */}
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>X Axis: </label>
+        <Dropdown overlay={renderFeatureMenu("x")}><Button>{selectedX || "Select X Axis"}</Button></Dropdown>
+      </div>
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>Y Axis: </label>
+        <Dropdown overlay={renderFeatureMenu("y")}><Button>{selectedY || "Select Y Axis"}</Button></Dropdown>
+      </div>
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>Z Axis: </label>
+        <Dropdown overlay={renderFeatureMenu("z")}><Button>{selectedZ || "Select Z Axis"}</Button></Dropdown>
+      </div>
+
       {curveFitVisible && selectedGraph && (
-        <CurveFittingModal
-          visible={curveFitVisible}
-          onCancel={() => setCurveFitVisible(false)}
-          graph={selectedGraph || {}}
-        />
+        <CurveFittingModal visible={curveFitVisible} onCancel={() => setCurveFitVisible(false)} graph={selectedGraph} />
       )}
     </Card>
   );
