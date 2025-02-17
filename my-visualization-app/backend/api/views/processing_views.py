@@ -7,6 +7,7 @@ from backend.api.models import UploadedFile, Dataset
 from rest_framework.views import APIView
 import json
 import pandas as pd
+import numpy as np
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FitCurveView(APIView):
@@ -66,7 +67,7 @@ class InterpolateView(APIView):
             num_points = body.get("numPoints") or 100  # Default to 100 if null
             min_value = body.get("minValue", None)  # Minimum x value for interpolation (optional)
             max_value = body.get("maxValue", None)  # Maximum x value for interpolation (optional)
-            new_dataset_name = body.get("new_dataset_name", "Reduced Dataset")
+            new_dataset_name = body.get("new_dataset_name", "Interpolated Dataset")
 
             # Ensure dataset_id is provided
             if not dataset_id:
@@ -90,6 +91,7 @@ class InterpolateView(APIView):
             # Generate new features and records
             reduced_features = [x_feature, y_feature]
             reduced_records = interpolated_data.to_dict(orient="records")
+            print(reduced_records)
 
             # Create a new Dataset and associate it with last_dataset
             new_dataset = Dataset.objects.create(
@@ -118,6 +120,7 @@ class ExtrapolateView(APIView):
             y_feature = request_data.get('y_feature')
             method = request_data.get('kind')
             extrapolate_range = request_data.get('params', {}).get('extrapolateRange', [])
+            new_dataset_name = request_data.get("new_dataset_name", "Extrapolated Dataset")
 
             # Ensure that the request data is valid
             if not dataset_id or not x_feature or not y_feature or not method or not extrapolate_range:
@@ -127,6 +130,7 @@ class ExtrapolateView(APIView):
             dataset = Dataset.objects.get(id=dataset_id)
             # Convert dataset to Pandas DataFrame
             dataset_df = dataset.get_dataframe()
+            print(1)
 
             # Call the extrapolate function to perform extrapolation
             extrapolated_data = Engine.extrapolate(
@@ -136,11 +140,34 @@ class ExtrapolateView(APIView):
                 target_x=extrapolate_range,
                 method=method
             )
+            print(2)
+            # Generate new features and records
+            reduced_features = [x_feature, y_feature]
+            reduced_records = extrapolated_data.to_dict(orient="records")
+            for record in reduced_records:
+                for key in record:
+                    if isinstance(record[key], np.generic):
+                        record[key] = record[key].item()  # convert to Python 
+            print(3)
+            print(dataset.id)
+            print(reduced_features)
+            print(reduced_records)
+            # Create a new Dataset and associate it with last_dataset
+            new_dataset = Dataset.objects.create(
+                name=new_dataset_name,
+                features=reduced_features,
+                records=reduced_records,
+                last_dataset=dataset  # Linked original dataset
+            )
+            print(4)
 
             # Convert the DataFrame to a dictionary and return it to the frontend
             result = extrapolated_data.to_dict(orient='records')
 
-            return JsonResponse({"original_data": dataset_df.to_dict(orient='records'), "extrapolated_data": result})
+            return JsonResponse({"original_data": dataset_df.to_dict(orient='records'),
+                "extrapolated_data": result,
+                "new_dataset_id": new_dataset.id
+            })
 
         except Exception as e:
             # Catch exceptions and return an error message

@@ -163,13 +163,21 @@ const Sidebar = ({
                                         datasetManager.setCurrentDatasetId(newDatasetId);
                                         console.log(`Current dataset updated to ID: ${newDatasetId}`);
                                     }
-                                    console.log("Dimensionality reduction result received:", newData);
+                                    console.log("Interpolation result received:", newData);
                 }}/>
 
             {/* extrapolation Modal */}
             <ExtrapolationModal visible={extrapolationModalVisible} onCancel={() => setExtrapolationModalVisible(false)}
                                 uiController={uiController}
-                                logAction={logAction}/>
+                                logAction={logAction}
+                                onClose={() => setExtrapolationModalVisible(false)}
+                                onUpdateDataset={(newData, newDatasetId) => {
+                                    if (newDatasetId) {
+                                        datasetManager.setCurrentDatasetId(newDatasetId);
+                                        console.log(`Current dataset updated to ID: ${newDatasetId}`);
+                                    }
+                                    console.log("Extrapolation result received:", newData);
+                                }}/>
 
             {/* oversample data Modal */}
             <OversampleModal visible={oversampleModalVisible} onCancel={() => setOversampleModalVisible(false)}

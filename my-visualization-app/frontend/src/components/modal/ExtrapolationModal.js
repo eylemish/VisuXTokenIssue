@@ -17,7 +17,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const ExtrapolationModal = ({ visible, onCancel, uiController, logAction }) => {
+const ExtrapolationModal = ({ visible, onCancel, uiController, logAction, onUpdateDataset, onClose }) => {
   const [method, setMethod] = useState("linear");
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
@@ -31,6 +31,7 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction }) => {
   const [numPoints, setNumPoints] = useState(null);
   const [minValue, setMinValue] = useState(null);
   const [maxValue, setMaxValue] = useState(null);
+  const [newDatasetId, setNewDatasetId] = useState(null);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -91,6 +92,7 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction }) => {
 
       const resultData = await result.json(); 
       setExtrapolatedData(resultData.extrapolated_data);
+      setNewDatasetId(resultData.new_dataset_id);
       console.log(extrapolatedData);
       setOriginalData(resultData.original_data);
       message.success("Extrapolation started!");
@@ -139,6 +141,46 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction }) => {
     { title: xColumn || "X Value", dataIndex: xColumn, key: xColumn },
     { title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn },
   ];
+
+  const renderTable = () => {
+    if (!extrapolatedData || !Array.isArray(extrapolatedData) || extrapolatedData.length === 0) {
+      return <p style={{ textAlign: "center", color: "gray" }}>No data available</p>;
+    }
+
+    const firstRow = extrapolatedData[0] || {};
+    const columns = Object.keys(firstRow).map((key) => ({
+      title: key,
+      dataIndex: key,
+      key: key,
+    }));
+
+    const dataSource = extrapolatedData.map((row, index) => ({
+      key: index,
+      ...row,
+    }));
+
+    console.log("Generated Table Columns:", columns);
+    console.log("Rendering table with dataSource:", dataSource);
+
+    return <Table dataSource={dataSource} columns={columns} pagination={{ pageSize: 10 }} />;
+  };
+
+  // apply result
+  const handleApplyExtrapolate = () => {
+    
+    if (!newDatasetId || !extrapolatedData) {
+        message.error("No reduced dataset available to apply.");
+        return;
+    }
+    console.log("1")
+    datasetManager.addDatasetId(newDatasetId);
+    datasetManager.setCurrentDatasetId(newDatasetId);
+    onUpdateDataset(extrapolatedData, newDatasetId);
+    message.success("Interpolate applied successfully!");
+    console.log("2")
+    logAction(`Applied extrapolated dataset ID ${newDatasetId} as the new active dataset.`, "Extrapolate");
+    onClose();
+  };
 
   return (
     <>
@@ -234,22 +276,14 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction }) => {
       </Button>
     </Modal>
 
-    {/* Modal to display interpolation result */}
-    <Modal
-        title="Extrapolation Results"
-        visible={showResultModal}
-        onCancel={handleCloseResultModal}
-        footer={null}
-      >
-        <Table
-          columns={resultColumns}
-          dataSource={extrapolatedData}
-          rowKey="x"
-          pagination={false}
-          size="small"
-        />
-        <Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
-          See results a Graph
+    {/* 结果展示 Modal */}
+    <Modal title="Extrapolation Results" open={showResultModal} onCancel={() => setShowResultModal(false)} footer={null} width={600}>
+        {extrapolatedData && renderTable()}
+        <Button onClick={handleCreateGraph} style={{ marginTop: "10px", marginRight: "10px" }}>
+          Create Graph
+        </Button>
+        <Button type="primary" onClick={handleApplyExtrapolate} style={{ marginTop: "10px" }}>
+          Apply Interpolation
         </Button>
       </Modal>
     </>

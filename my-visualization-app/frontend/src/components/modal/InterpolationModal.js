@@ -100,7 +100,7 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction, onUpda
     console.log("2")
     logAction(`Applied interpolated dataset ID ${newDatasetId} as the new active dataset.`, "Interpolate");
     onClose();
-};
+  };
 
   const handleCloseResultModal = () => {
     setShowResultModal(false);
