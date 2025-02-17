@@ -120,21 +120,25 @@ const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
         <div style={{ marginTop: "20px" }}>
           <Typography.Title level={4}>Correlation Heatmap</Typography.Title>
           <Plot
-            data={[
-              {
-                z: correlationMatrix.values, //
-                x: correlationMatrix.columns, // X
-                y: correlationMatrix.columns, // Y
-                type: "heatmap",
-                colorscale: "Viridis", // color
-              },
-            ]}
-            layout={{
-              title: "Feature Correlation Heatmap",
-              width: 600,
-              height: 500,
-            }}
+              data={[
+                  {
+                    z: correlationMatrix.values, // correlation values
+                    x: correlationMatrix.columns, // X-axis labels
+                    y: correlationMatrix.columns, // Y-axis labels
+                    type: "heatmap",
+                    colorscale: "Viridis",
+                    text: correlationMatrix.values.map(row => row.map(value => value.toFixed(2))), // format numbers
+                    texttemplate: "%{text}", // display values
+                    showscale: true, // display color scale
+                  },
+              ]}
+              layout={{
+                title: "Feature Correlation Heatmap",
+                width: 600,
+                height: 500,
+              }}
           />
+
         </div>
       )}
     </Modal>
