@@ -59,6 +59,13 @@ class VisualizationManager {
         if (featureData.length >= 2) plotData.y = featureData[1];
         if (featureData.length >= 3) plotData.z = featureData[2];
 
+        if (type === "scatterpolar" && featureData.length >= 2) {
+            plotData.r = featureData[0];
+            plotData.theta = featureData[1];
+            delete plotData.x;
+            delete plotData.y;
+        }
+
         let traces = [plotData];
 
         // Amendments to the `fittedCurve` data format
@@ -96,6 +103,13 @@ class VisualizationManager {
 
         return {data: traces, layout};
     }
+
+
+
+
+
+
+
 
     /**
      * Rendering Plotly Charts
