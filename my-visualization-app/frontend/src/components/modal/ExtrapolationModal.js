@@ -276,7 +276,7 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction, onUpda
       </Button>
     </Modal>
 
-    {/* 结果展示 Modal */}
+    {/* Results Show Modal */}
     <Modal title="Extrapolation Results" open={showResultModal} onCancel={() => setShowResultModal(false)} footer={null} width={600}>
         {extrapolatedData && renderTable()}
         <Button onClick={handleCreateGraph} style={{ marginTop: "10px", marginRight: "10px" }}>

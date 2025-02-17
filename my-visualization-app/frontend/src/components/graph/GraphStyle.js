@@ -15,7 +15,7 @@ class GraphStyle {
       width: this.layoutSize.width,
       height: this.layoutSize.height,
       title: 'Graph Visualization',
-      paper_bgcolor: this.backgroundColor, // 背景颜色
+      paper_bgcolor: this.backgroundColor,
       plot_bgcolor: this.backgroundColor,
     };
   }

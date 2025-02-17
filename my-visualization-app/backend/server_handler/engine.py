@@ -305,7 +305,7 @@ class Engine:
                 try:
                     poly_coeffs = np.polyfit(x, y, degree)
                 except Exception as e:
-                    print(f"拟合过程中出现错误: {e}")
+                    print(f"Errors in the fitting process: {e}")
                     return None, None, None
                 poly_func = np.poly1d(poly_coeffs)
                 y_fit_curve = poly_func(x_fit)
@@ -324,7 +324,7 @@ class Engine:
                     print("Warning: Some y values are negative, which may affect exponential fitting.")
 
                 if initial_params is None:
-                    initial_params = [max(y), 0.01, min(y)]  # 根据数据调整初始值
+                    initial_params = [max(y), 0.01, min(y)]  # Adjustment of initial values according to data
 
                 with warnings.catch_warnings():
                     warnings.simplefilter("error", OptimizeWarning)

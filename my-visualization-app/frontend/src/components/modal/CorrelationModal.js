@@ -68,7 +68,7 @@ const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
       });
 
       const resultData = await result.json();
-      setCorrelationMatrix(resultData.correlation_matrix); // ✅ 存储相关性矩阵
+      setCorrelationMatrix(resultData.correlation_matrix); // Storage correlation matrix
       message.success("Correlation matrix generated!");
       logAction(`Correlation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Correlate")
     } catch (error) {

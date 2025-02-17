@@ -16,10 +16,10 @@ class FitCurveView(APIView):
             body = json.loads(request.body)
             #dataset_id = body.get("dataset_id")
             params = body.get("params", {})
-            x_feature = params.get("xColumn")  # 从 params 读取 x 特征
-            y_feature = params.get("yColumn")  # 从 params 读取 y 特征
-            method = params.get("type", "linear")  # 从 params 读取 method，默认 "linear"
-            degree = params.get("degree", 2)  # 从 params 读取 degree，默认 2
+            x_feature = params.get("xColumn")
+            y_feature = params.get("yColumn")
+            method = params.get("type", "linear")
+            degree = params.get("degree", 2)
             initial_params = params.get("initial_params", None)
             # Ensure dataset_id is provided
             #if not dataset_id:
@@ -178,33 +178,33 @@ class ExtrapolateView(APIView):
 class CorrelationView(APIView):
     def post(self, request):
         try:
-            # 解析请求 JSON
+            # Parsing Request JSON
             body = json.loads(request.body)
-            dataset_id = body.get("dataset_id")  # 获取数据集 ID
-            selected_features = body.get("features", [])  # 获取用户选择的列
-            method = body.get("method", "pearson")  # 相关性计算方法（默认 Pearson）
+            dataset_id = body.get("dataset_id")
+            selected_features = body.get("features", [])
+            method = body.get("method", "pearson")
 
-            # 确保 `dataset_id` 存在
+            # Ensure that `dataset_id` exists
             if not dataset_id:
                 return JsonResponse({"error": "Dataset ID is required"}, status=400)
 
-            # 获取数据集对象
+            # Getting the dataset object
             dataset = get_object_or_404(Dataset, id=dataset_id)  # 用 `id` 代替 `dataset_id`
 
-            # 将数据集转换为 Pandas DataFrame
+            # Converting a dataset to a Pandas DataFrame
             df = dataset.get_dataframe()
 
-            # 确保选中的列在 DataFrame 中
+            # Ensure that the selected columns are in the DataFrame
             if not all(feature in df.columns for feature in selected_features):
                 return JsonResponse({"error": "One or more selected features are missing from the dataset"}, status=400)
 
-            # 计算相关性矩阵
+            # Calculate the correlation matrix
             correlation_matrix = df[selected_features].corr(method=method)
 
-            # 将相关性矩阵转换为 JSON 格式
+            # Convert correlation matrix to JSON format
             result = {
-                "columns": correlation_matrix.columns.tolist(),  # X/Y 轴的列名
-                "values": correlation_matrix.values.tolist(),  # 相关性矩阵的值
+                "columns": correlation_matrix.columns.tolist(),  # Column names for X/Y axis
+                "values": correlation_matrix.values.tolist(),  # Value of the correlation matrix
             }
 
             return JsonResponse({"correlation_matrix": result})

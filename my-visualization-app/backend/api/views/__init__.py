@@ -23,7 +23,7 @@ __all__ = [
     "OversampleDataView",
     "SuggestFeatureCombiningView",
     "SuggestFeatureDroppingView",
-    "AddDataView",
+    # "AddDataView",
     "ExtrapolateView",
     "InterpolateView",
     "CorrelationView",

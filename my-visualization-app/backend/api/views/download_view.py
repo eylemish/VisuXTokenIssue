@@ -15,7 +15,6 @@ import pandas as pd
 @method_decorator(csrf_exempt, name='dispatch')
 class DownloadView(APIView):
     def get(self, request, dataset_id, file_format, *args, **kwargs):
-        print(f"Received dataset_id={dataset_id}, file_format={file_format}")  # 调试信息
 
         # Get the specified dataset
         dataset = get_object_or_404(Dataset, id=dataset_id)
@@ -49,7 +48,7 @@ class DownloadView(APIView):
                 response['Content-Disposition'] = f'attachment; filename="{dataset.name}.xlsx"'
                 return response
             except Exception as e:
-                print(f"Excel generation error: {e}")  # 服务器终端打印错误
+                print(f"Excel generation error: {e}")
                 return JsonResponse({"error": f"Failed to generate Excel file: {str(e)}"}, status=500)
         else:
             return JsonResponse({"error": "Unsupported format"}, status=400)
