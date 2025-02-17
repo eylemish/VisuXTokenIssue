@@ -16,7 +16,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
+const InterpolationModal = ({ visible, onCancel, uiController, logAction, onUpdateDataset, onClose }) => {
   const [method, setMethod] = useState("linear");
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
@@ -26,6 +26,7 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
   const [minValue, setMinValue] = useState(null);
   const [maxValue, setMaxValue] = useState(null);
   const [inputMode, setInputMode] = useState("auto"); // "auto" or "manual"
+  const [newDatasetId, setNewDatasetId] = useState(null);
 
   const [columns, setColumns] = useState([]); // Store column names
   const [showResultModal, setShowResultModal] = useState(false); // Control result modal visibility
@@ -75,6 +76,7 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
   
       const resultData = await result.json(); 
       setInterpolatedData(resultData.interpolated_data);
+      setNewDatasetId(resultData.new_dataset_id);
       message.success("Interpolation started!");
       setShowResultModal(true); // Display result modal when data is ready
       logAction(`Interpolation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Interpolate")
@@ -82,6 +84,23 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
       message.error(`Error: ${error.message}`);
     }
   };
+
+  // apply result
+  const handleApplyInterpolate = () => {
+    
+    if (!newDatasetId || !interpolatedData) {
+        message.error("No reduced dataset available to apply.");
+        return;
+    }
+    console.log("1")
+    datasetManager.addDatasetId(newDatasetId);
+    datasetManager.setCurrentDatasetId(newDatasetId);
+    onUpdateDataset(interpolatedData, newDatasetId);
+    message.success("Interpolate applied successfully!");
+    console.log("2")
+    logAction(`Applied interpolated dataset ID ${newDatasetId} as the new active dataset.`, "Interpolate");
+    onClose();
+};
 
   const handleCloseResultModal = () => {
     setShowResultModal(false);
@@ -121,6 +140,29 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
     { title: xColumn || "X Value", dataIndex: xColumn, key: xColumn },
     { title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn },
   ];
+
+  const renderTable = () => {
+    if (!interpolatedData || !Array.isArray(interpolatedData) || interpolatedData.length === 0) {
+      return <p style={{ textAlign: "center", color: "gray" }}>No data available</p>;
+    }
+
+    const firstRow = interpolatedData[0] || {};
+    const columns = Object.keys(firstRow).map((key) => ({
+      title: key,
+      dataIndex: key,
+      key: key,
+    }));
+
+    const dataSource = interpolatedData.map((row, index) => ({
+      key: index,
+      ...row,
+    }));
+
+    console.log("Generated Table Columns:", columns);
+    console.log("Rendering table with dataSource:", dataSource);
+
+    return <Table dataSource={dataSource} columns={columns} pagination={{ pageSize: 10 }} />;
+  };
 
   return (
     <>
@@ -204,22 +246,14 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction }) => {
         </Button>
       </Modal>
 
-      {/* Modal to display interpolation result */}
-      <Modal
-        title="Interpolation Results"
-        visible={showResultModal}
-        onCancel={handleCloseResultModal}
-        footer={null}
-      >
-        <Table
-          columns={resultColumns}
-          dataSource={interpolatedData}
-          rowKey="x"
-          pagination={false}
-          size="small"
-        />
-        <Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
-          See results a Graph
+      {/* 结果展示 Modal */}
+      <Modal title="Interpolation Results" open={showResultModal} onCancel={() => setShowResultModal(false)} footer={null} width={600}>
+        {interpolatedData && renderTable()}
+        <Button onClick={handleCreateGraph} style={{ marginTop: "10px", marginRight: "10px" }}>
+          Create Graph
+        </Button>
+        <Button type="primary" onClick={handleApplyInterpolate} style={{ marginTop: "10px" }}>
+          Apply Interpolation
         </Button>
       </Modal>
     </>

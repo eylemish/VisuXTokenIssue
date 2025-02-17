@@ -156,7 +156,15 @@ const Sidebar = ({
             {/* interpolation Modal */}
             <InterpolationModal visible={interpolationModalVisible} onCancel={() => setInterpolationModalVisible(false)}
                                 uiController={uiController}
-                                logAction={logAction}/>
+                                logAction={logAction}
+                                onClose={() => setInterpolationModalVisible(false)}
+                                onUpdateDataset={(newData, newDatasetId) => {
+                                    if (newDatasetId) {
+                                        datasetManager.setCurrentDatasetId(newDatasetId);
+                                        console.log(`Current dataset updated to ID: ${newDatasetId}`);
+                                    }
+                                    console.log("Dimensionality reduction result received:", newData);
+                }}/>
 
             {/* extrapolation Modal */}
             <ExtrapolationModal visible={extrapolationModalVisible} onCancel={() => setExtrapolationModalVisible(false)}

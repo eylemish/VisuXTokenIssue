@@ -66,6 +66,7 @@ class InterpolateView(APIView):
             num_points = body.get("numPoints") or 100  # Default to 100 if null
             min_value = body.get("minValue", None)  # Minimum x value for interpolation (optional)
             max_value = body.get("maxValue", None)  # Maximum x value for interpolation (optional)
+            new_dataset_name = body.get("new_dataset_name", "Reduced Dataset")
 
             # Ensure dataset_id is provided
             if not dataset_id:
@@ -86,9 +87,20 @@ class InterpolateView(APIView):
                 min_value=min_value,
                 max_value=max_value
             )
-            print(interpolated_data)
+            # Generate new features and records
+            reduced_features = [x_feature, y_feature]
+            reduced_records = interpolated_data.to_dict(orient="records")
+
+            # Create a new Dataset and associate it with last_dataset
+            new_dataset = Dataset.objects.create(
+                name=new_dataset_name,
+                features=reduced_features,
+                records=reduced_records,
+                last_dataset=dataset  # Linked original dataset
+            )
+            
             # Return the interpolated data in JSON format
-            return JsonResponse({"interpolated_data": interpolated_data.to_dict(orient='records')})
+            return JsonResponse({"interpolated_data": interpolated_data.to_dict(orient='records'), "new_dataset_id": new_dataset.id})
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
