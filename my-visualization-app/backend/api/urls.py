@@ -3,6 +3,7 @@ from .views import DataVisualizationView, OversampleDataView, SuggestFeatureComb
     ApplyPcaView, HandleUserActionView, ExportLogView, ExtrapolateView, FitCurveView, InterpolateView, \
     CorrelationView, DimensionalReductionView, GetCsrfTokenView, DatasetDetailView, DatasetColumnsView, \
     DeleteFeatureView, UploadView, ChangeDataView, DownloadView
+from backend.api.views.dataset_views import CreateDatasetView
 
 urlpatterns = [
     path('visualize/', DataVisualizationView.as_view(), name='visualize'),
@@ -25,4 +26,5 @@ urlpatterns = [
     path('dataset/<int:dataset_id>/columns/', DatasetColumnsView.as_view(), name='dataset-columns'),
     path('change_data/', ChangeDataView.as_view(), name='change-data'),
     path('delete_feature/', DeleteFeatureView.as_view(), name='delete_feature'),
+    path('create_dataset/', CreateDatasetView.as_view(), name = 'creat_dataset'),
 ]

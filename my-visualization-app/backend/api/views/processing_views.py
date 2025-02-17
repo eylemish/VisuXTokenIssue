@@ -88,10 +88,10 @@ class InterpolateView(APIView):
                 min_value=min_value,
                 max_value=max_value
             )
+            """
             # Generate new features and records
             reduced_features = [x_feature, y_feature]
             reduced_records = interpolated_data.to_dict(orient="records")
-            print(reduced_records)
 
             # Create a new Dataset and associate it with last_dataset
             new_dataset = Dataset.objects.create(
@@ -100,9 +100,11 @@ class InterpolateView(APIView):
                 records=reduced_records,
                 last_dataset=dataset  # Linked original dataset
             )
-            
+            """
             # Return the interpolated data in JSON format
-            return JsonResponse({"interpolated_data": interpolated_data.to_dict(orient='records'), "new_dataset_id": new_dataset.id})
+            return JsonResponse({"interpolated_data": interpolated_data.to_dict(orient='records')
+            #, "new_dataset_id": new_dataset.id
+            })
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -140,7 +142,7 @@ class ExtrapolateView(APIView):
                 target_x=extrapolate_range,
                 method=method
             )
-            print(2)
+            """
             # Generate new features and records
             reduced_features = [x_feature, y_feature]
             reduced_records = extrapolated_data.to_dict(orient="records")
@@ -148,10 +150,6 @@ class ExtrapolateView(APIView):
                 for key in record:
                     if isinstance(record[key], np.generic):
                         record[key] = record[key].item()  # convert to Python 
-            print(3)
-            print(dataset.id)
-            print(reduced_features)
-            print(reduced_records)
             # Create a new Dataset and associate it with last_dataset
             new_dataset = Dataset.objects.create(
                 name=new_dataset_name,
@@ -159,14 +157,14 @@ class ExtrapolateView(APIView):
                 records=reduced_records,
                 last_dataset=dataset  # Linked original dataset
             )
-            print(4)
+            """
 
             # Convert the DataFrame to a dictionary and return it to the frontend
             result = extrapolated_data.to_dict(orient='records')
 
             return JsonResponse({"original_data": dataset_df.to_dict(orient='records'),
                 "extrapolated_data": result,
-                "new_dataset_id": new_dataset.id
+                #"new_dataset_id": new_dataset.id
             })
 
         except Exception as e:
@@ -246,10 +244,11 @@ class DimensionalReductionView(APIView):
                 n_components=n_components
             )
 
+            
             # Generate new features and records
             reduced_features = [f"dim{i+1}" for i in range(n_components)]
             reduced_records = reduced_data.to_dict(orient="records")
-
+            """
             # Create a new Dataset and associate it with last_dataset
             new_dataset = Dataset.objects.create(
                 name=new_dataset_name,
@@ -259,10 +258,11 @@ class DimensionalReductionView(APIView):
             )
 
             new_dataset.id = dataset_id + 1
+            """
 
             return JsonResponse({
                 "message": "Dimensionality reduction successful.",
-                "new_dataset_id": new_dataset.id,
+                #"new_dataset_id": new_dataset.id,
                 "reduced_features": reduced_features,
                 "reduced_records": reduced_records
             }, status=200)

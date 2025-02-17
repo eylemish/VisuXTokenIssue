@@ -64,14 +64,14 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
 
             console.log("API Response:", response.data);
 
-            const {new_dataset_id, reduced_features, reduced_records} = response.data;
+            const {reduced_features, reduced_records} = response.data;
 
             if (Array.isArray(reduced_records) && reduced_records.length) {
                 setReducedData({
                     features: reduced_features,
                     records: reduced_records.map((row, index) => ({key: index, ...row})),
                 });
-                setNewDatasetId(new_dataset_id);
+                //setNewDatasetId(new_dataset_id);
             } else {
                 setReducedData(null);
             }
@@ -86,18 +86,35 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
     };
 
     // apply result
-    const handleApplyReduction = () => {
-        if (!newDatasetId || !reducedData) {
+    const handleApplyReduction = async () => {
+        const requestData = {
+            dataset_id: datasetManager.getCurrentDatasetId(), 
+            features: reducedData.features,
+            records: reducedData.records,
+            new_dataset_name: "Interpolated Dataset"
+          };
+          const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+              },
+              body: JSON.stringify(requestData),
+              credentials: "include", // allow to include Cookie
+            });
+          const resultData = await result.json();
+          setNewDatasetId(resultData.new_dataset_id);
+        if (!resultData.new_dataset_id || !reducedData) {
             message.error("No reduced dataset available to apply.");
             return;
         }
 
-        datasetManager.addDatasetId(newDatasetId);
-        datasetManager.setCurrentDatasetId(newDatasetId);
-        onUpdateDataset(reducedData.records, newDatasetId);
+        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
+        onUpdateDataset(reducedData.records, resultData.new_dataset_id);
         message.success("Dimensionality reduction applied successfully!");
 
-        logAction(`Applied reduced dataset ID ${newDatasetId} as the new active dataset.`,method.toUpperCase());
+        logAction(`Applied reduced dataset ID ${resultData.new_dataset_id} as the new active dataset.`,method.toUpperCase());
         onClose();
     };
 
