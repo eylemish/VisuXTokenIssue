@@ -158,21 +158,21 @@ const EditGraphPanel = () => {
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>X Axis: </label>
         <Dropdown overlay={renderFeatureMenu("x")}>
-          <Button>{selectedX || "Select X Axis"}</Button>
+          <Button disabled={selectedX === null}>{selectedX || "Select X Axis"}</Button>
         </Dropdown>
       </div>
 
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Y Axis: </label>
         <Dropdown overlay={renderFeatureMenu("y")}>
-          <Button>{selectedY || "Select Y Axis"}</Button>
+          <Button disabled={selectedY === null}>{selectedY || "Select Y Axis"}</Button>
         </Dropdown>
       </div>
 
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Z Axis: </label>
         <Dropdown overlay={renderFeatureMenu("z")}>
-          <Button>{selectedZ || "Select Z Axis"}</Button>
+          <Button disabled={selectedZ === null}>{selectedZ || "Select Z Axis"}</Button>
         </Dropdown>
       </div>
 
