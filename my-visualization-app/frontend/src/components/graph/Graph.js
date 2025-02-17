@@ -1,8 +1,9 @@
 import GraphStyle from "./GraphStyle";
+import { chartCategories } from "./ChartCategories";
 
 class Graph {
   constructor(id, name, dataset, type, selectedFeatures, style = new GraphStyle()) {
-    console.log("📊 Graph constructor received dataset:", dataset);
+    console.log("Graph constructor received dataset:", dataset);
     this.id = id;
     this.name = name;
     this.dataset = dataset; // { x: [...], y: [...] }
@@ -16,7 +17,7 @@ class Graph {
     this.createdAt = new Date();
     this.updatedAt = new Date();
     this.visible = true;
-    this.fittedCurve = null;  // Used to store curve-fitting data
+    this.fittedCurve = null; // Stores curve-fitting data
   }
 
   updateDataset(newDataset) {
@@ -39,8 +40,7 @@ class Graph {
   }
 
   switchType(newType) {
-    this.type = newType;
-    this.updatedAt = new Date();
+    this.setType(newType);
   }
 
   setMetadata(metadata) {
@@ -91,15 +91,41 @@ class Graph {
     this.dataset = newDataset;
   }
 
-  // 设置拟合曲线数据
   setFittedCurve(fittedCurve) {
     this.fittedCurve = fittedCurve;
     this.updatedAt = new Date();
   }
 
-  // 获取拟合曲线数据
   getFittedCurve() {
     return this.fittedCurve;
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  setType(newType) {
+    const oldType = this.type;
+    this.type = newType;
+
+    const oldRequiredFeatures = this.getRequiredFeatures(oldType);
+    const newRequiredFeatures = this.getRequiredFeatures(newType);
+
+    if (newRequiredFeatures > oldRequiredFeatures) {
+      for (let i = 0; i < newRequiredFeatures - oldRequiredFeatures; i++) {
+        this.selectedFeatures.push(this.selectedFeatures[0]);
+      }
+    } else if (newRequiredFeatures < oldRequiredFeatures) {
+      this.selectedFeatures = this.selectedFeatures.slice(0, newRequiredFeatures);
+    }
+  }
+
+  getRequiredFeatures(graphType) {
+    for (let category in chartCategories) {
+      const searchedType = chartCategories[category].find((searchedType) => searchedType.type === graphType);
+      if (searchedType) return searchedType.requiredFeatures;
+    }
+    return 0;
   }
 }
 

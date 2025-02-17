@@ -1,240 +1,180 @@
+import { enableMock, mockGraphs } from "./mockData";
 import VisualizationManager from "./VisualizationManager";
 import Graph from "./Graph";
+import { chartCategories } from "./ChartCategories";
 
 class GraphManager {
-    constructor() {
-        if (!GraphManager.instance) {
-            this.graphs = new Map();
-            this.currentGraph = null;
-            this.visualizationManager = new VisualizationManager();
-            this.eventListeners = [];
-            GraphManager.instance = this; // Saving the only instance
-        }
-        return GraphManager.instance;
+  constructor() {
+    if (!GraphManager.instance) {
+      this.graphs = new Map();
+      this.currentGraph = null;
+      this.visualizationManager = new VisualizationManager();
+      this.eventListeners = [];
+      GraphManager.instance = this;
+    }
+    return GraphManager.instance;
+  }
+
+  /**
+   * Create a new graph and add it to the graph map.
+   */
+  createGraph(graphInfo) {
+    const graphId = `graph_${Date.now()}`;
+
+    if (!graphInfo.graphType) {
+      console.error("Missing `graphType` in graphInfo.");
+      return null;
     }
 
-    createGraph(graphInfo) {
-        const graphId = `graph_${Date.now()}`;
-
-        if (!graphInfo.graphType) {
-            console.error("Missing `graphType` in graphInfo.");
-            return null;
-        }
-
-        const transformedDataset = {};
-        if (graphInfo.dataset && graphInfo.dataset.records && graphInfo.dataset.features) {
-            graphInfo.dataset.features.forEach(feature => {
-                transformedDataset[feature] = graphInfo.dataset.records.map(record => record[feature]);
-            });
-        } else {
-            console.error("Invalid dataset structure.");
-            return null;
-        }
-
-        console.log(`Transformed dataset for Graph ID ${graphId}:`, transformedDataset);
-
-        const newGraph = new Graph(
-            graphId,
-            graphInfo.graphName || graphId,
-            transformedDataset,
-            graphInfo.graphType, // Ensure that types are passed correctly
-            graphInfo.selectedFeatures || [],
-            {}
-        );
-
-        console.log(`Graph name ${newGraph.name}:`);
-        this.addGraphToMap(newGraph);
-        this.notify({type: "graphUpdated"});
-
-        return newGraph;
+    const transformedDataset = {};
+    if (graphInfo.dataset && graphInfo.dataset.records && graphInfo.dataset.features) {
+      graphInfo.dataset.features.forEach((feature) => {
+        transformedDataset[feature] = graphInfo.dataset.records.map((record) => record[feature]);
+      });
+    } else {
+      console.error("Invalid dataset structure.");
+      return null;
     }
 
+    const newGraph = new Graph(
+      graphId,
+      graphInfo.graphName || graphId,
+      transformedDataset,
+      graphInfo.graphType,
+      graphInfo.selectedFeatures || [],
+      {}
+    );
 
-    addGraphToMap(graph) {
-        if (!(graph instanceof Graph)) {
-            console.error("Invalid Graph object.");
-            return false;
-        }
+    this.addGraphToMap(newGraph);
+    this.notify({ type: "graphUpdated" });
+    return newGraph;
+  }
 
-        if (this.graphs.has(graph.id)) {
-            console.warn(`Graph with ID ${graph.id} already exists in the map.`);
-            return false;
-        }
-
-        this.graphs.set(graph.id, graph);
-        console.log(`Graph (ID: ${graph.id}) added to map.`);
-        return true;
+  /**
+   * Add a graph object to the internal graph map.
+   */
+  addGraphToMap(graph) {
+    if (!(graph instanceof Graph)) {
+      console.error("Invalid Graph object.");
+      return false;
     }
-
-    applyCurveFitting(graphId, fittedData) {
-        const graph = this.graphs.get(graphId);
-        if (!graph) {
-            console.warn(`GraphManager: Graph ID ${graphId} not found.`);
-            return false;
-        }
-        // Storing the fitted data to a chart object
-        graph.fittedCurve = fittedData;
-        console.log(`Graph (ID: ${graphId}) received fitted curve data.`);
-        // Trigger an event to notify the listener that the curve fit has been updated
-        this.notify({ type: "graphUpdated", graphId, updatedGraph: graph });
-        return true;
+    if (this.graphs.has(graph.id)) {
+      console.warn(`Graph with ID ${graph.id} already exists.`);
+      return false;
     }
+    this.graphs.set(graph.id, graph);
+    return true;
+  }
 
-    deleteGraph(graphId) {
-        if (this.graphs.has(graphId)) {
-            this.graphs.delete(graphId);
-            if (this.currentGraph?.id === graphId) {
-                this.currentGraph = null;
-            }
-            console.log(`Deleted Graph (ID: ${graphId})`);
-            return true;
-        }
-        console.warn(`Delete Failed: Graph (ID: ${graphId}) not found`);
-        return false;
+  /**
+   * Apply curve fitting to a graph and notify listeners.
+   */
+  applyCurveFitting(graphId, fittedData) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
+      return false;
     }
+    graph.setFittedCurve(fittedData);
+    this.notify({ type: "graphUpdated", graphId });
+    return true;
+  }
 
-    replaceGraph(graphId, newGraph) {
-        if (this.graphs.has(graphId)) {
-            this.graphs.set(graphId, newGraph);
-            if (this.currentGraph?.id === graphId) {
-                this.currentGraph = newGraph;
-            }
-            console.log(`Replaced Graph (ID: ${graphId})`);
-            return true;
-        }
-        return false;
+  deleteGraph(graphId) {
+    if (this.graphs.has(graphId)) {
+      this.graphs.delete(graphId);
+      if (this.currentGraph?.id === graphId) {
+        this.currentGraph = null;
+      }
+      return true;
     }
+    return false;
+  }
 
-    switchGraphType(graphId, newType) {
-        const graph = this.graphs.get(graphId);
-        if (graph) {
-            graph.type = newType;
-            console.log(`Switched Graph (ID: ${graphId}) to type: ${newType}`);
-            if (this.visualizationManager) {
-                this.visualizationManager.renderChart(graph);
-            } else {
-                console.warn("visualizationManager is undefined, cannot render chart");
-            }
-        }
+  replaceGraph(graphId, newGraph) {
+    if (this.graphs.has(graphId)) {
+      this.graphs.set(graphId, newGraph);
+      if (this.currentGraph?.id === graphId) {
+        this.currentGraph = newGraph;
+      }
+      return true;
     }
+    return false;
+  }
 
-    getGraphById(graphId) {
-        const graph = this.graphs.get(graphId);
-        if (!graph) {
-            console.warn(`GraphManager: Graph ID ${graphId} not found.`);
-            return null;
-        }
-        if (!graph.dataset || Object.keys(graph.dataset).length === 0) {
-            console.warn(`GraphManager: Graph ${graphId} has an empty dataset.`);
-        }
-        return graph;
+  getGraphById(graphId) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
     }
+    return graph || null;
+  }
 
-
-    setCurrentGraph(graphId) {
-        if (this.graphs.has(graphId)) {
-            this.currentGraph = this.graphs.get(graphId);
-            console.log(`Set Current Graph (ID: ${graphId})`);
-            return true;
-        }
-        return false;
+  setCurrentGraph(graphId) {
+    if (this.graphs.has(graphId)) {
+      this.currentGraph = this.graphs.get(graphId);
+      return true;
     }
+    return false;
+  }
 
-    showDatasetPreview() {
-        if (this.currentGraph) {
-            console.log("Dataset Preview:", this.currentGraph.dataset);
-        }
+  updateGraph(graphId, dataset, style) {
+    const graph = this.graphs.get(graphId);
+    if (graph) {
+      graph.setDataset(dataset);
+      graph.updateStyle(style);
+      this.notify({ type: "graphUpdated" });
+      return true;
     }
+    return false;
+  }
 
-    showFeatureSelectionMenu() {
-        if (this.currentGraph) {
-            console.log("Feature Selection Menu for:", this.currentGraph.name);
-        }
+  getAllGraphs() {
+    return Array.from(this.graphs.values());
+  }
+
+  changeGraphColor(graphId, newColor) {
+    const graph = this.graphs.get(graphId);
+    if (graph) {
+      graph.changeColor(newColor);
+      this.notify({ type: "graphUpdated" });
+      return true;
     }
+    return false;
+  }
 
-    updateGraph(graphId, dataset, style) {
-        const graph = this.graphs.get(graphId);
-        if (graph) {
-            graph.dataset = dataset;
-            graph.style = style;
-            console.log(`Updated Graph (ID: ${graphId})`);
-            this.notify({type: "graphUpdated"});
-            return true;
-        }
-        return false;
+  changeAxis(graphId, selectedAxis, newFeature) {
+    const graph = this.graphs.get(graphId);
+    if (graph) {
+      if (selectedAxis === "x") graph.setXAxis(newFeature);
+      if (selectedAxis === "y") graph.setYAxis(newFeature);
+      if (selectedAxis === "z") graph.setZAxis(newFeature);
+      this.notify({ type: "graphUpdated" });
+      return true;
     }
+    return false;
+  }
 
-    getAllGraphs() {
-        return Array.from(this.graphs.values());
+  changeType(graphId, newType) {
+    const graph = this.graphs.get(graphId);
+    if (graph) {
+      graph.setType(newType);
+      this.notify({ type: "graphUpdated" });
     }
+  }
 
-    static getInstance() {
-        if (!GraphManager.instance) {
-            GraphManager.instance = new GraphManager();
-        }
-        return GraphManager.instance;
-    }
+  notify(data) {
+    console.log("GraphManager triggered", data);
+    this.eventListeners.forEach((callback) => callback(data));
+  }
 
-    changeGraphColor(graphId, newColor) {
-        const graph = this.graphs.get(graphId);
-        if (graph) {
-            graph.changeColor(newColor);
-            console.log(`Graph (ID: ${graphId}) color changed to ${newColor}`);
-            this.notify({type: "graphUpdated"});
-            return true;
-        } else {
-            console.warn(`GraphManager: Graph ID ${graphId} not found.`);
-            return false;
-        }
-    }
+  onChange(callback) {
+    this.eventListeners.push(callback);
+  }
 
-    changeAxis(graphId, selectedAxis, newFeature) {
-        const graph = this.graphs.get(graphId);
-        let changedAxis;
-
-        if (graph) {
-            switch (selectedAxis) {
-                case "x":
-                    changedAxis = graph.setXAxis(newFeature);
-                    break;
-                case "y":
-                    changedAxis = graph.setYAxis(newFeature);
-                    break;
-                case "z":
-                    changedAxis = graph.setZAxis(newFeature);
-                    break;
-                default:
-                    console.log("ERROR WITH AXIS");
-                    return false;
-            }
-
-            console.log(`Graph (ID: ${graphId}) changed feature of ${selectedAxis} to ${newFeature}`);
-            this.notify({type: "graphUpdated"});
-            return true;
-        } else {
-            console.warn(`GraphManager: Graph ID ${graphId} not found.`);
-            return false;
-        }
-    }
-
-
-    notify(data) {
-        console.log("GraphManager triggered", data)
-        this.eventListeners.forEach(callback => callback(data));
-    }
-
-    // Subscribe to changes
-    onChange(callback) {
-        this.eventListeners.push(callback);
-    }
-
-
-    // offChange()
-    offChange(callback) {
-        this.eventListeners = this.eventListeners.filter(fn => fn !== callback);
-    }
+  offChange(callback) {
+    this.eventListeners = this.eventListeners.filter((fn) => fn !== callback);
+  }
 }
 
-const graphManagerInstance = new GraphManager();
-export default graphManagerInstance;
-export { GraphManager };
+export default GraphManager.getInstance();
