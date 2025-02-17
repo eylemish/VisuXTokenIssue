@@ -177,4 +177,6 @@ class GraphManager {
   }
 }
 
-export default GraphManager.getInstance();
+const graphManagerInstance = new GraphManager();
+export default graphManagerInstance;
+export { GraphManager };
