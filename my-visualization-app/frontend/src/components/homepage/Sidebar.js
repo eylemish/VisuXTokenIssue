@@ -111,35 +111,42 @@ const Sidebar = ({
 
                 {/* Graph Manager */}
                 <SubMenu key="graphManager" icon={<FundOutlined/>} title="Graph Manager">
-                    <Menu.Item key="newGraph" onClick={() => setNewGraphModalVisible(true)}>New Graph</Menu.Item>
+
+                    <Menu.Item
+                        key="newGraph" onClick={() => setNewGraphModalVisible(true)}>New Graph
+                    </Menu.Item>
                     <Menu.Item //new graph edit
                         key="editGraph"
                         onClick={() => setShowGraphEdit(!showGraphEdit)}>
                         {showGraphEdit ? "Close Graph Edit" : "Edit Graph"}
                     </Menu.Item>
+                    <Menu.Item
+                        key="Correlate Data" onClick={() => setCorrelationModalVisible(true)}>Correlate Data
+                    </Menu.Item>
 
                 </SubMenu>
 
                 {/* Data Processing */}
-                <SubMenu key="dataProcessing" icon={<SlidersOutlined/>} title="Data Processing">
-                    <Menu.Item key="dimReduction" onClick={handleDimensionalityReduction}>
+                <SubMenu key="dataManager" icon={<SlidersOutlined/>} title="Data Manager">
+
+                    <Menu.Item
+                        key="dimReduction" onClick={handleDimensionalityReduction}>
                         Dimensionality Reduction
                     </Menu.Item>
+                    <Menu.Item
+                        key="Interpolate Data" onClick={() => setInterpolationModalVisible(true)}>Interpolate Data
+                    </Menu.Item>
+                    <Menu.Item
+                        key="Extrapolate Data" onClick={() => setExtrapolationModalVisible(true)}>Extrapolate Data
+                    </Menu.Item>
+                    <Menu.Item
+                        key="Oversample Data" onClick={() => setOversampleModalVisible(true)}>Oversample Data
+                    </Menu.Item>
+
+
+
                 </SubMenu>
 
-                {/* Data Analysis */}
-                <SubMenu key="dataAnalysis" icon={<BuildOutlined/>} title="Data Analysis">
-                    {/*<Menu.Item key="Curve Fitting" onClick={() => setCurveFittingModalVisible(true)}>Curve*/}
-                    {/*    Fitting</Menu.Item>*/}
-                    <Menu.Item key="Interpolate Data" onClick={() => setInterpolationModalVisible(true)}>Interpolate
-                        Data</Menu.Item>
-                    <Menu.Item key="Extrapolate Data" onClick={() => setExtrapolationModalVisible(true)}>Extrapolate
-                        Data</Menu.Item>
-                    <Menu.Item key="Oversample Data" onClick={() => setOversampleModalVisible(true)}>Oversample
-                        Data</Menu.Item>
-                    <Menu.Item key="Correlate Data" onClick={() => setCorrelationModalVisible(true)}>Correlate
-                        Data</Menu.Item>
-                </SubMenu>
             </Menu>
 
             {/* modal area */}
