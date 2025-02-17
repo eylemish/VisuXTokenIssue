@@ -92,8 +92,6 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction, onUpda
 
       const resultData = await result.json(); 
       setExtrapolatedData(resultData.extrapolated_data);
-      setNewDatasetId(resultData.new_dataset_id);
-      console.log(extrapolatedData);
       setOriginalData(resultData.original_data);
       message.success("Extrapolation started!");
       setShowResultModal(true); // Display result modal when data is ready
@@ -166,19 +164,34 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction, onUpda
   };
 
   // apply result
-  const handleApplyExtrapolate = () => {
+  const handleApplyExtrapolate = async () => {
+    const requestData = {
+      dataset_id: datasetId, 
+      features: [xColumn, yColumn],
+      records: extrapolatedData,
+      new_dataset_name: "Extrapolated Dataset"
+    };
+    const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+        },
+        body: JSON.stringify(requestData),
+        credentials: "include", // allow to include Cookie
+      });
+    const resultData = await result.json();
+    setNewDatasetId(resultData.new_dataset_id);
     
-    if (!newDatasetId || !extrapolatedData) {
+    if (!resultData.new_dataset_id || !extrapolatedData) {
         message.error("No reduced dataset available to apply.");
         return;
     }
-    console.log("1")
-    datasetManager.addDatasetId(newDatasetId);
-    datasetManager.setCurrentDatasetId(newDatasetId);
-    onUpdateDataset(extrapolatedData, newDatasetId);
+    datasetManager.addDatasetId(resultData.new_dataset_id);
+    datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
+    onUpdateDataset(extrapolatedData, resultData.new_dataset_id);
     message.success("Interpolate applied successfully!");
-    console.log("2")
-    logAction(`Applied extrapolated dataset ID ${newDatasetId} as the new active dataset.`, "Extrapolate");
+    logAction(`Applied extrapolated dataset ID ${resultData.new_dataset_id} as the new active dataset.`, "Extrapolate");
     onClose();
   };
 

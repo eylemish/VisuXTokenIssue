@@ -110,3 +110,34 @@ class DeleteFeatureView(APIView):
             "message": "Feature(s) removed successfully",
             "dataset_id": original_dataset.id
         })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CreateDatasetView(APIView):
+    def post(self, request):
+        try:
+            # Parse the request body
+            body = json.loads(request.body)
+            dataset_id = body.get("dataset_id")  # Get the ID of the uploaded file
+            features = body.get("features")  # The column name for the x-axis
+            name = body.get("new_dataset_name")
+            records = body.get("records")
+
+            last_dataset = get_object_or_404(Dataset, id=dataset_id)
+            print(last_dataset.id)
+            print(features)
+            print(name)
+            print(records)
+
+            # Create a new Dataset and associate it with last_dataset
+            new_dataset = Dataset.objects.create(
+                name=name,
+                features=features,
+                records=records,
+                last_dataset=last_dataset  # Linked original dataset
+            )
+            print("created")
+            # Return the interpolated data in JSON format
+            return JsonResponse({"new_dataset_id": new_dataset.id})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

@@ -86,19 +86,33 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction, onUpda
   };
 
   // apply result
-  const handleApplyInterpolate = () => {
-    
-    if (!newDatasetId || !interpolatedData) {
+  const handleApplyInterpolate = async () => {
+    const requestData = {
+      dataset_id: datasetId, 
+      features: [xColumn, yColumn],
+      records: interpolatedData,
+      new_dataset_name: "Interpolated Dataset"
+    };
+    const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+        },
+        body: JSON.stringify(requestData),
+        credentials: "include", // allow to include Cookie
+      });
+    const resultData = await result.json();
+    setNewDatasetId(resultData.new_dataset_id);
+    if (!resultData.new_dataset_id || !interpolatedData) {
         message.error("No reduced dataset available to apply.");
         return;
     }
-    console.log("1")
-    datasetManager.addDatasetId(newDatasetId);
-    datasetManager.setCurrentDatasetId(newDatasetId);
-    onUpdateDataset(interpolatedData, newDatasetId);
+    datasetManager.addDatasetId(resultData.new_dataset_id);
+    datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
+    onUpdateDataset(interpolatedData, resultData.new_dataset_id);
     message.success("Interpolate applied successfully!");
-    console.log("2")
-    logAction(`Applied interpolated dataset ID ${newDatasetId} as the new active dataset.`, "Interpolate");
+    logAction(`Applied interpolated dataset ID ${resultData.new_dataset_id} as the new active dataset.`, "Interpolate");
     onClose();
   };
 
