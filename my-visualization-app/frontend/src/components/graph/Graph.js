@@ -101,15 +101,12 @@ class Graph {
     const oldRequiredFeatures = this.getRequiredFeatures(oldType);
     const newRequiredFeatures = this.getRequiredFeatures(newType);
 
-    const difference = newRequiredFeatures - oldRequiredFeatures;
-    if (difference > 0) {
-      for (let i = 0; i < difference; i++) {
-        this.selectedFeatures[newRequiredFeatures - 1 - i] = this.selectedFeatures[0];
+    if (newRequiredFeatures > oldRequiredFeatures) {
+      for (let i = 0; i < newRequiredFeatures - oldRequiredFeatures; i++) {
+        this.selectedFeatures.push(this.selectedFeatures[0]);
       }
-    } else if (difference < 0) {
-      for (let i = 0; i < difference; i++) {
-        this.selectedFeatures[oldRequiredFeatures - 1 - i] = null;
-      }
+    } else if (newRequiredFeatures < oldRequiredFeatures) {
+      this.selectedFeatures = this.selectedFeatures.slice(0, newRequiredFeatures);
     }
   }
 
