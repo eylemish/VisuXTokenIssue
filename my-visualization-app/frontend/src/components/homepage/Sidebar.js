@@ -5,7 +5,7 @@ import {
     TableOutlined,
     FileTextOutlined, SlidersOutlined, FundOutlined, LineChartOutlined, BuildOutlined,
 } from "@ant-design/icons";
-import datasetManager from "../file/DatasetManager"; // ✅ 使用单例 DatasetManager
+import datasetManager from "../file/DatasetManager";
 import DimReductionModal from "../modal/DimReductionModal";
 import NewGraphModal from "../modal/NewGraphModal";
 import CurveFittingModal from "../modal/CurveFittingModal";
@@ -31,7 +31,7 @@ const Sidebar = ({
                      showTable,
                      showGraphEdit,
                  }) => {
-    // 控制工具窗口
+    // Control Tool Window
     const [openKeys, setOpenKeys] = useState([]);
     const [newGraphModalVisible, setNewGraphModalVisible] = useState(false);
     const [dimReductionModalVisible, setDimReductionModalVisible] = useState(false);
@@ -67,7 +67,7 @@ const Sidebar = ({
         };
     }, []);
 
-    // 处理菜单展开
+    // Processing Menu Expansion
     const handleOpenChange = (keys) => {
         setOpenKeys(keys);
     };
@@ -129,8 +129,8 @@ const Sidebar = ({
 
                 {/* Data Analysis */}
                 <SubMenu key="dataAnalysis" icon={<BuildOutlined/>} title="Data Analysis">
-                    <Menu.Item key="Curve Fitting" onClick={() => setCurveFittingModalVisible(true)}>Curve
-                        Fitting</Menu.Item>
+                    {/*<Menu.Item key="Curve Fitting" onClick={() => setCurveFittingModalVisible(true)}>Curve*/}
+                    {/*    Fitting</Menu.Item>*/}
                     <Menu.Item key="Interpolate Data" onClick={() => setInterpolationModalVisible(true)}>Interpolate
                         Data</Menu.Item>
                     <Menu.Item key="Extrapolate Data" onClick={() => setExtrapolationModalVisible(true)}>Extrapolate
