@@ -192,6 +192,7 @@ const ExtrapolationModal = ({ visible, onCancel, uiController, logAction, onUpda
     onUpdateDataset(extrapolatedData, resultData.new_dataset_id);
     message.success("Interpolate applied successfully!");
     logAction(`Applied extrapolated dataset ID ${resultData.new_dataset_id} as the new active dataset.`, "Extrapolate");
+    setShowResultModal(false);
     onClose();
   };
 

@@ -113,6 +113,7 @@ const InterpolationModal = ({ visible, onCancel, uiController, logAction, onUpda
     onUpdateDataset(interpolatedData, resultData.new_dataset_id);
     message.success("Interpolate applied successfully!");
     logAction(`Applied interpolated dataset ID ${resultData.new_dataset_id} as the new active dataset.`, "Interpolate");
+    setShowResultModal(false);
     onClose();
   };
 

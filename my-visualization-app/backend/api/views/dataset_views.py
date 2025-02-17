@@ -123,11 +123,6 @@ class CreateDatasetView(APIView):
             records = body.get("records")
 
             last_dataset = get_object_or_404(Dataset, id=dataset_id)
-            print(last_dataset.id)
-            print(features)
-            print(name)
-            print(records)
-
             # Create a new Dataset and associate it with last_dataset
             new_dataset = Dataset.objects.create(
                 name=name,
@@ -135,8 +130,7 @@ class CreateDatasetView(APIView):
                 records=records,
                 last_dataset=last_dataset  # Linked original dataset
             )
-            print("created")
-            # Return the interpolated data in JSON format
+            # Return the created dataset id in JSON format
             return JsonResponse({"new_dataset_id": new_dataset.id})
 
         except Exception as e:
