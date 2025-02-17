@@ -1,6 +1,7 @@
 import { enableMock, mockGraphs } from "./mockData";
 import VisualizationManager from "./VisualizationManager";
 import Graph from "./Graph";
+import { chartCategories } from "./ChartCategories";
 
 class GraphManager {
   constructor() {
@@ -111,18 +112,20 @@ class GraphManager {
     return false;
   }
 
-  switchGraphType(graphId, newType) {
-    const graph = this.graphs.get(graphId);
-    if (graph) {
-      graph.type = newType;
-      console.log(`Switched Graph (ID: ${graphId}) to type: ${newType}`);
-      if (this.visualizationManager) {
-        this.visualizationManager.renderChart(graph);
-      } else {
-        console.warn("visualizationManager is undefined, cannot render chart");
-      }
-    }
-  }
+  // idk who wrote this but this is not working
+
+  // switchGraphType(graphId, newType) {
+  //   const graph = this.graphs.get(graphId);
+  //   if (graph) {
+  //     graph.type = newType;
+  //     console.log(`Switched Graph (ID: ${graphId}) to type: ${newType}`);
+  //     if (this.visualizationManager) {
+  //       this.visualizationManager.renderChart(graph);
+  //     } else {
+  //       console.warn("visualizationManager is undefined, cannot render chart");
+  //     }
+  //   }
+  // }
 
   getGraphById(graphId) {
   const graph = this.graphs.get(graphId);
@@ -218,22 +221,33 @@ class GraphManager {
     }
 }
 
+changeType(graphId, newType) {
+  const graph = this.graphs.get(graphId);
 
-  notify(data) {
-    console.log("GraphManager triggered", data)
-    this.eventListeners.forEach(callback => callback(data));
+  if (graph) {
+    graph.setType(newType);
+    console.log(`Graph (ID: ${graphId}) changed type to ${newType}`);
+      this.notify({ type: "graphUpdated" });
+  } else {
+    console.warn(`GraphManager: Graph ID ${graphId} not found.`);
   }
+}
 
-  // Subscribe to changes
-  onChange(callback) {
-    this.eventListeners.push(callback);
-  }
+//these 3 are all related to notifing graph section about the changes
+notify(data) {
+  console.log("GraphManager triggered", data)
+  this.eventListeners.forEach(callback => callback(data));
+}
+
+onChange(callback) {
+  this.eventListeners.push(callback);
+}
 
 
-  // offChange()
-  offChange(callback) {
-    this.eventListeners = this.eventListeners.filter(fn => fn !== callback);
-  }
+
+offChange(callback) {
+  this.eventListeners = this.eventListeners.filter(fn => fn !== callback);
+}
   
 }
 

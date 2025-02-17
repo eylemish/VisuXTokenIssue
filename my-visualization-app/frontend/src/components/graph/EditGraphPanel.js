@@ -4,6 +4,7 @@ import { ChromePicker } from "react-color";
 import GraphManager from "./GraphManager";
 import VisualizationManager from "./VisualizationManager";
 import CurveFittingModal from "../modal/CurveFittingModal";
+import { chartCategories } from "./ChartCategories";
 
 const visualizationManager = new VisualizationManager();
 
@@ -14,6 +15,7 @@ const EditGraphPanel = () => {
   const [selectedX, setSelectedX] = useState(null);
   const [selectedY, setSelectedY] = useState(null);
   const [selectedZ, setSelectedZ] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
   
   const [curveFitVisible, setCurveFitVisible] = useState(false);
 
@@ -32,7 +34,7 @@ const EditGraphPanel = () => {
       setGraphDetails(graphs);
     };
 
-    fetchGraphs(); // 初次加载
+    fetchGraphs(); // 初次加载 -why are you copy/pasting the lines i wrote and then comment in chinese?
 
     const handleGraphChange = () => fetchGraphs();
     GraphManager.onChange(handleGraphChange);
@@ -40,7 +42,7 @@ const EditGraphPanel = () => {
     return () => GraphManager.offChange(handleGraphChange);
   }, []);
 
-  // 选择图表后，更新颜色
+  // 选择图表后，更新颜色 -same for here
   const handleGraphSelect = (graphId) => {
     setSelectedGraphForEdit(graphId);
     const graph = graphDetails.find((g) => g.graphId === graphId);
@@ -51,18 +53,18 @@ const EditGraphPanel = () => {
     setSelectedZ(graph?.zColumn || null);
   };
 
-  // 颜色选择
+  // 颜色选择 -same for here
   const handleColorChange = (color) => {
     setEditColor(color.hex);
   };
 
-  // 提交颜色修改
+  // 提交颜色修改 -same for here
   const handleEditGraphSubmit = () => {
     if (!selectedGraphForEdit) return;
 
     GraphManager.changeGraphColor(selectedGraphForEdit, editColor);
 
-    // 更新 UI
+    // 更新 UI -same for here
     setGraphDetails((prevState) =>
       prevState.map((graph) =>
         graph.graphId === selectedGraphForEdit
@@ -89,16 +91,6 @@ const EditGraphPanel = () => {
     GraphManager.changeAxis(selectedGraphForEdit, axis, newFeature);
   };
 
-  // const renderFeatureMenu = (axis) => (
-  //   <Menu>
-  //     {Object.keys(selectedGraph?.graph?.getdataset()).map((feature) => (
-  //       <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
-  //         {feature}
-  //       </Menu.Item>
-  //     ))}
-  //   </Menu>
-  // );
-
   const renderFeatureMenu = (axis) => {
     const dataset = selectedGraph?.graphObject?.getDataset
       ? selectedGraph.graphObject.getDataset()
@@ -122,6 +114,32 @@ const EditGraphPanel = () => {
       </Menu>
     );
   };
+
+  const handleTypeChange = (newType) => {
+    if (!selectedGraphForEdit) return;
+
+    setSelectedType(newType);
+    GraphManager.changeType(selectedGraphForEdit, newType);
+  };
+
+  const renderChartCategories = () => (
+    <Menu>
+      {Object.entries(chartCategories).map(([category, charts]) => (
+        <Menu.SubMenu key={category} title={category}>
+          {charts.map((chart) => (
+            <Menu.Item
+              key={chart.type}
+              onClick={() => handleTypeChange(chart.type)}
+            >
+              <Space>
+                {chart.icon} {chart.name}
+              </Space>
+            </Menu.Item>
+          ))}
+        </Menu.SubMenu>
+      ))}
+    </Menu>
+  );
   
   
 
@@ -156,6 +174,13 @@ const EditGraphPanel = () => {
       </Button>
 
       <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>Select Chart Type: </label>
+        <Dropdown overlay={renderChartCategories}>
+          <Button>Select Chart Type</Button>
+        </Dropdown>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>X Axis: </label>
         <Dropdown overlay={renderFeatureMenu("x")}>
           <Button disabled={selectedX === null}>{selectedX || "Select X Axis"}</Button>
@@ -175,7 +200,6 @@ const EditGraphPanel = () => {
           <Button disabled={selectedZ === null}>{selectedZ || "Select Z Axis"}</Button>
         </Dropdown>
       </div>
-
 
       {/* CurveFittingModal */}
       {curveFitVisible && (

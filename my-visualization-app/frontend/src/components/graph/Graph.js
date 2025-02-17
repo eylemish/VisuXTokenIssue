@@ -1,4 +1,5 @@
 import GraphStyle from "./GraphStyle";
+import { chartCategories } from "./ChartCategories";
 
 class Graph {
   constructor(id, name, dataset, type, selectedFeatures, style = new GraphStyle()) {
@@ -88,6 +89,37 @@ class Graph {
   setDataset(newDataset) {
     this.dataset = newDataset
   }
+
+  getType() {
+    return this.type;
+  }
+
+  setType(newType) {
+    const oldType = this.type;
+    this.type = newType;
+
+    const oldRequiredFeatures = this.getRequiredFeatures(oldType);
+    const newRequiredFeatures = this.getRequiredFeatures(newType);
+
+    const difference = newRequiredFeatures - oldRequiredFeatures;
+    if (difference > 0) {
+      for (let i = 0; i < difference; i++) {
+        this.selectedFeatures[newRequiredFeatures - 1 - i] = this.selectedFeatures[0];
+      }
+    } else if (difference < 0) {
+      for (let i = 0; i < difference; i++) {
+        this.selectedFeatures[oldRequiredFeatures - 1 - i] = null;
+      }
+    }
+  }
+
+  getRequiredFeatures(graphType) {
+    for (let category in chartCategories) {
+        const searchedType = chartCategories[category].find((searchedType) =>searchedType.type === graphType);
+        if (searchedType) return searchedType.requiredFeatures;
+    }
+    return 0;
+}
 
   // needs update
   // getGraphInfo() { 
