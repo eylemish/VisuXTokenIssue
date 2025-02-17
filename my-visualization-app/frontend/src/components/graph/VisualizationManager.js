@@ -16,7 +16,7 @@ class VisualizationManager {
         ],
         "Advanced Charts": [
             {type: "heatmap", name: "Heatmap", requiredFeatures: 3},
-            {type: "radar", name: "Radar Chart", requiredFeatures: 3},
+            {type: "scatterpolar", name: "Radar Chart", requiredFeatures: 3},
             {type: "dot", name: "Dot Chart", requiredFeatures: 2},
             {type: "area", name: "Area Chart", requiredFeatures: 2},
         ],
@@ -47,7 +47,7 @@ class VisualizationManager {
 
         // raw data
         let plotData = {
-            type: type === "scatter3d" ? "scatter3d" : type,
+            type: type,
             mode: type === "scatter" || type === "scatter3d" ? "markers" : undefined,
             marker: {
                 color: graphStyle.getMarkerStyle()?.color || "blue",
@@ -93,14 +93,6 @@ class VisualizationManager {
             yaxis: {title: selectedFeatures[1] || "Y"},
             ...graphStyle.getLayout(),
         };
-
-        // if (type === "scatter3d" || featureData.length >= 3) {
-        //     layout.scene = {
-        //         xaxis: {title: selectedFeatures[0] || "X"},
-        //         yaxis: {title: selectedFeatures[1] || "Y"},
-        //         zaxis: {title: selectedFeatures[2] || "Z"},
-        //     };
-        // }
 
         return {data: traces, layout};
     }

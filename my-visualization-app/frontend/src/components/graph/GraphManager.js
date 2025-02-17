@@ -159,10 +159,15 @@ class GraphManager {
     const graph = this.graphs.get(graphId);
     if (graph) {
       graph.setType(newType);
-      this.notify({ type: "graphUpdated" });
-    }
+      console.log(`Graph (ID: ${graphId}) changed type to ${newType}`);
+        this.notify({ type: "graphUpdated" });
+    } else {
+      console.warn(`GraphManager: Graph ID ${graphId} not found.`);
   }
+ } 
 
+
+  //these 3 are all related to notifying other claasses about changes
   notify(data) {
     console.log("GraphManager triggered", data);
     this.eventListeners.forEach((callback) => callback(data));

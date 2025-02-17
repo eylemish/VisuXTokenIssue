@@ -30,12 +30,14 @@ const EditGraphPanel = () => {
         dataset: graph.dataset || {},
         color: graph.style?.colorScheme || "#ffffff",
         style: graph.style,
-        graphObject: graph,
+        graphObject: graph, //to save the original object
       }));
       setGraphDetails(graphs);
     };
 
     fetchGraphs();
+
+    const handleGraphChange = () => fetchGraphs();
     GraphManager.onChange(fetchGraphs);
 
     return () => GraphManager.offChange(fetchGraphs);
@@ -55,8 +57,11 @@ const EditGraphPanel = () => {
   };
 
   const handleEditGraphSubmit = () => {
+
     if (!selectedGraphForEdit) return;
+
     GraphManager.changeGraphColor(selectedGraphForEdit, editColor);
+    
     setGraphDetails((prevState) =>
       prevState.map((graph) =>
         graph.graphId === selectedGraphForEdit
@@ -77,18 +82,25 @@ const EditGraphPanel = () => {
   };
 
   const renderFeatureMenu = (axis) => {
-    const dataset = selectedGraph?.graphObject?.getDataset?.() || {};
+    const dataset = selectedGraph?.graphObject?.getDataset
+      ? selectedGraph.graphObject.getDataset()
+      : null;
+
+    if (!dataset) {
+      return (
+        <Menu>
+          <Menu.Item disabled>No Features Available</Menu.Item>
+        </Menu>
+      );
+    }
+
     return (
       <Menu>
-        {Object.keys(dataset).length > 0 ? (
-          Object.keys(dataset).map((feature) => (
-            <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
-              {feature}
-            </Menu.Item>
-          ))
-        ) : (
-          <Menu.Item disabled>No Features Available</Menu.Item>
-        )}
+        {Object.keys(dataset).map((feature) => (
+          <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
+            {feature}
+          </Menu.Item>
+        ))}
       </Menu>
     );
   };
@@ -98,6 +110,7 @@ const EditGraphPanel = () => {
     setSelectedType(newType);
     GraphManager.changeType(selectedGraphForEdit, newType);
 
+     //rerendering is for when the new type has different amount of features than the old one
     const updatedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
     if (updatedGraph) {
       setSelectedX(updatedGraph.graphFeatures[0] || null);
@@ -111,7 +124,10 @@ const EditGraphPanel = () => {
       {Object.entries(chartCategories).map(([category, charts]) => (
         <Menu.SubMenu key={category} title={category}>
           {charts.map((chart) => (
-            <Menu.Item key={chart.type} onClick={() => handleTypeChange(chart.type)}>
+            <Menu.Item
+              key={chart.type}
+              onClick={() => handleTypeChange(chart.type)}
+            >
               <Space>
                 {chart.icon} {chart.name}
               </Space>
@@ -121,6 +137,7 @@ const EditGraphPanel = () => {
       ))}
     </Menu>
   );
+
 
   return (
     <Card title="Edit Graph" style={{ width: "100%" }}>
@@ -140,25 +157,35 @@ const EditGraphPanel = () => {
         <ChromePicker color={editColor} onChange={handleColorChange} />
       </div>
 
-      <Button type="primary" onClick={handleEditGraphSubmit}>Update Graph</Button>
+      <Button type="primary" onClick={handleEditGraphSubmit}>Recolour Graph</Button>
       <Button type="default" onClick={() => setCurveFitVisible(true)}>Fit Curve</Button>
 
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Select Chart Type: </label>
-        <Dropdown overlay={renderChartCategories}><Button>Select Chart Type</Button></Dropdown>
+        <Dropdown overlay={renderChartCategories}>
+          <Button>Select Chart Type</Button>
+        </Dropdown>
       </div>
 
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>X Axis: </label>
-        <Dropdown overlay={renderFeatureMenu("x")}><Button>{selectedX || "Select X Axis"}</Button></Dropdown>
+        <Dropdown overlay={renderFeatureMenu("x")}>
+          <Button disabled={selectedX === null}>{selectedX || "Select X Axis"}</Button>
+        </Dropdown>
       </div>
+
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Y Axis: </label>
-        <Dropdown overlay={renderFeatureMenu("y")}><Button>{selectedY || "Select Y Axis"}</Button></Dropdown>
+        <Dropdown overlay={renderFeatureMenu("y")}>
+          <Button disabled={selectedY === null}>{selectedY || "Select Y Axis"}</Button>
+        </Dropdown>
       </div>
+      
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Z Axis: </label>
-        <Dropdown overlay={renderFeatureMenu("z")}><Button>{selectedZ || "Select Z Axis"}</Button></Dropdown>
+        <Dropdown overlay={renderFeatureMenu("z")}>
+          <Button disabled={selectedZ === null}>{selectedZ || "Select Z Axis"}</Button>
+        </Dropdown>
       </div>
 
       {curveFitVisible && selectedGraph && (

@@ -24,7 +24,7 @@ const chartCategories = {
   ],
   "Advanced Charts": [
     { type: "heatmap", name: "Heatmap", icon: <HeatMapOutlined />, requiredFeatures: 3 },
-    { type: "radar", name: "Radar Chart", icon: <RadarChartOutlined />, requiredFeatures: 3 },
+    { type: "scatterpolar", name: "Radar Chart", icon: <RadarChartOutlined />, requiredFeatures: 3 },
     { type: "dot", name: "Dot Chart", icon: <DotChartOutlined />, requiredFeatures: 2 },
     { type: "area", name: "Area Chart", icon: <AreaChartOutlined />, requiredFeatures: 2 },
   ],
