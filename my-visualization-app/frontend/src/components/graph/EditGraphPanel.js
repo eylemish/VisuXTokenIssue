@@ -25,6 +25,7 @@ const EditGraphPanel = () => {
         graphId: graph.id,
         graphName: graph.name,
         graphType: graph.type,
+        graphFeatures: graph.selectedFeatures,
         xColumn: graph.xAxis,
         yColumn: graph.yAxis,
         color: graph.style?.colorScheme || "#ffffff",
@@ -48,9 +49,9 @@ const EditGraphPanel = () => {
     const graph = graphDetails.find((g) => g.graphId === graphId);
     setEditColor(graph ? graph.color : "#ffffff");
 
-    setSelectedX(graph?.xColumn || null);
-    setSelectedY(graph?.yColumn || null);
-    setSelectedZ(graph?.zColumn || null);
+    setSelectedX(graph?.graphFeatures[0] || null);
+    setSelectedY(graph?.graphFeatures[1] || null);
+    setSelectedZ(graph?.graphFeatures[2] || null);
   };
 
   // 颜色选择 -same for here
@@ -120,6 +121,14 @@ const EditGraphPanel = () => {
 
     setSelectedType(newType);
     GraphManager.changeType(selectedGraphForEdit, newType);
+
+    //rerendering is for when the new type has different amount of features than the old one
+    const updatedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
+    if (updatedGraph) {
+      setSelectedX(updatedGraph.graphFeatures[0] || null);
+      setSelectedY(updatedGraph.graphFeatures[1] || null);
+      setSelectedZ(updatedGraph.graphFeatures[2] || null);
+    }
   };
 
   const renderChartCategories = () => (
