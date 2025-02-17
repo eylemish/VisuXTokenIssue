@@ -10,9 +10,6 @@ import GraphWindow from "../graph/GraphWindow";
 import LogManager from "../log/LogManager";
 import LogWindow from "../log/LogWindow";
 import EditGraphPanel from "../graph/EditGraphPanel";
-import DimReductionModal from "../modal/DimReductionModal";
-import Sidebar from "./Sidebar";
-import { Layout, message } from "antd";
 
 const gridConfig = {
   cols: 12,
@@ -69,7 +66,6 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
   const [graphWindows, setGraphWindows] = useState([]);
 
   const logManager = uiController.getLogManager(); // Access to the log manager via UIController
-  const [logs, setLogs] = useState(logManager.getLogs());
   useEffect(() => {
     const handleResize = () => {
       setGridWidth(window.innerWidth - 200);
