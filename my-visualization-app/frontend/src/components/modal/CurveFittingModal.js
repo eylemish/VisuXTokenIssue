@@ -1,100 +1,59 @@
-import React, {useEffect, useState} from "react";
-import { Modal, Button, Input, Select, message, Table } from "antd";
-import Action from "../Action";
-import CurveFitPlot from "../graph/CurveFitPlot";
+import React, { useState, useEffect } from "react";
+import { Modal, Button, Input, Select, message } from "antd";
+import GraphManager from "../graph/GraphManager";
 
-// Get CSRF Token（fit Django）
-function getCSRFToken() {
-  let cookieValue = null;
-  if (document.cookie) {
-    document.cookie.split(";").forEach((cookie) => {
-      const [name, value] = cookie.trim().split("=");
-      if (name === "csrftoken") {
-        cookieValue = decodeURIComponent(value);
-      }
-    });
-  }
-  return cookieValue;
-}
+const CurveFittingModal = ({ visible, onCancel, graph }) => {
 
-const CurveFittingModal = ({ visible, onCancel, uiController, xColumn, yColumn, logAction }) => {
   const [degree, setDegree] = useState(2);
   const [fitType, setFitType] = useState("polynomial");
-  //const [datasetId, setDatasetId] = useState(null);
-  //const [xColumn, setXColumn] = useState(null);
-  //const [yColumn, setYColumn] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedX, setSelectedX] = useState("");
+  const [selectedY, setSelectedY] = useState("");
 
-
-  //const [columns, setColumns] = useState([]); 
-  const [originalData, setOriginalData] = useState([]);
-  const [fittedData, setFittedData] = useState([]);
-  const [params, setParams] = useState([]);
-  const [covariance, setCovariance] = useState([]);
-
-  //const datasetManager = uiController.getDatasetManager();
-  //const availableDatasets = datasetManager.getAllDatasetsId();
-
-  /**
-  // **Get column names when the user selects a dataset**
+  // Update X / Y axis options when `graph` changes
   useEffect(() => {
-    if (!datasetId) {
-      setColumns([]);
+    if (graph && graph.dataset && Object.keys(graph.dataset).length > 0) {
+      setSelectedX(graph.xAxis || Object.keys(graph.dataset)[0]);
+      setSelectedY(graph.yAxis || Object.keys(graph.dataset)[1]);
+    } else {
+      setSelectedX("");
+      setSelectedY("");
+    }
+  }, [graph]);
+
+  const handleFit = async () => {
+    if (!selectedX || !selectedY) {
+      message.error("Please select valid X and Y columns.");
       return;
     }
 
-    const fetchColumns = async () => {
-      const cols = await datasetManager.getDatasetColumns(datasetId);
-      setColumns(cols);
-    };
-
-    fetchColumns();
-  }, [datasetId]); // Dependent on `datasetId`, triggered on change
- */
-
-
-  const handleFit = async () => {
-    //if (!datasetId || !xColumn || !yColumn) {
-    //  message.error("Please select a dataset and two columns!");
-     // return;
-    //}
-  
-    console.log(xColumn);
     const requestData = {
-      //dataset_id: datasetId,  // ensure valid datasetID
       params: {
-        xColumn,
-        yColumn,
+        xColumn: selectedX,
+        yColumn: selectedY,
         type: fitType,
-        degree: degree
-      }
+        degree: fitType === "polynomial" ? degree : undefined,
+      },
     };
-    
+
     setLoading(true);
     try {
       const result = await fetch("http://127.0.0.1:8000/api/fit_curve/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken()  // make sure send CSRF Token
-      },
-      body: JSON.stringify(requestData),
-      credentials: "include", // allow to include Cookie
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
       });
-  
-      const resultData = await result.json(); // to JSON
+
+      const resultData = await result.json();
       if (resultData.error) {
         message.error(`Curve fitting failed: ${resultData.error}`);
         return;
       }
+      console.log("test:", resultData.generated_data);
 
-      
-      setOriginalData(resultData.original_data); // store original data
-      setFittedData(resultData.generated_data);
-      setParams(resultData.params);
-      setCovariance(resultData.covariance);
+      GraphManager.applyCurveFitting(graph.graphId, resultData.generated_data);
       message.success("Curve fitting completed!");
-      logAction(`Curve fitting performed using ${requestData.kind}.`, "Curve fitting")
+      onCancel();
     } catch (error) {
       message.error(`Error: ${error.message}`);
     } finally {
@@ -102,47 +61,50 @@ const CurveFittingModal = ({ visible, onCancel, uiController, xColumn, yColumn, 
     }
   };
 
-  
   return (
     <Modal title="Curve Fitting" open={visible} onCancel={onCancel} footer={null}>
-      <p><strong>X Column:</strong> {xColumn}</p>
-      <p><strong>Y Column:</strong> {yColumn}</p>
+      {graph && graph.dataset && Object.keys(graph.dataset).length > 0 ? (
+        <>
+          <p><strong>Select X Column:</strong></p>
+          <Select value={selectedX} onChange={setSelectedX} style={{ width: "100%" }}>
+            {Object.keys(graph.dataset).map((feature) => (
+              <Select.Option key={feature} value={feature}>{feature}</Select.Option>
+            ))}
+          </Select>
 
-      <Select defaultValue="polynomial" onChange={setFitType} style={{ width: "100%", marginTop: "10px" }}>
-        <Select.Option value="linear">Linear</Select.Option>
-        <Select.Option value="polynomial">Polynomial</Select.Option>
-        <Select.Option value="exponential">Exponential</Select.Option>
-      </Select>
+          <p style={{ marginTop: "10px" }}><strong>Select Y Column:</strong></p>
+          <Select value={selectedY} onChange={setSelectedY} style={{ width: "100%" }}>
+            {Object.keys(graph.dataset).map((feature) => (
+              <Select.Option key={feature} value={feature}>{feature}</Select.Option>
+            ))}
+          </Select>
 
-      {fitType === "polynomial" && (
-        <Input
-          type="number"
-          placeholder="Degree"
-          value={degree}
-          onChange={(e) => setDegree(e.target.value)}
-          min={1}
-          max={10}
-          style={{ marginTop: "10px" }}
-        />
+          <p style={{ marginTop: "10px" }}><strong>Fit Type:</strong></p>
+          <Select value={fitType} onChange={setFitType} style={{ width: "100%" }}>
+            <Select.Option value="linear">Linear</Select.Option>
+            <Select.Option value="polynomial">Polynomial</Select.Option>
+            <Select.Option value="exponential">Exponential</Select.Option>
+          </Select>
+
+          {fitType === "polynomial" && (
+            <Input
+              type="number"
+              value={degree}
+              onChange={(e) => setDegree(Number(e.target.value))}
+              min={1}
+              max={10}
+              style={{ marginTop: "10px" }}
+            />
+          )}
+
+          <Button type="primary" onClick={handleFit} block style={{ marginTop: "10px" }} loading={loading}>
+            {loading ? "Fitting..." : "Run Curve Fitting"}
+          </Button>
+        </>
+      ) : (
+        <p style={{ color: "red" }}>Error: No data available for curve fitting.</p>
       )}
-
-      <Button type="primary" onClick={handleFit} block style={{ marginTop: "10px" }}>
-        Run Curve Fitting
-      </Button>
-
-      {fittedData.length > 0 && (
-      <div style={{ marginTop: "20px" }}>
-        <h3>Fitting Results</h3>
-        <CurveFitPlot originalData={originalData} fittedData={fittedData} />
-
-        <div style={{ marginTop: "20px" }}>
-        <h4>Fitting Parameters</h4>
-        <pre>{JSON.stringify(params, null, 2)}</pre> {/* show params in JSON format */}
-        </div>
-      </div>
-    )}
     </Modal>
-    
   );
 };
 

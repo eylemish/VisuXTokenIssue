@@ -2,6 +2,7 @@ import GraphStyle from "./GraphStyle";
 
 class Graph {
   constructor(id, name, dataset, type, selectedFeatures, style = new GraphStyle()) {
+    console.log("📊 Graph constructor received dataset:", dataset);
     this.id = id;
     this.name = name;
     this.dataset = dataset; // { x: [...], y: [...] }
@@ -15,6 +16,7 @@ class Graph {
     this.createdAt = new Date();
     this.updatedAt = new Date();
     this.visible = true;
+    this.fittedCurve = null;  // Used to store curve-fitting data
   }
 
   updateDataset(newDataset) {
@@ -86,24 +88,19 @@ class Graph {
   }
 
   setDataset(newDataset) {
-    this.dataset = newDataset
+    this.dataset = newDataset;
   }
 
-  // needs update
-  // getGraphInfo() { 
-  //   return {
-  //     id: this.id,
-  //     name: this.name,
-  //     type: this.type,
-  //     xAxisLabel: this.xAxisLabel,
-  //     yAxisLabel: this.yAxisLabel,
-  //     dataset: this.dataset,
-  //     style: this.style,
-  //     metadata: this.metadata,
-  //     createdAt: this.createdAt,
-  //     updatedAt: this.updatedAt,
-  //   };
-  // }
+  // 设置拟合曲线数据
+  setFittedCurve(fittedCurve) {
+    this.fittedCurve = fittedCurve;
+    this.updatedAt = new Date();
+  }
+
+  // 获取拟合曲线数据
+  getFittedCurve() {
+    return this.fittedCurve;
+  }
 }
 
 export default Graph;
