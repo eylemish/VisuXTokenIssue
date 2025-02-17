@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Select, Button } from "antd";
+import { Card, Select, Button, Dropdown, Space, Menu } from "antd";
 import { ChromePicker } from "react-color";
 import GraphManager from "./GraphManager";
 import VisualizationManager from "./VisualizationManager";
@@ -11,6 +11,10 @@ const EditGraphPanel = () => {
   const [graphDetails, setGraphDetails] = useState([]);
   const [selectedGraphForEdit, setSelectedGraphForEdit] = useState(null);
   const [editColor, setEditColor] = useState("#ffffff");
+  const [selectedX, setSelectedX] = useState(null);
+  const [selectedY, setSelectedY] = useState(null);
+  const [selectedZ, setSelectedZ] = useState(null);
+  
   const [curveFitVisible, setCurveFitVisible] = useState(false);
 
   useEffect(() => {
@@ -23,6 +27,7 @@ const EditGraphPanel = () => {
         yColumn: graph.yAxis,
         color: graph.style?.colorScheme || "#ffffff",
         style: graph.style,
+        graphObject: graph, //to save the original object
       }));
       setGraphDetails(graphs);
     };
@@ -40,6 +45,10 @@ const EditGraphPanel = () => {
     setSelectedGraphForEdit(graphId);
     const graph = graphDetails.find((g) => g.graphId === graphId);
     setEditColor(graph ? graph.color : "#ffffff");
+
+    setSelectedX(graph?.xColumn || null);
+    setSelectedY(graph?.yColumn || null);
+    setSelectedZ(graph?.zColumn || null);
   };
 
   // 颜色选择
@@ -68,6 +77,53 @@ const EditGraphPanel = () => {
   };
 
   const selectedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
+
+  const handleAxisChange = (axis, newFeature) => {
+    if (!selectedGraphForEdit) return;
+  
+
+    if (axis === "x") setSelectedX(newFeature);
+    if (axis === "y") setSelectedY(newFeature);
+    if (axis === "z") setSelectedZ(newFeature);
+  
+    GraphManager.changeAxis(selectedGraphForEdit, axis, newFeature);
+  };
+
+  // const renderFeatureMenu = (axis) => (
+  //   <Menu>
+  //     {Object.keys(selectedGraph?.graph?.getdataset()).map((feature) => (
+  //       <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
+  //         {feature}
+  //       </Menu.Item>
+  //     ))}
+  //   </Menu>
+  // );
+
+  const renderFeatureMenu = (axis) => {
+    const dataset = selectedGraph?.graphObject?.getDataset
+      ? selectedGraph.graphObject.getDataset()
+      : null;
+  
+    if (!dataset) {
+      return (
+        <Menu>
+          <Menu.Item disabled>No Features Available</Menu.Item>
+        </Menu>
+      );
+    }
+  
+    return (
+      <Menu>
+        {Object.keys(dataset).map((feature) => (
+          <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
+            {feature}
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
+  };
+  
+  
 
   return (
     <Card title="Edit Graph" style={{ width: "100%" }}>
@@ -98,6 +154,28 @@ const EditGraphPanel = () => {
       <Button type="default" onClick={() => setCurveFitVisible(true)}>
         Fit Curve
       </Button>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>X Axis: </label>
+        <Dropdown overlay={renderFeatureMenu("x")}>
+          <Button>{selectedX || "Select X Axis"}</Button>
+        </Dropdown>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>Y Axis: </label>
+        <Dropdown overlay={renderFeatureMenu("y")}>
+          <Button>{selectedY || "Select Y Axis"}</Button>
+        </Dropdown>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ marginRight: "8px" }}>Z Axis: </label>
+        <Dropdown overlay={renderFeatureMenu("z")}>
+          <Button>{selectedZ || "Select Z Axis"}</Button>
+        </Dropdown>
+      </div>
+
 
       {/* CurveFittingModal */}
       {curveFitVisible && (
