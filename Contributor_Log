@@ -60,6 +60,11 @@ and we execute agile development with a strong focus on collaboration.)
 - graph for manipulated data - after engine operations user can create a graph optionally (Implemented by: Ezgi)
 - colour with hex codes - users can change colour with hex codes after creating their graph(Implemented by: Ezgi)
 - [Feature 3] - [Short description] (Implemented by: [Member Name])
+- methods in Engine - implement methods for curvefitting, interpolate, extrapolate，dimensional reduction(Implemented by: Shengjie)
+- methods in Views - APIs for curvefitting, interplate, extrapolate, dimensional reduction, (Implemented by: Shengjie)
+- connect curvefitting - curvefitting works in frontend (Implemented by: Shengjie)
+- connect interpolate - interpolate works in frontend and show text result (Implemented by: Shengjie)
+- connect extrapolate - extrapolate works in frontend and show text result (Implemented by: Shengjie)
 
 ------------------------------------------------------------
 3. Pending Features (To-Do List)
