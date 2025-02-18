@@ -81,29 +81,40 @@ const EditGraphPanel = () => {
     GraphManager.changeAxis(selectedGraphForEdit, axis, newFeature);
   };
 
-  const renderFeatureMenu = (axis) => {
+
+  const renderFeatureSelect = (axis, selectedValue, setSelectedValue) => {
     const dataset = selectedGraph?.graphObject?.getDataset
       ? selectedGraph.graphObject.getDataset()
       : null;
-
+  
     if (!dataset) {
       return (
-        <Menu>
-          <Menu.Item disabled>No Features Available</Menu.Item>
-        </Menu>
+        <Select disabled placeholder="No Features Available" style={{ width: 200 }} />
       );
     }
-
+  
     return (
-      <Menu>
+      <Select
+        showSearch
+        style={{ width: 200 }}
+        placeholder={`Select ${axis.toUpperCase()} Axis`}
+        optionFilterProp="children"
+        value={selectedValue}
+        onChange={(value) => {
+          setSelectedValue(value);
+          handleAxisChange(axis, value);
+        }}
+        onSearch={(value) => console.log(`Search ${axis}:`, value)}
+      >
         {Object.keys(dataset).map((feature) => (
-          <Menu.Item key={feature} onClick={() => handleAxisChange(axis, feature)}>
+          <Select.Option key={feature} value={feature}>
             {feature}
-          </Menu.Item>
+          </Select.Option>
         ))}
-      </Menu>
+      </Select>
     );
   };
+  
 
   const handleTypeChange = (newType) => {
     if (!selectedGraphForEdit) return;
@@ -167,26 +178,22 @@ const EditGraphPanel = () => {
         </Dropdown>
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "8px" }}>X Axis: </label>
-        <Dropdown overlay={renderFeatureMenu("x")}>
-          <Button disabled={selectedX === null}>{selectedX || "Select X Axis"}</Button>
-        </Dropdown>
-      </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "8px" }}>Y Axis: </label>
-        <Dropdown overlay={renderFeatureMenu("y")}>
-          <Button disabled={selectedY === null}>{selectedY || "Select Y Axis"}</Button>
-        </Dropdown>
-      </div>
-      
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "8px" }}>Z Axis: </label>
-        <Dropdown overlay={renderFeatureMenu("z")}>
-          <Button disabled={selectedZ === null}>{selectedZ || "Select Z Axis"}</Button>
-        </Dropdown>
-      </div>
+     
+  <div style={{ marginBottom: "10px" }}>
+    <label style={{ marginRight: "8px" }}>X Axis: </label>
+    {renderFeatureSelect("x", selectedX, setSelectedX)}
+  </div>
+  
+  <div style={{ marginBottom: "10px" }}>
+    <label style={{ marginRight: "8px" }}>Y Axis: </label>
+    {renderFeatureSelect("y", selectedY, setSelectedY)}
+  </div>
+  
+  <div style={{ marginBottom: "10px" }}>
+    <label style={{ marginRight: "8px" }}>Z Axis: </label>
+    {renderFeatureSelect("z", selectedZ, setSelectedZ)}
+  </div>
 
       {curveFitVisible && selectedGraph && (
         <CurveFittingModal visible={curveFitVisible} onCancel={() => setCurveFitVisible(false)} graph={selectedGraph} />
