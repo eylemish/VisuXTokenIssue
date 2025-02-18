@@ -16,8 +16,8 @@ class VisualizationManager {
         ],
         "Advanced Charts": [
             {type: "heatmap", name: "Heatmap", requiredFeatures: 3},
-            {type: "scatterpolar", name: "Radar Chart", requiredFeatures: 3},
-            {type: "dot", name: "Dot Chart", requiredFeatures: 2},
+            {type: "scatterpolar", name: "Radar Chart", requsiredFeatures: 3},
+            {type: "scatter3d", name: "3D Scatter Plot", requiredFeatures: 3 },
             {type: "area", name: "Area Chart", requiredFeatures: 2},
         ],
     };

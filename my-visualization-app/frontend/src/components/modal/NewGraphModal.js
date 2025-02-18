@@ -9,6 +9,7 @@ import {
   RadarChartOutlined,
   PictureOutlined,
   DotChartOutlined,
+  AppstoreOutlined
 } from "@ant-design/icons";
 import datasetManager from "../file/DatasetManager";
 
@@ -17,7 +18,7 @@ const { TabPane } = Tabs;
 // Define chart categories
 const chartCategories = {
   "Basic Charts": [
-    { type: "scatter", name: "Scatter Plot", icon: <PictureOutlined />, requiredFeatures: 2 },
+    { type: "scatter", name: "Scatter Plot", icon: <DotChartOutlined />, requiredFeatures: 2 },
     { type: "line", name: "Line Chart", icon: <LineChartOutlined />, requiredFeatures: 2 },
     { type: "bar", name: "Bar Chart", icon: <BarChartOutlined />, requiredFeatures: 2 },
     { type: "pie", name: "Pie Chart", icon: <PieChartOutlined />, requiredFeatures: 1 },
@@ -25,7 +26,7 @@ const chartCategories = {
   "Advanced Charts": [
     { type: "heatmap", name: "Heatmap", icon: <HeatMapOutlined />, requiredFeatures: 3 },
     { type: "scatterpolar", name: "Radar Chart", icon: <RadarChartOutlined />, requiredFeatures: 3 },
-    { type: "dot", name: "Dot Chart", icon: <DotChartOutlined />, requiredFeatures: 2 },
+    { type: "scatter3d", name: "3D Scatter Plot", icon: <AppstoreOutlined />, requiredFeatures: 3 },
     { type: "area", name: "Area Chart", icon: <AreaChartOutlined />, requiredFeatures: 2 },
   ],
 };
