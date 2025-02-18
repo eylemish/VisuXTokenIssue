@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {Layout, Menu, message} from "antd";
+import {Button, Layout, Menu, message} from "antd";
 import {
     BarChartOutlined,
     TableOutlined,
@@ -32,7 +32,7 @@ const Sidebar = ({
                      showGraphEdit,
                  }) => {
     // Control Tool Window
-    const [openKeys, setOpenKeys] = useState([]);
+    const [openKeys, setOpenKeys] = useState(["graphManager", "dataProcessing"]);
     const [newGraphModalVisible, setNewGraphModalVisible] = useState(false);
     const [dimReductionModalVisible, setDimReductionModalVisible] = useState(false);
     const [curveFittingModalVisible, setCurveFittingModalVisible] = useState(false);
@@ -91,20 +91,61 @@ const Sidebar = ({
                 defaultSelectedKeys={["graphOverview"]}
                 style={{height: "100%", borderRight: 0}}
             >
+
                 {/* Open/Close a window（Graph / DataTable / Log /preview plot） */}
-                <Menu.Item key="toggleDataTable" icon={<TableOutlined/>} onClick={() => setShowTable(!showTable)}>
+                <Menu.Item
+                    key="toggleDataTable"
+                    icon={<TableOutlined/>}
+                    onClick={() => setShowTable(!showTable)}
+                    style={{
+                        backgroundColor: showTable ? "#1890ff" : "#f0f0f0",
+                        color: showTable ? "white" : "black",
+                        borderRadius: "5px",
+                        transition: "background-color 0.3s, color 0.3s",
+                    }}
+                >
                     {showTable ? "Close Data Table" : "Open Data Table"}
                 </Menu.Item>
 
-                <Menu.Item key="toggleGraph" icon={<BarChartOutlined/>} onClick={() => setShowGraph(!showGraph)}>
+                <Menu.Item
+                    key="toggleGraph"
+                    icon={<BarChartOutlined/>}
+                    onClick={() => setShowGraph(!showGraph)}
+                    style={{
+                        backgroundColor: showGraph ? "#1890ff" : "#f0f0f0",
+                        color: showGraph ? "white" : "black",
+                        borderRadius: "5px",
+                        transition: "background-color 0.3s, color 0.3s",
+                    }}
+                >
                     {showGraph ? "Close Graph Window" : "Open Graph Window"}
                 </Menu.Item>
 
-                <Menu.Item key="toggleDataPlot" icon={<LineChartOutlined/>} onClick={() => setShowData(!showData)}>
+                <Menu.Item
+                    key="toggleDataPlot"
+                    icon={<LineChartOutlined/>}
+                    onClick={() => setShowData(!showData)}
+                    style={{
+                        backgroundColor: showData ? "#1890ff" : "#f0f0f0",
+                        color: showData ? "white" : "black",
+                        borderRadius: "5px",
+                        transition: "background-color 0.3s, color 0.3s",
+                    }}
+                >
                     {showData ? "Close Data Plot" : "Open Data Plot"}
                 </Menu.Item>
 
-                <Menu.Item key="toggleLog" icon={<FileTextOutlined/>} onClick={() => setShowLog(!showLog)}>
+                <Menu.Item
+                    key="toggleLog"
+                    icon={<FileTextOutlined/>}
+                    onClick={() => setShowLog(!showLog)}
+                    style={{
+                        backgroundColor: showLog ? "#1890ff" : "#f0f0f0",
+                        color: showLog ? "white" : "black",
+                        borderRadius: "5px",
+                        transition: "background-color 0.3s, color 0.3s",
+                    }}
+                >
                     {showLog ? "Close Log Window" : "Open Log Window"}
                 </Menu.Item>
 
@@ -127,11 +168,11 @@ const Sidebar = ({
                 </SubMenu>
 
                 {/* Data Processing */}
-                <SubMenu key="dataManager" icon={<SlidersOutlined/>} title="Data Manager">
+                <SubMenu key="dataProcessing" icon={<SlidersOutlined/>} title="Data Processing">
 
                     <Menu.Item
                         key="dimReduction" onClick={handleDimensionalityReduction}>
-                        Dimensionality Reduction
+                        Dim Reduction
                     </Menu.Item>
                     <Menu.Item
                         key="Interpolate Data" onClick={() => setInterpolationModalVisible(true)}>Interpolate Data
