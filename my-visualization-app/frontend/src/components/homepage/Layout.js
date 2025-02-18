@@ -4,10 +4,6 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import DataWindow from "../table/DataWindow";
 import GraphSection from "../graph/GraphSection";
-import LogHistory from "../log/LogHistory";
-import GraphComponent from "../graph/GraphComponent";
-import GraphWindow from "../graph/GraphWindow";
-import LogManager from "../log/LogManager";
 import LogWindow from "../log/LogWindow";
 import EditGraphPanel from "../graph/EditGraphPanel";
 
@@ -65,7 +61,20 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
 
   const [graphWindows, setGraphWindows] = useState([]);
 
-  const logManager = uiController.getLogManager(); // Access to the log manager via UIController
+ // const logManager = uiController.getLogManager(); // Access to the log manager via UIController
+
+  const [logManager, setLogManager] = useState(() => uiController.getLogManager());
+  const [logs, setLogs] = useState(logManager.getLogs());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLogs([...logManager.getLogs()]); // Get logs every 500ms
+    }, 500);
+
+    return () => clearInterval(interval); // clear the interval
+  }, []);
+
+
   useEffect(() => {
     const handleResize = () => {
       setGridWidth(window.innerWidth - 200);

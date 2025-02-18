@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import { Modal, Button, InputNumber, Select, message, Table } from "antd";
-import datasetManager from "../file/DatasetManager";
 
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
