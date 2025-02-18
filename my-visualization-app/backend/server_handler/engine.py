@@ -347,16 +347,6 @@ class Engine:
 
         except Exception as e:
             raise ValueError(f"Error in curve fitting: {e}")
-    """
-    # Oversample the data in SMOTE.
-    def oversample(self, x: np.ndarray, y:np.ndarray):
-        try:
-            smote = SMOTE(random_state = None)
-            x_resampled, y_oversampled = smote.fit_resample(x, y)
-            return x_resampled, y_oversampled
-        except Exception as e:
-            raise ValueError(f"Error in oversampling: {e}")
-    """
 
     def oversample_data(dataset: pd.DataFrame, x_feature: str, y_feature: str, method: str = 'smote', oversample_factor: int = 1) -> pd.DataFrame:
         """

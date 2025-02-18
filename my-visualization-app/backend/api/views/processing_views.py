@@ -243,23 +243,11 @@ class DimensionalReductionView(APIView):
                 method=method,
                 n_components=n_components
             )
-
             
             # Generate new features and records
             reduced_features = [f"dim{i+1}" for i in range(n_components)]
             reduced_records = reduced_data.to_dict(orient="records")
-            """
-            # Create a new Dataset and associate it with last_dataset
-            new_dataset = Dataset.objects.create(
-                name=new_dataset_name,
-                features=reduced_features,
-                records=reduced_records,
-                last_dataset=dataset  # Linked original dataset
-            )
-
-            new_dataset.id = dataset_id + 1
-            """
-
+            
             return JsonResponse({
                 "message": "Dimensionality reduction successful.",
                 #"new_dataset_id": new_dataset.id,
@@ -308,11 +296,15 @@ class OversampleDataView(APIView):
             )
 
             # Convert the oversampled data to a dictionary for easy JSON response
-            oversampled_data_json = oversampled_data.to_dict(orient="records")
+            oversampled_features = list(oversampled_data.columns)
+            oversampled_records = oversampled_data.to_dict(orient="records")
 
             # Return the oversampled data as a JSON response
-            return JsonResponse({"oversampled_data": oversampled_data_json})
-
+            return JsonResponse({
+                "message": "Oversampling successful.",
+                "oversampled_features": oversampled_features,
+                "oversampled_records": oversampled_records
+            }, status=200)
         except Exception as e:
             # If any error occurs, return an error response with the exception message
             return JsonResponse({"error": str(e)}, status=400)

@@ -189,7 +189,14 @@ const Sidebar = ({
             {/* oversample data Modal */}
             <OversampleModal visible={oversampleModalVisible} onCancel={() => setOversampleModalVisible(false)}
                              uiController={uiController}
-                             logAction={logAction}/>
+                             logAction={logAction}
+                             onUpdateDataset={(newData, newDatasetId) => {
+                                if (newDatasetId) {
+                                    datasetManager.setCurrentDatasetId(newDatasetId);
+                                    console.log(`Current dataset updated to ID: ${newDatasetId}`);
+                                }
+                                console.log("Oversampling result received:", newData);
+                            }}/>
 
             {/* correlate data 的 Modal */}
             <CorrelationModal visible={correlationModalVisible} onCancel={() => setCorrelationModalVisible(false)}

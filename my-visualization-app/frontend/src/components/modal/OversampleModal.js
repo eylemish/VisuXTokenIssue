@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { Modal, Button, InputNumber, Select, message, Table } from "antd";
-import Action from "../Action";
+import datasetManager from "../file/DatasetManager";
 
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
@@ -16,7 +16,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
+const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateDataset}) => {
   const [method, setMethod] = useState("smote"); // Select oversampling method
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
@@ -28,6 +28,9 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
   const [oversampledData, setOversampledData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [newDatasetId, setNewDatasetId] = useState(null);
+  const [oversampledFeature, setOversampledFeature] = useState(null);
+  const [oversampledRecord, setOversampledRecord] = useState(null);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -36,6 +39,8 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
   useEffect(() => {
     if (!datasetId) {
       setColumns([]);
+      setNewDatasetId(null);
+      setOversampledData(null);
       return;
     }
 
@@ -62,6 +67,12 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
       }
     }
 
+    const currentDatasetId = datasetId || datasetManager.getCurrentDatasetId();
+        if (!currentDatasetId) {
+            message.error("No valid dataset ID found. Please upload a dataset first.");
+            return;
+        }
+
     console.log("Request data:", requestData);
     setLoading(true);
     try {
@@ -74,17 +85,24 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
       body: JSON.stringify(requestData),
       credentials: "include", // allow to include Cookie
       });
-      const resultData = await result.json(); // to JSON
-      console.log(resultData)
+
+      const resultData = await result.json();
+      const {oversampled_features, oversampled_records} = resultData;
+      if (Array.isArray(oversampled_records) && oversampled_records.length) {
+        setOversampledFeature(oversampled_features)
+        setOversampledRecord(oversampled_records)
+        //setNewDatasetId(new_dataset_id);
+    } else {
+        setOversampledData(null);
+    }
+      console.log(oversampled_records)
       if (resultData.error) {
         message.error(`Oversampling failed: ${resultData.error}`);
         return
       }  
 
-      console.log(resultData.original_data);
       setOriginalData(resultData.original_data); // Store original data
-      setOversampledData(resultData.oversampled_data);
-      console.log(resultData.oversampledData);  // Output generated data
+      setOversampledData(oversampled_records);
 
       message.success("Oversampling completed!");
       logAction(`Oversampling performed using ${requestData.kind} on dataset ID ${requestData.datasetId}.`, method.toUpperCase())
@@ -102,36 +120,42 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
     setShowResultModal(false);
   };
 
-  const handleCreateGraph = () => {
-      if (!xColumn || !yColumn || oversampledData.length === 0) {
-        message.error("Please select X and Y columns before creating a graph!");
-        return;
-      }
-  
-      const dataset = {
-        features: [xColumn, yColumn],
-        records: oversampledData.map(dataPoint => ({
-          [xColumn]: dataPoint.x,
-          [yColumn]: dataPoint.y,
-        })),
-      };
-  
-      console.log(dataset);
-  
-      const graphInfo = {
-        graphName: "Oversample Graph",
-        graphType: "line",
-        dataset: dataset,
-        selectedFeatures: [xColumn, yColumn],
-      };
-  
-      uiController.handleUserAction({
-        type: "CREATE_GRAPH",
-        graphInfo,
-      });
-  
-      message.success("Graph created successfully!");
+    // apply result
+    const handleApply = async () => {
+        const requestData = {
+            dataset_id: datasetManager.getCurrentDatasetId(), 
+            features: oversampledFeature,
+            records: oversampledRecord,
+            new_dataset_name: "Oversampled Dataset"
+          };
+          const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),  // send CSRF Token
+              },
+              body: JSON.stringify(requestData),
+              credentials: "include", // allow to include Cookie
+            });
+          const resultData = await result.json();
+          console.log(result)
+          console.log(resultData)
+          setNewDatasetId(resultData.new_dataset_id);
+          console.log(resultData.new_dataset_id)
+        if (!resultData.new_dataset_id || !oversampledFeature) {
+            message.error("No oversampled dataset available to apply.");
+            return;
+        }
+
+        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
+        onUpdateDataset(oversampledRecord, resultData.new_dataset_id);
+        message.success("Oversampling applied successfully!");
+
+        logAction(`Applied oversampled dataset ID ${resultData.new_dataset_id} as the new active dataset.`,method.toUpperCase());
+        onCancel();
     };
+
     const resultColumns = [
       { title: xColumn || "X Value", dataIndex: xColumn, key: xColumn },
       { title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn },
@@ -192,12 +216,22 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
         </Button>
       </Modal>
 
+      
       <Modal
         title="Oversample Results"
         visible={showResultModal}
         onCancel={handleCloseResultModal}
         footer={null}
       >
+
+        {/* Confirm, Apply button */}
+      <div style={{textAlign: "right", marginBottom: "15px"}}>
+        <Button onClick={onCancel} style={{marginRight: 10}}>Cancel</Button>
+        <Button type="primary" onClick={handleOversample} loading={loading}
+                style={{marginRight: 10}}>Confirm</Button>
+        {oversampledData && <Button type="primary" onClick={handleApply}>Apply Oversampling</Button>}
+        </div>
+
         <Table
           columns={resultColumns}
           dataSource={oversampledData}
@@ -205,10 +239,6 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction}) => {
           pagination={false}
           size="small"
         />
-        {/*<Button type="primary" onClick={handleCreateGraph} block style={{ marginTop: "10px" }}>
-          See results a Graph
-        </Button>
-        */}
       </Modal>
     </>
     
