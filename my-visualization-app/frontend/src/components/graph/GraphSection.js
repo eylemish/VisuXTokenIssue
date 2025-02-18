@@ -84,6 +84,8 @@ const GraphSection = () => {
             ...prevState,
             [graphId]: !prevState[graphId],
         }));
+
+        GraphManager.changeVisibility(graphId);
     };
 
 

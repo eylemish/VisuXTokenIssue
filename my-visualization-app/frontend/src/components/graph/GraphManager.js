@@ -66,6 +66,9 @@ class GraphManager {
     return true;
   }
 
+
+
+
   /**
    * Apply curve fitting to a graph and notify listeners.
    */
@@ -129,6 +132,13 @@ class GraphManager {
     return false;
   }
 
+
+
+
+
+
+
+
   getAllGraphs() {
     return Array.from(this.graphs.values());
   }
@@ -164,8 +174,18 @@ class GraphManager {
     } else {
       console.warn(`GraphManager: Graph ID ${graphId} not found.`);
   }
- } 
+ }
 
+ changeVisibility(graphId) {
+  const graph = this.graphs.get(graphId);
+  if (graph) {
+    graph.toggleVisibility();
+    console.log(`Graph (ID: ${graphId}) changed visibility.`);
+  } else {
+    console.warn(`GraphManager: Graph ID ${graphId} not found.`);
+}
+
+ }
 
   //these 3 are all related to notifying other claasses about changes
   notify(data) {
