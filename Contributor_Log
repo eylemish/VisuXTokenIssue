@@ -44,9 +44,6 @@ and we execute agile development with a strong focus on collaboration.)
 ------------------------------------------------------------
 
 - framework setup - Build react and django, front and back-end separation structure (Implemented by: Jing)
-- [Feature 2] - [Short description] (Implemented by: [Member Name])
-- connect file uploading - upload and store the user uploaded file (Implemented by: Jing)
-- [Feature 3] - [Short description] (Implemented by: [Member Name])
 - dataset passing- Implementing method to let frontend get data from backend (Implemented by: Jing)
 - connect dim reduction - dim reduction works on frontend and show text result (Implemented by: Jing)
 - connect visualization- show plotly visualization of dataset on frontend(Implemented by: Jing)
@@ -57,6 +54,7 @@ and we execute agile development with a strong focus on collaboration.)
 - feature selection menu - user can change the showed features of a graph by selecting columns (Implemented by: Ezgi)
 - data preview chart- show data preview by features(Implemented by: Jing)
 - optional graph name - user can give the graph a name or continue usign their id (Implemented by: Ezgi)
+- graph from interpolation result - user has an option to see the results as a graph in the graph window (Implemented by: Ezgi)
 - graph for manipulated data - after engine operations user can create a graph optionally (Implemented by: Ezgi)
 - colour with hex codes - users can change colour with hex codes after creating their graph(Implemented by: Ezgi)
 - [Feature 3] - [Short description] (Implemented by: [Member Name])
@@ -65,6 +63,10 @@ and we execute agile development with a strong focus on collaboration.)
 - connect curvefitting - curvefitting works in frontend (Implemented by: Shengjie)
 - connect interpolate - interpolate works in frontend and show text result (Implemented by: Shengjie)
 - connect extrapolate - extrapolate works in frontend and show text result (Implemented by: Shengjie)
+- feature dropdown - users can change the x,y and z axis by clicking on other features in dropdown menu (Implemented by Ezgi)
+- type dropdown - users can change type of the graph by clicking on other features in dropdown menu (Implemented by Ezgi)
+- graph layers - users can layer their graphs over each other by clicking the button (Implemented by Ezgi)
+
 
 ------------------------------------------------------------
 3. Pending Features (To-Do List)

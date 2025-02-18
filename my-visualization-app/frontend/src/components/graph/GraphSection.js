@@ -21,10 +21,11 @@ const GraphSection = () => {
     const [graphDetails, setGraphDetails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [visibleGraphs, setVisibleGraphs] = useState({});
+    const [combineGraphs, setCombineGraphs] = useState(false);
 
     useEffect(() => {
         const handleGraphChange = (data) => {
-            console.log("🟢 GraphSection received update event:", data);
+            console.log("GraphSection received update event:", data);
             if (data.type === "graphUpdated" || data.type === "curveFittingUpdated") {
                 setGraphDetails((prevState) =>
                     prevState.map((graph) => {
@@ -85,118 +86,141 @@ const GraphSection = () => {
         }));
     };
 
-    return (
-        <Card style={{height: "100%", display: "flex", flexDirection: "column"}}>
-            <Title level={4} style={{textAlign: "left"}}>
-                Graphs
-            </Title>
 
-            {loading ? (
-                <Spin size="large"/>
-            ) : (
-                <div
-                    style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                    }}
-                >
-                    {graphDetails.length > 0 ? (
-                        <>
-                            <Row style={{width: "100%"}}>
-                                <Col span={24}>
-                                    <List
-                                        size="large"
-                                        bordered
-                                        dataSource={graphDetails}
-                                        renderItem={(graph) => (
-                                            <List.Item
-                                                style={{display: "flex", alignItems: "center"}}
-                                            >
-                        <span
-                            style={{cursor: "pointer"}}
-                            onClick={() => toggleGraphVisibility(graph.graphId)}
-                        >
-                          {`Graph ID: ${graph.graphName} - ${graph.graphType}`}
-                        </span>
-                                                <Button
-                                                    onClick={() => toggleGraphVisibility(graph.graphId)}
-                                                    style={{marginLeft: "auto"}}
-                                                >
-                                                    {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
-                                                </Button>
-                                            </List.Item>
-                                        )}
+    const handleLayerGraphs = () => {
+        setCombineGraphs(!combineGraphs);
+      };
+    
+      const combineGraphData = () => {
+        const combinedData = graphDetails
+          .filter((graph) => visibleGraphs[graph.graphId])
+          .map((graph, index) => {
+            const color = graph.color || `hsl(${(index * 50) % 360}, 100%, 50%)`;
+            return {
+              ...graph.graphScript?.data[0],
+              name: graph.graphName,
+              line: { color: color },
+            };
+          });
+    
+        const layout = {
+          title: "Combined Graphs",
+          xaxis: { title: graphDetails[0]?.xAxis },
+          yaxis: { title: graphDetails[0]?.yAxis },
+          showlegend: true,
+        };
+        return { data: combinedData, layout };
+      };
+
+      return (
+        <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+          <Button onClick={handleLayerGraphs} style={{ marginBottom: "20px" }}>
+            {combineGraphs ? "Show Individual Graphs" : "Layer Graphs"}
+          </Button>
+    
+          {loading ? (
+            <Spin size="large" />
+          ) : (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              {graphDetails.length > 0 ? (
+                <>
+                  <Row style={{ width: "100%" }}>
+                    <Col span={24}>
+                      <List
+                        size="large"
+                        bordered
+                        dataSource={graphDetails}
+                        renderItem={(graph) => (
+                          <List.Item
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            <span
+                              style={{ cursor: "pointer" }}
+                              onClick={() => toggleGraphVisibility(graph.graphId)}
+                            >
+                              {`Graph ID: ${graph.graphName} - ${graph.graphType}`}
+                            </span>
+                            <Button
+                              onClick={() => toggleGraphVisibility(graph.graphId)}
+                              style={{ marginLeft: "auto" }}
+                            >
+                              {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
+                            </Button>
+                          </List.Item>
+                        )}
+                      />
+                    </Col>
+    
+                    <Col span={24} style={{ marginTop: "20px" }}>
+                      <Card style={{ width: "100%", padding: "10px" }} bordered={true}>
+                        {combineGraphs ? (
+                          <div
+                            style={{
+                              maxWidth: "600px",
+                              margin: "0 auto",
+                            }}
+                          >
+                            <Plot
+                              key={Math.random()}
+                              data={combineGraphData().data}
+                              layout={combineGraphData().layout}
+                              config={{ responsive: true }}
+                              style={{
+                                width: "100%",
+                                height: "300px",
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          graphDetails.map((graph) => {
+                            const { graphScript, graphId, graphName } = graph;
+                            const { data, layout } = graphScript || {};
+                            return (
+                              <div key={graphId}>
+                                {visibleGraphs[graphId] && (
+                                  <Card
+                                    style={{
+                                      width: "100%",
+                                      padding: "10px",
+                                      marginTop: "20px",
+                                    }}
+                                    title={`Graph ID: ${graphName}`}
+                                    bordered={true}
+                                  >
+                                    <Plot
+                                      key={Math.random()}
+                                      data={data}
+                                      layout={layout}
+                                      config={{ responsive: true }}
+                                      style={{
+                                        width: "100%",
+                                        height: "300px",
+                                      }}
                                     />
-                                </Col>
-
-                                {graphDetails.map((graph) => {
-                                    const {graphScript, graphId, graphName} = graph;
-                                    const {data, layout} = graphScript || {};
-                                    return (
-                                        <Col span={24} key={graphId} style={{marginTop: "20px"}}>
-                                            {visibleGraphs[graphId] && (
-                                                <Card
-                                                    style={{width: "100%", padding: "10px"}}
-                                                    title={`Graph ID: ${graphName}`}
-                                                    bordered={true}
-                                                >
-                                                    <Paragraph strong>Type: {graph.graphType}</Paragraph>
-                                                    <div>
-                                                        <Paragraph strong>
-                                                            Selected Features:
-                                                        </Paragraph>
-                                                        {graph.selectedFeatures &&
-                                                        graph.selectedFeatures.length > 0 ? (
-                                                            <Row gutter={[8, 8]}>
-                                                                {graph.selectedFeatures.map(
-                                                                    (feature, featureIndex) => (
-                                                                        <Col span={8} key={featureIndex}>
-                                                                            <Tag color="blue">{feature}</Tag>
-                                                                        </Col>
-                                                                    )
-                                                                )}
-                                                            </Row>
-                                                        ) : (
-                                                            <Tag color="red">No features selected</Tag>
-                                                        )}
-                                                    </div>
-
-                                                    <Divider/>
-
-                                                    {data && layout ? (
-                                                        <div
-                                                            style={{
-                                                                maxWidth: "600px",
-                                                                margin: "0 auto",
-                                                            }}
-                                                        >
-                                                            <Plot
-                                                                key={Math.random()}
-                                                                data={data}
-                                                                layout={layout}
-                                                                config={{responsive: true}}
-                                                                style={{width: "100%", height: "300px"}}
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <p>Graph data could not be visualized.</p>
-                                                    )}
-                                                </Card>
-                                            )}
-                                        </Col>
-                                    );
-                                })}
-                            </Row>
-                        </>
-                    ) : (
-                        <p>No Graphs Available</p>
-                    )}
-                </div>
-            )}
+                                  </Card>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </Card>
+                    </Col>
+                  </Row>
+                </>
+              ) : (
+                <p>No Graphs Available</p>
+              )}
+            </div>
+          )}
         </Card>
-    );
-};
-
-export default GraphSection;
+      );
+    };
+    
+    export default GraphSection;
