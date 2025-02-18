@@ -17,6 +17,7 @@ const EditGraphPanel = () => {
   const [selectedZ, setSelectedZ] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
   const [curveFitVisible, setCurveFitVisible] = useState(false);
+  const [multipleY, setMultipleY] = useState(false);
 
   useEffect(() => {
     const fetchGraphs = () => {
@@ -130,6 +131,14 @@ const EditGraphPanel = () => {
     }
   };
 
+  const handleAddMultipleYClick = () =>{
+    if (!selectedGraphForEdit) return;
+
+    if (selectedGraphForEdit.type === 'line') {
+      console.log("Button clicked");
+    }
+  }
+
   const renderChartCategories = () => (
     <Menu>
       {Object.entries(chartCategories).map(([category, charts]) => (
@@ -194,6 +203,15 @@ const EditGraphPanel = () => {
     <label style={{ marginRight: "8px" }}>Z Axis: </label>
     {renderFeatureSelect("z", selectedZ, setSelectedZ)}
   </div>
+
+  <Button
+        type="default"
+        onClick={handleAddMultipleYClick}
+        style={{ marginTop: "10px", backgroundColor: selectedGraph && selectedGraph.graphType !== 'line' ? '#d9d9d9' : '' }}
+        disabled={selectedGraph && selectedGraph.graphType !== 'line'}
+      >
+        Add Multiple Y
+      </Button>
 
       {curveFitVisible && selectedGraph && (
         <CurveFittingModal visible={curveFitVisible} onCancel={() => setCurveFitVisible(false)} graph={selectedGraph} />

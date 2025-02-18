@@ -66,7 +66,8 @@ and we execute agile development with a strong focus on collaboration.)
 - feature dropdown - users can change the x,y and z axis by clicking on other features in dropdown menu (Implemented by Ezgi)
 - type dropdown - users can change type of the graph by clicking on other features in dropdown menu (Implemented by Ezgi)
 - graph layers - users can layer their graphs over each other by clicking the button (Implemented by Ezgi)
-- better show/hide option - after a user clicks hide button, it will not be shown even if the page is rerendered
+- better show/hide option - after a user clicks hide button, it will not be shown even if the page is rerendered (Implemented by Ezgi)
+- search inside feature menu -user can search features to change inside drop down menu (Implemented by Ezgi)
 
 
 ------------------------------------------------------------
