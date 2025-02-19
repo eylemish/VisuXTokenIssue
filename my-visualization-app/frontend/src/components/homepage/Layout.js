@@ -6,6 +6,7 @@ import DataWindow from "../table/DataWindow";
 import GraphSection from "../graph/GraphSection";
 import LogWindow from "../log/LogWindow";
 import EditGraphPanel from "../graph/EditGraphPanel";
+import DataTable from "../table/DataTable";
 
 const gridConfig = {
   cols: 12,
@@ -143,7 +144,7 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
         {/* Render DataWindow only if showData is true */}
         {showTable && (
           <div key="dataTable" className="drag-handle" style={{ height: "100%", width: "100%", display:"flex", minWidth: "400px", minHeight: "300px" }}>
-            <DataWindow style={{ flex: 1 }} isVisible={true} />
+            <DataTable style={{ flex: 1 }} isVisible={true} />
           </div>
         )}
 
