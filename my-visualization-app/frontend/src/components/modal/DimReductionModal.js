@@ -75,7 +75,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
             } else {
                 setReducedData(null);
             }
-            logAction(`Dimensionality reduction performed using ${method.toUpperCase()} to ${nComponents} dimensions on dataset ID ${currentDatasetId}.`, method.toUpperCase())
+            logAction(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()) + "_" + nComponents + "_" + method, method.toUpperCase())
             message.success("Dimensionality reduction successful!");
         } catch (error) {
             console.error("Error during dimensionality reduction:", error.response?.data || error.message);
@@ -91,7 +91,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
             dataset_id: datasetManager.getCurrentDatasetId(), 
             features: reducedData.features,
             records: reducedData.records,
-            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+"_dim_reduced_"+method
+            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+"_dim_reduced_" + method
           };
           const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
               method: "POST",
@@ -114,7 +114,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
         onUpdateDataset(reducedData.records, resultData.new_dataset_id);
         message.success("Dimensionality reduction applied successfully!");
 
-        logAction(`Applied reduced dataset ID ${resultData.new_dataset_id} as the new active dataset.`,method.toUpperCase());
+        logAction(`new_dataset_id_${resultData.new_dataset_id}`,"Apply DimReduction");
         onClose();
     };
 

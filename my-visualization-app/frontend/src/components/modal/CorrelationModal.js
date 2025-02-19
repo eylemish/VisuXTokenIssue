@@ -15,7 +15,7 @@ function getCSRFToken() {
   return cookieValue;
 }
 
-const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
+const CorrelationModal = ({ visible, onCancel, uiController}) => {
   const [method, setMethod] = useState("pearson");
   const [datasetId, setDatasetId] = useState(null);
   const [selectedColumns, setSelectedColumns] = useState([]); // User-selected features
@@ -94,7 +94,6 @@ const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
       const resultData = await result.json();
       setCorrelationMatrix(resultData.correlation_matrix);
       message.success("Correlation matrix generated!");
-      logAction(`Correlation performed using ${requestData.method} on dataset ID ${datasetId}.`, "Correlate");
     } catch (error) {
       message.error(`Error: ${error.message}`);
     } finally {

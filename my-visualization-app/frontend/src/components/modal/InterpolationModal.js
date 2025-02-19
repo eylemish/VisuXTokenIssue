@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {Modal, Button, Select, message, Table, Input, Checkbox, InputNumber, Radio} from "antd";
-import Action from "../Action";
 
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
@@ -33,7 +32,6 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
 
     const datasetManager = uiController.getDatasetManager();
     const availableDatasets = datasetManager.getAllDatasetsId();
-    const availableDatasetsName = datasetManager.getAllDatasetsName();
 
     useEffect(() => {
         if (!datasetId) {
@@ -80,7 +78,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             setNewDatasetId(resultData.new_dataset_id);
             message.success("Interpolation started!");
             setShowResultModal(true); // Display result modal when data is ready
-            logAction(`Interpolation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Interpolate")
+            logAction(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()) + "_" + method, "Interpolate")
         } catch (error) {
             message.error(`Error: ${error.message}`);
         }
@@ -113,13 +111,9 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(interpolatedData, resultData.new_dataset_id);
         message.success("Interpolate applied successfully!");
-        logAction(`Applied interpolated dataset ID ${resultData.new_dataset_id} as the new active dataset.`, "Interpolate");
+        logAction(`new_dataset_id_${resultData.new_dataset_id}`,"Apply Interpolation");
         setShowResultModal(false);
         onClose();
-    };
-
-    const handleCloseResultModal = () => {
-        setShowResultModal(false);
     };
 
     const handleCreateGraph = () => {

@@ -34,7 +34,6 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
     const [newDatasetId, setNewDatasetId] = useState(null);
 
     const datasetManager = uiController.getDatasetManager();
-    const availableDatasetsName = datasetManager.getAllDatasetsName();
     const availableDatasetsId = datasetManager.getAllDatasetsId();
 
     // **Get column names when the user selects a dataset**
@@ -95,14 +94,10 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             setOriginalData(resultData.original_data);
             message.success("Extrapolation started!");
             setShowResultModal(true); // Display result modal when data is ready
-            logAction(`Extrapolation performed using ${requestData.kind} on dataset ID ${datasetId}.`, "Extrapolate")
+            logAction(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()) + "_" + method, "Extrapolate")
         } catch (error) {
             message.error(`Error: ${error.message}`);
         }
-    };
-
-    const handleCloseResultModal = () => {
-        setShowResultModal(false);
     };
 
     const handleCreateGraph = () => {
@@ -163,11 +158,6 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
         message.success("Graph created successfully!");
     };
 
-    const resultColumns = [
-        {title: xColumn || "X Value", dataIndex: xColumn, key: xColumn},
-        {title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn},
-    ];
-
     const renderTable = () => {
         if (!extrapolatedData || !Array.isArray(extrapolatedData) || extrapolatedData.length === 0) {
             return <p style={{textAlign: "center", color: "gray"}}>No data available</p>;
@@ -218,8 +208,8 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
         datasetManager.addDatasetId(resultData.new_dataset_id, resultData.name);
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(extrapolatedData, resultData.new_dataset_id);
-        message.success("Interpolate applied successfully!");
-        logAction(`Applied extrapolated dataset ID ${resultData.new_dataset_id} as the new active dataset.`, "Extrapolate");
+        message.success("Extrapolate applied successfully!");
+        logAction(`new_dataset_id_${resultData.new_dataset_id}`,"Apply Extrapolation");
         setShowResultModal(false);
         onClose();
     };
@@ -325,7 +315,7 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
                     Create Graph
                 </Button>
                 <Button type="primary" onClick={handleApplyExtrapolate} style={{marginTop: "10px"}}>
-                    Apply Interpolation
+                    Apply Extrapolate
                 </Button>
             </Modal>
         </>

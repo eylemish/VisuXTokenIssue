@@ -104,7 +104,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
       setOversampledData(oversampled_records);
 
       message.success("Oversampling completed!");
-      logAction(`Oversampling performed using ${requestData.kind} on dataset ID ${requestData.datasetId}.`, method.toUpperCase())
+      logAction(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()) + "_" + method, method.toUpperCase())
       setShowResultModal(true);
       } catch (error) {
           message.error(`Error: ${error.message}`);
@@ -151,7 +151,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
         onUpdateDataset(oversampledRecord, resultData.new_dataset_id);
         message.success("Oversampling applied successfully!");
 
-        logAction(`Applied oversampled dataset ID ${resultData.new_dataset_id} as the new active dataset.`,method.toUpperCase());
+        logAction(`new_dataset_id_${resultData.new_dataset_id}`,"Apply Oversample");
         onCancel();
     };
 
