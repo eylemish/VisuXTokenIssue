@@ -34,7 +34,8 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
     const [newDatasetId, setNewDatasetId] = useState(null);
 
     const datasetManager = uiController.getDatasetManager();
-    const availableDatasets = datasetManager.getAllDatasetsId();
+    const availableDatasetsName = datasetManager.getAllDatasetsName();
+    const availableDatasetsId = datasetManager.getAllDatasetsId();
 
     // **Get column names when the user selects a dataset**
     useEffect(() => {
@@ -196,7 +197,7 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             dataset_id: datasetId,
             features: [xColumn, yColumn],
             records: extrapolatedData,
-            new_dataset_name: "Extrapolated Dataset"
+            new_dataset_name:datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+ "_Extrapolated Dataset+" + method
         };
         const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
             method: "POST",
@@ -214,7 +215,7 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             message.error("No reduced dataset available to apply.");
             return;
         }
-        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.addDatasetId(resultData.new_dataset_id, resultData.name);
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(extrapolatedData, resultData.new_dataset_id);
         message.success("Interpolate applied successfully!");
@@ -231,8 +232,8 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
                     placeholder="Choose a dataset"
                     onChange={setDatasetId}
                 >
-                    {availableDatasets.map((id) => (
-                        <Select.Option key={id} value={id}>{id}</Select.Option>
+                    {availableDatasetsId.map((id) => (
+                        <Select.Option key={id} value={id}>{datasetManager.getDatasetNameById(id)}</Select.Option>
                     ))}
                 </Select>
 

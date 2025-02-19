@@ -33,6 +33,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
 
     const datasetManager = uiController.getDatasetManager();
     const availableDatasets = datasetManager.getAllDatasetsId();
+    const availableDatasetsName = datasetManager.getAllDatasetsName();
 
     useEffect(() => {
         if (!datasetId) {
@@ -91,7 +92,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             dataset_id: datasetId,
             features: [xColumn, yColumn],
             records: interpolatedData,
-            new_dataset_name: "Interpolated Dataset"
+            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+"_Interpolated_Dataset_" + method
         };
         const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
             method: "POST",
@@ -215,7 +216,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
                     onChange={(value) => setDatasetId(value)}
                 >
                     {availableDatasets.map((id) => (
-                        <Select.Option key={id} value={id}>{id}</Select.Option>
+                        <Select.Option key={id} value={id}>{datasetManager.getDatasetNameById(id)}</Select.Option>
                     ))}
                 </Select>
 

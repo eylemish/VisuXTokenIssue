@@ -1,7 +1,9 @@
 class DatasetManager {
   constructor() {
     if (!DatasetManager.instance) {
+      this.datasetMap = new Map();
       this.datasetIds = new Set(); // Store all dataset IDs
+      this.datasetNames = new Set(); // Store all dataset names
       this.currentDatasetId = null; // Dataset ID of the current operation
       DatasetManager.instance = this; // preserve the singleton case (computing)
     }
@@ -9,16 +11,23 @@ class DatasetManager {
   }
 
   // Add data set ID
-  addDatasetId(datasetId) {
+  addDatasetId(datasetId, datasetName) {
     if (!datasetId) {
       console.warn("Cannot add an empty dataset ID.");
       return;
     }
     this.datasetIds.add(datasetId);
+    this.datasetNames.add(datasetName);
+    this.datasetMap.set(datasetId, datasetName);
     if (!this.currentDatasetId) {
       this.currentDatasetId = datasetId; // If the current ID is not set, it is selected by default
     }
     console.log(`Dataset ID ${datasetId} added. Current IDs:`, Array.from(this.datasetIds));
+  }
+
+   // Get dataset name by id
+   getDatasetNameById(datasetId) {
+    return this.datasetMap.get(datasetId) || "Not Found";
   }
 
   // Set the current dataset ID
@@ -57,6 +66,11 @@ class DatasetManager {
   // Get all dataset IDs
   getAllDatasetsId() {
     return Array.from(this.datasetIds);
+  }
+
+  //Get all dataset names
+  getAllDatasetsName() {
+    return Array.from(this.datasetMap.values());
   }
 
   // Get the column names of the dataset

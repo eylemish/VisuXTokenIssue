@@ -27,6 +27,7 @@ const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
+  const availableDatasetsName = datasetManager.getAllDatasetsName();
 
   // **when user select a dataset, get the column**
   useEffect(() => {
@@ -110,7 +111,7 @@ const CorrelationModal = ({ visible, onCancel, uiController, logAction }) => {
         onChange={setDatasetId}
       >
         {availableDatasets.map((id) => (
-          <Select.Option key={id} value={id}>{id}</Select.Option>
+          <Select.Option key={id} value={id}>{availableDatasetsName}</Select.Option>
         ))}
       </Select>
 

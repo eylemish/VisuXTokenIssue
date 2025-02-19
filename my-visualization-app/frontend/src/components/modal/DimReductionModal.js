@@ -91,7 +91,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
             dataset_id: datasetManager.getCurrentDatasetId(), 
             features: reducedData.features,
             records: reducedData.records,
-            new_dataset_name: "Interpolated Dataset"
+            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+"_dim_reduced_"+method
           };
           const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
               method: "POST",
@@ -109,7 +109,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
             return;
         }
 
-        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.addDatasetId(resultData.new_dataset_id, resultData.name);
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(reducedData.records, resultData.new_dataset_id);
         message.success("Dimensionality reduction applied successfully!");

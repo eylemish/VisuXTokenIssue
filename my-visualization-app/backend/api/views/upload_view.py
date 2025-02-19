@@ -65,7 +65,7 @@ class UploadView(APIView):
             )
 
             return Response(
-                {"message": f"File '{file.name}' uploaded and stored successfully.", "dataset_id": dataset.id},
+                {"message": f"File '{file.name}' uploaded and stored successfully.", "dataset_id": dataset.id, "name": file.name},
                 status=status.HTTP_201_CREATED
             )
 

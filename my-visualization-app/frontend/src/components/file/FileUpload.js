@@ -75,7 +75,7 @@ const FileUpload = ({ datasetManager }) => {
 
       if (data.dataset_id) {
         // add dataset_id to DatasetManager
-        datasetManager.addDatasetId(data.dataset_id);
+        datasetManager.addDatasetId(data.dataset_id, data.name);
         message.success(`File uploaded successfully. Dataset ID: ${data.dataset_id}`);
       } else {
         message.warning("No dataset ID returned from backend.");

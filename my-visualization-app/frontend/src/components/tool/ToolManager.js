@@ -27,11 +27,11 @@ class ToolManager {
   }
 
   // **Scenario 1: dataset is modified, update UI**
-  handleDatasetChange(toolName, oldDatasetId, newDatasetId, params) {
+  handleDatasetChange(toolName, oldDatasetId, newDatasetId, params, filename) {
     console.log(`Dataset updated: ${newDatasetId}`);
 
     // **Updated DatasetManager (only ID stored)**
-    this.uiController.getDatasetManager().addDatasetId(newDatasetId);
+    this.uiController.getDatasetManager().addDatasetId(newDatasetId, filename);
 
     // **Notify the UI to update tables and charts**
     this.updateUIForDatasetChange(oldDatasetId, newDatasetId);

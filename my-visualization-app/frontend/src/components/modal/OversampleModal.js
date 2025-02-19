@@ -125,7 +125,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
             dataset_id: datasetManager.getCurrentDatasetId(), 
             features: oversampledFeature,
             records: oversampledRecord,
-            new_dataset_name: "Oversampled Dataset"
+            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()) + "_Oversampled_" + method + "_" + factor
           };
           const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
               method: "POST",
@@ -146,7 +146,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
             return;
         }
 
-        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.addDatasetId(resultData.new_dataset_id, resultData.name);
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(oversampledRecord, resultData.new_dataset_id);
         message.success("Oversampling applied successfully!");
@@ -169,7 +169,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
           onChange={setDatasetId}
         >
           {availableDatasets.map((id) => (
-            <Select.Option key={id} value={id}>{id}</Select.Option>
+            <Select.Option key={id} value={id}>{datasetManager.getDatasetNameById(id)}</Select.Option>
           ))}
         </Select>
 

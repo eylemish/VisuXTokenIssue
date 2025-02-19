@@ -131,7 +131,7 @@ class CreateDatasetView(APIView):
                 last_dataset=last_dataset  # Linked original dataset
             )
             # Return the created dataset id in JSON format
-            return JsonResponse({"new_dataset_id": new_dataset.id})
+            return JsonResponse({"new_dataset_id": new_dataset.id,"name":new_dataset.name})
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
