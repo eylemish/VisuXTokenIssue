@@ -13,8 +13,8 @@ const CurveFittingModal = ({ visible, onCancel, graph }) => {
   // Update X / Y axis options when `graph` changes
   useEffect(() => {
     if (graph && graph.dataset && Object.keys(graph.dataset).length > 0) {
-      setSelectedX(graph.xAxis || Object.keys(graph.dataset)[0]);
-      setSelectedY(graph.yAxis || Object.keys(graph.dataset)[1]);
+      setSelectedX(graph.xColumn || Object.keys(graph.dataset)[0]);
+      setSelectedY(graph.yColumn || Object.keys(graph.dataset)[1]);
     } else {
       setSelectedX("");
       setSelectedY("");
