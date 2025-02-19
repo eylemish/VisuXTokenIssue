@@ -2,7 +2,7 @@ import GraphStyle from "./GraphStyle";
 import { chartCategories } from "./ChartCategories";
 
 class Graph {
-  constructor(id, name, dataset, type, selectedFeatures, style = new GraphStyle()) {
+  constructor(datasetId, id, name, dataset, type, selectedFeatures, style = new GraphStyle()) {
     console.log("Graph constructor received dataset:", dataset);
     this.id = id;
     this.name = name;
@@ -18,6 +18,7 @@ class Graph {
     this.updatedAt = new Date();
     this.visible = true;
     this.fittedCurve = null; // Stores curve-fitting data
+    this.datasetId = datasetId;
   }
 
   updateDataset(newDataset) {

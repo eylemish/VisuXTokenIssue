@@ -32,6 +32,7 @@ const EditGraphPanel = () => {
         color: graph.style?.colorScheme || "#ffffff",
         style: graph.style,
         graphObject: graph, //to save the original object
+        graphDatasetId: graph.datasetId,
       }));
       setGraphDetails(graphs);
     };

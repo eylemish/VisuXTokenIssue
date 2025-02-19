@@ -120,6 +120,7 @@ const GraphModal = ({ visible, onCancel, uiController }) => {
       graphType: selectedGraphType, // Ensure that graphType is passed correctly
       dataset,
       selectedFeatures,
+      datasetId: datasetId,
     };
 
     console.log("Sending graphInfo to UIController:", graphInfo);

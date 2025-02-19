@@ -37,6 +37,7 @@ class GraphManager {
     }
 
     const newGraph = new Graph(
+      graphInfo.datasetId,
       graphId,
       graphInfo.graphName || graphId,
       transformedDataset,

@@ -33,6 +33,7 @@ const CurveFittingModal = ({ visible, onCancel, graph }) => {
         yColumn: selectedY,
         type: fitType,
         degree: fitType === "polynomial" ? degree : undefined,
+        datasetId: graph.graphDatasetId,
       },
     };
 
