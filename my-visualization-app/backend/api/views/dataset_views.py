@@ -91,7 +91,7 @@ class DeleteFeatureView(APIView):
         original_dataset = Dataset.objects.get(id=dataset_id)
 
         # Copy the dataset to maintain modification history
-        new_dataset = original_dataset.copy_dataset(new_name=f"{original_dataset.name}_modified")
+        #new_dataset = original_dataset.copy_dataset(new_name=f"{original_dataset.name}_modified")
 
         # Keep only the features that are not being removed
         original_dataset.features = [f for f in original_dataset.features if f not in features_to_remove]
