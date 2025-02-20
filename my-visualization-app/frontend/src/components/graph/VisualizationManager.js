@@ -109,8 +109,10 @@ class VisualizationManager {
         const featureData = this.#extractFeatureData(dataset, selectedFeatures);
         if (!featureData) return null;
 
+        const filteredData = this.#filterDataByShowedDatapoints(featureData, graph.showedDatapoints);
+
         // Creating the data
-        let plotData = this.#applyGraphStyle(graph, featureData);
+        let plotData = this.#applyGraphStyle(graph, filteredData);
         let traces = [plotData];
 
         // Curve Fitting
@@ -133,6 +135,13 @@ class VisualizationManager {
         }
         return featureData;
     }
+
+    #filterDataByShowedDatapoints(featureData, showedDatapoints) {
+        return featureData.map((feature, index) => {
+            // Use showedDatapoints to filter out the data
+            return feature.filter((_, idx) => showedDatapoints.includes(idx + 1)); // Convert 0-indexed to 1-indexed
+        });
+    }    
 
     #applyGraphStyle(graph, featureData) {
         switch (graph.type) {
@@ -284,19 +293,19 @@ class VisualizationManager {
     }
 
     #buildLayout(name, selectedFeatures) {
-        // Dinamik olarak x, y, z eksenlerini ayarlıyoruz
+        
         const layout = {
             title: { 
                 text: name, 
                 font: { size: 20, color: "#333" }, 
-                x: 0.5  // Ortalanmış başlık
+                x: 0.5  
             },
             xaxis: { 
                 title: selectedFeatures[0] || "X", 
                 gridcolor: "#DDDDDD", 
                 zerolinecolor: "#BBBBBB" 
             },
-            // Eğer 2 özellik varsa, y eksenini de ekliyoruz
+            
             ...(selectedFeatures.length >= 2 && {
                 yaxis: { 
                     title: selectedFeatures[1] || "Y", 
@@ -304,7 +313,7 @@ class VisualizationManager {
                     zerolinecolor: "#BBBBBB" 
                 }
             }),
-            // Eğer 3 özellik varsa, z eksenini de ekliyoruz
+            
             ...(selectedFeatures.length === 3 && {
                 zaxis: {
                     title: selectedFeatures[2] || "Z", 
@@ -312,9 +321,9 @@ class VisualizationManager {
                     zerolinecolor: "#BBBBBB"
                 }
             }),
-            plot_bgcolor: "rgba(245, 245, 245, 0.9)",  // Hafif gri arkaplan
+            plot_bgcolor: "rgba(245, 245, 245, 0.9)", 
             paper_bgcolor: "white", 
-            margin: { l: 50, r: 50, t: 50, b: 50 },  // Daha temiz kenar boşlukları
+            margin: { l: 50, r: 50, t: 50, b: 50 }, 
         };
     
         return layout;

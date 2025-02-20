@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Select, Button, Dropdown, Space, Menu } from "antd";
+import { Card, Select, Button, Dropdown, Space, Menu, Input, Divider} from "antd";
 import { ChromePicker } from "react-color";
 import GraphManager from "./GraphManager";
 import VisualizationManager from "./VisualizationManager";
@@ -18,6 +18,11 @@ const EditGraphPanel = () => {
   const [selectedType, setSelectedType] = useState(null);
   const [curveFitVisible, setCurveFitVisible] = useState(false);
   const [multipleY, setMultipleY] = useState(false);
+  const [filterData, setFilterData] = useState({
+    include: [],
+    exclude: []
+  });
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   useEffect(() => {
     const fetchGraphs = () => {
@@ -54,6 +59,8 @@ const EditGraphPanel = () => {
     setSelectedZ(graph?.graphFeatures[2] || null);
   };
 
+  const toggleFilterVisibility = () => setIsFilterVisible(!isFilterVisible);
+
   const handleColorChange = (color) => {
     setEditColor(color.hex);
   };
@@ -72,6 +79,45 @@ const EditGraphPanel = () => {
       )
     );
   };
+
+  const handleFilterChange = (type, startValue, endValue) => {
+    const start = Number(startValue);
+    const end = Number(endValue);
+    if (start && end && start <= end) {
+      
+      setFilterData((prevData) => {
+        const newFilters = { ...prevData };
+  
+        
+        if (newFilters[type]) {
+          newFilters[type] = newFilters[type].filter(
+            (filter) => !(filter.start === start && filter.end === end)
+          );
+        }
+  
+        
+        newFilters[type] = [...(newFilters[type] || []), { start, end }];
+        return newFilters;
+      });
+  
+      if (selectedGraphForEdit) {
+        const graph = GraphManager.getGraphById(selectedGraphForEdit);
+        if (!graph) return;
+  
+        if (type === "include") {
+          // Include range: Filter data points within the range
+          GraphManager.restoreRangeToGraph(selectedGraphForEdit, start, end);
+          console.log('include');
+        } else if (type === "exclude") {
+          // Exclude range: Filter data points outside the range
+          GraphManager.excludeRangeFromGraph(selectedGraphForEdit, start, end);
+        }
+      }
+    }
+  };
+  
+
+
 
   const selectedGraph = graphDetails.find((graph) => graph.graphId === selectedGraphForEdit);
 
@@ -140,6 +186,21 @@ const EditGraphPanel = () => {
     }
   }
 
+  const renderShowedDatapoints = () => {
+    if (!selectedGraph) return null;
+    const showedDatapoints = selectedGraph.graphObject.showedDatapoints || [];
+    return (
+      <div style={{ marginTop: "10px" }}>
+        <label>Showed Data Points: </label>
+        <ul>
+          {showedDatapoints.map((point, index) => (
+            <li key={index}>Data Point {point}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   const renderChartCategories = () => (
     <Menu>
       {Object.entries(chartCategories).map(([category, charts]) => (
@@ -189,6 +250,8 @@ const EditGraphPanel = () => {
       </div>
 
 
+      {renderShowedDatapoints()}
+
      
   <div style={{ marginBottom: "10px" }}>
     <label style={{ marginRight: "8px" }}>X Axis: </label>
@@ -213,6 +276,52 @@ const EditGraphPanel = () => {
       >
         Add Multiple Y
       </Button>
+      <Divider />
+
+<div style={{ marginBottom: "10px" }}>
+  <label style={{ marginRight: "8px" }}>Include Filter (Start - End): </label>
+  <Input.Group compact>
+    <Input 
+      style={{ width: '120px' }} 
+      placeholder="Start"
+      onChange={(e) => setFilterData({ ...filterData, start: e.target.value })}
+    />
+    <Input 
+      style={{ width: '120px' }} 
+      placeholder="End"
+      onChange={(e) => setFilterData({ ...filterData, end: e.target.value })}
+    />
+    <Button 
+      type="default" 
+      onClick={() => handleFilterChange('include', filterData.start, filterData.end)}
+    >
+      Apply Include
+    </Button>
+  </Input.Group>
+</div>
+
+<div style={{ marginBottom: "10px" }}>
+  <label style={{ marginRight: "8px" }}>Exclude Filter (Start - End): </label>
+  <Input.Group compact>
+    <Input 
+      style={{ width: '120px' }} 
+      placeholder="Start"
+      onChange={(e) => setFilterData({ ...filterData, start: e.target.value })}
+    />
+    <Input 
+      style={{ width: '120px' }} 
+      placeholder="End"
+      onChange={(e) => setFilterData({ ...filterData, end: e.target.value })}
+    />
+    <Button 
+      type="default" 
+      onClick={() => handleFilterChange('exclude', filterData.start, filterData.end)}
+    >
+      Apply Exclude
+    </Button>
+  </Input.Group>
+</div>
+
 
       {curveFitVisible && selectedGraph && (
         <CurveFittingModal visible={curveFitVisible} onCancel={() => setCurveFitVisible(false)} graph={selectedGraph} />
