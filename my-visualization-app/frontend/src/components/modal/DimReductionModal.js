@@ -126,7 +126,7 @@ const DimReductionModal = ({visible, onClose, onUpdateDataset, logAction, datase
             return;
         }
 
-        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.addDatasetId(resultData.new_dataset_id, resultData.name);
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(reducedData.records, resultData.new_dataset_id);
         message.success("Dimensionality reduction applied successfully!");
