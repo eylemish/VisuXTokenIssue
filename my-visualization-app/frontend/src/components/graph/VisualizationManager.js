@@ -177,12 +177,17 @@ class VisualizationManager {
     #lineChart(featureData, graph) {
         return {
             type: "scatter",
-            mode: "lines",
+            mode: "lines+markers",
             x: featureData[0],
             y: featureData[1],
             line: {
                 color: graph.style?.getMarkerStyle()?.color || "green",
                 width: 2
+            },
+            marker: {
+                color: graph.style?.getMarkerStyle.color,
+                size: 8,
+                symbol: 'circle',
             },
         };
     }
