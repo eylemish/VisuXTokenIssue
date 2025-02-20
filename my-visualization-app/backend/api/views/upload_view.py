@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import numpy as np
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
@@ -50,6 +51,7 @@ class UploadView(APIView):
 
             # Extract Column Names & Data Records
             features = list(df.columns)
+            df = df.replace({np.nan: None})
             records = df.to_dict(orient="records")
 
             # Stored in database Dataset
