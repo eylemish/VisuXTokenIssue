@@ -252,41 +252,32 @@ const EditGraphPanel = () => {
         </Select>
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "8px" }}>Color: </label>
-        <ChromePicker color={editColor} onChange={handleColorChange} />
-      </div>
+      <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", gap: "20px" }}>
+  <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>X Axis: </label>
+      {renderFeatureSelect("x", selectedX, setSelectedX)}
+    </div>
+  
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>Y Axis: </label>
+      {renderFeatureSelect("y", selectedY, setSelectedY)}
+    </div>
+  
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>Z Axis: </label>
+      {renderFeatureSelect("z", selectedZ, setSelectedZ)}
+    </div>
 
-      <Button type="primary" onClick={handleEditGraphSubmit}>Recolour Graph</Button>
-      <Button type="default" onClick={() => setCurveFitVisible(true)}>Fit Curve</Button>
-
-      <div style={{ marginBottom: "10px" }}>
+    <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Select Chart Type: </label>
         <Dropdown overlay={renderChartCategories}>
           <Button>Select Chart Type</Button>
         </Dropdown>
       </div>
 
-
-      {renderShowedDatapoints()}
-
-     
-  <div style={{ marginBottom: "10px" }}>
-    <label style={{ marginRight: "8px" }}>X Axis: </label>
-    {renderFeatureSelect("x", selectedX, setSelectedX)}
-  </div>
-  
-  <div style={{ marginBottom: "10px" }}>
-    <label style={{ marginRight: "8px" }}>Y Axis: </label>
-    {renderFeatureSelect("y", selectedY, setSelectedY)}
-  </div>
-  
-  <div style={{ marginBottom: "10px" }}>
-    <label style={{ marginRight: "8px" }}>Z Axis: </label>
-    {renderFeatureSelect("z", selectedZ, setSelectedZ)}
-  </div>
-
-  <Button
+      <div style={{ marginBottom: "10px" }}>
+      <Button
         type="default"
         onClick={handleAddMultipleYClick}
         style={{ marginTop: "10px", backgroundColor: selectedGraph && selectedGraph.graphType !== 'line' ? '#d9d9d9' : '' }}
@@ -294,6 +285,24 @@ const EditGraphPanel = () => {
       >
         Add Multiple Y
       </Button>
+      </div>
+
+  </div>
+
+  
+  <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>Color: </label>
+      <ChromePicker color={editColor} onChange={handleColorChange} disableAlpha />
+    </div>
+    <Button type="primary" onClick={handleEditGraphSubmit}>Recolour Graph</Button>
+    <Button type="default" onClick={() => setCurveFitVisible(true)}>Fit Curve</Button>
+  </div>
+</div>
+
+
+
+  {renderShowedDatapoints()}
       <Divider />
 
 <div style={{ marginBottom: "10px" }}>
