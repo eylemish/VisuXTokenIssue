@@ -266,6 +266,27 @@ class DimensionalReductionView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class RecommendDimReductionView(APIView):
+    def get(self, request):
+        try:
+            dataset_id = request.GET.get("dataset_id")
+            if not dataset_id:
+                return JsonResponse({"error": "Dataset ID is required"}, status=400)
+
+            dataset = get_object_or_404(Dataset, id=dataset_id)
+            dataset_df = dataset.get_dataframe()
+
+            recommendations, parameters = Engine.recommend_dim_reduction(dataset_df)
+
+            return JsonResponse({
+                "recommendations": recommendations,
+                "parameters": parameters
+            })
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
 @method_decorator(csrf_exempt, name='dispatch')
 class OversampleDataView(APIView):
     def post(self, request):
