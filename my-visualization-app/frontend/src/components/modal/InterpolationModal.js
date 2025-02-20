@@ -107,7 +107,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             message.error("No reduced dataset available to apply.");
             return;
         }
-        datasetManager.addDatasetId(resultData.new_dataset_id);
+        datasetManager.addDatasetId(resultData.new_dataset_id, resultData.name);
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(interpolatedData, resultData.new_dataset_id);
         message.success("Interpolate applied successfully!");
