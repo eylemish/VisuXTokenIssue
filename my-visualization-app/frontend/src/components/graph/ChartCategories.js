@@ -1,5 +1,5 @@
-import { PictureOutlined, LineChartOutlined, BarChartOutlined, PieChartOutlined, HeatMapOutlined, RadarChartOutlined, DotChartOutlined, AreaChartOutlined, AppstoreAddOutlined } from '@ant-design/icons';
-// i am not sure if the import is needed - ezgi
+import {LineChartOutlined, BarChartOutlined, PieChartOutlined, HeatMapOutlined, RadarChartOutlined, DotChartOutlined, AreaChartOutlined, AppstoreAddOutlined } from '@ant-design/icons';
+
 export const chartCategories = {
     "Basic Charts": [
       { type: "scatter", name: "Scatter Plot", icon: <DotChartOutlined />, requiredFeatures: 2 },
