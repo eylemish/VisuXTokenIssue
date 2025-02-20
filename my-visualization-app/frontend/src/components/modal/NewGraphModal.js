@@ -12,24 +12,11 @@ import {
   AppstoreOutlined
 } from "@ant-design/icons";
 import datasetManager from "../file/DatasetManager";
+import { chartCategories } from "../graph/ChartCategories";
 
 const { TabPane } = Tabs;
 
 // Define chart categories
-const chartCategories = {
-  "Basic Charts": [
-    { type: "scatter", name: "Scatter Plot", icon: <DotChartOutlined />, requiredFeatures: 2 },
-    { type: "line", name: "Line Chart", icon: <LineChartOutlined />, requiredFeatures: 2 },
-    { type: "bar", name: "Bar Chart", icon: <BarChartOutlined />, requiredFeatures: 2 },
-    { type: "pie", name: "Pie Chart", icon: <PieChartOutlined />, requiredFeatures: 1 },
-  ],
-  "Advanced Charts": [
-    { type: "heatmap", name: "Heatmap", icon: <HeatMapOutlined />, requiredFeatures: 3 },
-    { type: "scatterpolar", name: "Radar Chart", icon: <RadarChartOutlined />, requiredFeatures: 3 },
-    { type: "scatter3d", name: "3D Scatter Plot", icon: <AppstoreOutlined />, requiredFeatures: 3 },
-    { type: "area", name: "Area Chart", icon: <AreaChartOutlined />, requiredFeatures: 2 },
-  ],
-};
 
 const GraphModal = ({ visible, onCancel, uiController }) => {
   const [features, setFeatures] = useState([]);
