@@ -30,6 +30,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
   const [newDatasetId, setNewDatasetId] = useState(null);
   const [oversampledFeature, setOversampledFeature] = useState(null);
   const [oversampledRecord, setOversampledRecord] = useState(null);
+  const [showTable, setShowTable] = useState(true);
 
   const datasetManager = uiController.getDatasetManager();
   const availableDatasets = datasetManager.getAllDatasetsId();
@@ -150,7 +151,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
         datasetManager.setCurrentDatasetId(resultData.new_dataset_id);
         onUpdateDataset(oversampledRecord, resultData.new_dataset_id);
         message.success("Oversampling applied successfully!");
-
+        setShowTable(false)
         logAction(`new_dataset_id_${resultData.new_dataset_id}`,"Apply Oversample");
         onCancel();
     };
@@ -215,7 +216,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
         </Button>
       </Modal>
 
-      
+      {showTable && (
       <Modal
         title="Oversample Results"
         visible={showResultModal}
@@ -224,23 +225,24 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
       >
 
         {/* Confirm, Apply button */}
-      <div style={{textAlign: "right", marginBottom: "15px"}}>
+        <div style={{textAlign: "right", marginBottom: "15px"}}>
         <Button onClick={onCancel} style={{marginRight: 10}}>Cancel</Button>
         <Button type="primary" onClick={handleOversample} loading={loading}
                 style={{marginRight: 10}}>Confirm</Button>
         {oversampledData && <Button type="primary" onClick={handleApply}>Apply Oversampling</Button>}
         </div>
-
-        <Table
+       
+        {showTable&&(<Table
           columns={resultColumns}
           dataSource={oversampledData}
           rowKey="x"
           pagination={false}
           size="small"
         />
+        )}
       </Modal>
+      )}
     </>
-    
   );
 };
 
