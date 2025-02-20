@@ -189,17 +189,35 @@ const EditGraphPanel = () => {
   const renderShowedDatapoints = () => {
     if (!selectedGraph) return null;
     const showedDatapoints = selectedGraph.graphObject.showedDatapoints || [];
+  
+    if (showedDatapoints.length === 0) return null;
+  
+    // Küçükten büyüğe sıralama
+    const sortedPoints = [...showedDatapoints].sort((a, b) => a - b);
+    let ranges = [];
+    let start = sortedPoints[0];
+    let prev = sortedPoints[0];
+  
+    sortedPoints.slice(1).forEach((num) => {
+      if (num === prev + 1) {
+        prev = num;
+      } else {
+        ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+        start = num;
+        prev = num;
+      }
+    });
+  
+    ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+    
     return (
       <div style={{ marginTop: "10px" }}>
-        <label>Showed Data Points: </label>
-        <ul>
-          {showedDatapoints.map((point, index) => (
-            <li key={index}>Data Point {point}</li>
-          ))}
-        </ul>
+        <label>Showing Data Points: </label>
+        <p>{ranges.join(", ")}</p>
       </div>
     );
   };
+  
 
   const renderChartCategories = () => (
     <Menu>
