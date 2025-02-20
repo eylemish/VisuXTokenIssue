@@ -2,7 +2,7 @@ from django.urls import path
 from .views import DataVisualizationView, OversampleDataView, SuggestFeatureCombiningView, SuggestFeatureDroppingView, \
     ApplyPcaView, HandleUserActionView, ExportLogView, ExtrapolateView, FitCurveView, InterpolateView, \
     CorrelationView, DimensionalReductionView, GetCsrfTokenView, DatasetDetailView, DatasetColumnsView, \
-    DeleteFeatureView, UploadView, ChangeDataView, DownloadView
+    DeleteFeatureView, UploadView, ChangeDataView, DownloadView, RecommendDimReductionView
 from backend.api.views.dataset_views import CreateDatasetView
 
 urlpatterns = [
@@ -20,6 +20,7 @@ urlpatterns = [
     path('extrapolate/', ExtrapolateView.as_view(), name='extrapolate'),
     path('correlation/', CorrelationView.as_view(), name='correlation'),
     path('dimensional_reduction/', DimensionalReductionView.as_view(), name='dimensional_reduction'),
+    path('recommend_dim_reduction/', RecommendDimReductionView.as_view(), name='recommend_dim_reduction'),
     path('oversample_data/', OversampleDataView.as_view(), name='oversample_data'),
     path("get_csrf_token/", GetCsrfTokenView.as_view(), name="get_csrf_token"),
     path('datasets/<int:dataset_id>/', DatasetDetailView.as_view(), name='dataset-detail'),

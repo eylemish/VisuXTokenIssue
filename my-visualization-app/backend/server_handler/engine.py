@@ -108,6 +108,33 @@ class Engine:
             return Engine.apply_umap(numeric_data, n_components)
         else:
             raise ValueError(f"Unsupported dimensionality reduction method: {method}")
+
+    @staticmethod
+    def recommend_dim_reduction(dataset_df):
+        try:
+            num_features = dataset_df.shape[1]
+            recommendations = []
+            parameters = {}
+
+            if num_features > 50:
+                recommendations.append("pca")
+                parameters["pca"] = {"n_components": min(10, num_features // 2)}
+
+            if num_features > 10:
+                recommendations.append("tsne")
+                parameters["tsne"] = {"n_components": 2, "perplexity": min(30, num_features - 1)}
+
+            if num_features > 5:
+                recommendations.append("umap")
+                parameters["umap"] = {"n_components": 2, "n_neighbors": min(15, num_features - 1)}
+
+            if not recommendations:
+                recommendations.append("pca")
+                parameters["pca"] = {"n_components": min(2, num_features)}
+
+            return recommendations, parameters
+        except Exception as e:
+            return [], {}
     """
     # Do interpolate with given data, given kind of interpolation, the number of generated data and the given range.
     # The default generated kind is linear.
