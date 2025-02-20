@@ -110,7 +110,7 @@ const CorrelationModal = ({ visible, onCancel, uiController}) => {
         onChange={setDatasetId}
       >
         {availableDatasets.map((id) => (
-          <Select.Option key={id} value={id}>{availableDatasetsName}</Select.Option>
+          <Select.Option key={id} value={id}>{datasetManager.getDatasetNameById(id)}</Select.Option>
         ))}
       </Select>
 

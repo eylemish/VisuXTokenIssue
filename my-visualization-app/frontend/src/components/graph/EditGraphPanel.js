@@ -189,17 +189,35 @@ const EditGraphPanel = () => {
   const renderShowedDatapoints = () => {
     if (!selectedGraph) return null;
     const showedDatapoints = selectedGraph.graphObject.showedDatapoints || [];
+  
+    if (showedDatapoints.length === 0) return null;
+  
+    // Küçükten büyüğe sıralama
+    const sortedPoints = [...showedDatapoints].sort((a, b) => a - b);
+    let ranges = [];
+    let start = sortedPoints[0];
+    let prev = sortedPoints[0];
+  
+    sortedPoints.slice(1).forEach((num) => {
+      if (num === prev + 1) {
+        prev = num;
+      } else {
+        ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+        start = num;
+        prev = num;
+      }
+    });
+  
+    ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+    
     return (
       <div style={{ marginTop: "10px" }}>
-        <label>Showed Data Points: </label>
-        <ul>
-          {showedDatapoints.map((point, index) => (
-            <li key={index}>Data Point {point}</li>
-          ))}
-        </ul>
+        <label>Showing Data Points: </label>
+        <p>{ranges.join(", ")}</p>
       </div>
     );
   };
+  
 
   const renderChartCategories = () => (
     <Menu>
@@ -234,41 +252,32 @@ const EditGraphPanel = () => {
         </Select>
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "8px" }}>Color: </label>
-        <ChromePicker color={editColor} onChange={handleColorChange} />
-      </div>
+      <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", gap: "20px" }}>
+  <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>X Axis: </label>
+      {renderFeatureSelect("x", selectedX, setSelectedX)}
+    </div>
+  
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>Y Axis: </label>
+      {renderFeatureSelect("y", selectedY, setSelectedY)}
+    </div>
+  
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>Z Axis: </label>
+      {renderFeatureSelect("z", selectedZ, setSelectedZ)}
+    </div>
 
-      <Button type="primary" onClick={handleEditGraphSubmit}>Recolour Graph</Button>
-      <Button type="default" onClick={() => setCurveFitVisible(true)}>Fit Curve</Button>
-
-      <div style={{ marginBottom: "10px" }}>
+    <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Select Chart Type: </label>
         <Dropdown overlay={renderChartCategories}>
           <Button>Select Chart Type</Button>
         </Dropdown>
       </div>
 
-
-      {renderShowedDatapoints()}
-
-     
-  <div style={{ marginBottom: "10px" }}>
-    <label style={{ marginRight: "8px" }}>X Axis: </label>
-    {renderFeatureSelect("x", selectedX, setSelectedX)}
-  </div>
-  
-  <div style={{ marginBottom: "10px" }}>
-    <label style={{ marginRight: "8px" }}>Y Axis: </label>
-    {renderFeatureSelect("y", selectedY, setSelectedY)}
-  </div>
-  
-  <div style={{ marginBottom: "10px" }}>
-    <label style={{ marginRight: "8px" }}>Z Axis: </label>
-    {renderFeatureSelect("z", selectedZ, setSelectedZ)}
-  </div>
-
-  <Button
+      <div style={{ marginBottom: "10px" }}>
+      <Button
         type="default"
         onClick={handleAddMultipleYClick}
         style={{ marginTop: "10px", backgroundColor: selectedGraph && selectedGraph.graphType !== 'line' ? '#d9d9d9' : '' }}
@@ -276,6 +285,24 @@ const EditGraphPanel = () => {
       >
         Add Multiple Y
       </Button>
+      </div>
+
+  </div>
+
+  
+  <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ marginBottom: "10px" }}>
+      <label style={{ marginRight: "8px" }}>Color: </label>
+      <ChromePicker color={editColor} onChange={handleColorChange} disableAlpha />
+    </div>
+    <Button type="primary" onClick={handleEditGraphSubmit}>Recolour Graph</Button>
+    <Button type="default" onClick={() => setCurveFitVisible(true)}>Fit Curve</Button>
+  </div>
+</div>
+
+
+
+  {renderShowedDatapoints()}
       <Divider />
 
 <div style={{ marginBottom: "10px" }}>
