@@ -188,6 +188,45 @@ class GraphManager {
 
  }
 
+ excludeRangeFromGraph(graphId, min, max) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
+      return false;
+    }
+
+    graph.showedDatapoints = graph.showedDatapoints.filter(num => num < min || num > max);
+    this.notify({ type: "graphUpdated", graphId });
+    return true;
+  }
+
+  
+  restoreRangeToGraph(graphId, min, max) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
+      return false;
+    }
+    graph.restoreRange(min, max);
+
+    this.notify({ type: "graphUpdated", graphId });
+    return true;
+  }
+
+
+   excludeRangeToGraph(graphId, min, max) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
+      return false;
+    }
+    graph.excludeRange(min, max);
+
+    this.notify({ type: "graphUpdated", graphId });
+    return true;
+  }
+
+
   //these 3 are all related to notifying other claasses about changes
   notify(data) {
     console.log("GraphManager triggered", data);

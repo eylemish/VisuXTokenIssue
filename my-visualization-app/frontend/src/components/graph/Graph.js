@@ -19,6 +19,7 @@ class Graph {
     this.visible = true;
     this.fittedCurve = null; // Stores curve-fitting data
     this.datasetId = datasetId;
+    this.showedDatapoints = Array.from({ length: this.dataset[selectedFeatures[0]].length }, (v, i) => i + 1);
   }
 
   updateDataset(newDataset) {
@@ -128,6 +129,20 @@ class Graph {
     }
     return 0;
   }
+
+  excludeRange(min, max) {
+    this.showedDatapoints = this.showedDatapoints.filter(num => num < min || num > max);
+  }
+
+  restoreRange(min, max) {
+    for (let i = min; i <= max; i++) {
+      if (!this.showedDatapoints.includes(i)) {
+        this.showedDatapoints.push(i);
+      }
+    }
+  }
+
+
 }
 
 export default Graph;
