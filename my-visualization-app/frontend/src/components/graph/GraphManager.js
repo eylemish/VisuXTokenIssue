@@ -87,24 +87,21 @@ class GraphManager {
   deleteGraph(graphId) {
     if (this.graphs.has(graphId)) {
       this.graphs.delete(graphId);
-      if (this.currentGraph?.id === graphId) {
-        this.currentGraph = null;
-      }
       return true;
     }
     return false;
   }
 
-  replaceGraph(graphId, newGraph) {
-    if (this.graphs.has(graphId)) {
-      this.graphs.set(graphId, newGraph);
-      if (this.currentGraph?.id === graphId) {
-        this.currentGraph = newGraph;
-      }
-      return true;
-    }
-    return false;
-  }
+  // replaceGraph(graphId, newGraph) {
+  //   if (this.graphs.has(graphId)) {
+  //     this.graphs.set(graphId, newGraph);
+  //     if (this.currentGraph?.id === graphId) {
+  //       this.currentGraph = newGraph;
+  //     }
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
   getGraphById(graphId) {
     const graph = this.graphs.get(graphId);
@@ -114,29 +111,24 @@ class GraphManager {
     return graph || null;
   }
 
-  setCurrentGraph(graphId) {
-    if (this.graphs.has(graphId)) {
-      this.currentGraph = this.graphs.get(graphId);
-      return true;
-    }
-    return false;
-  }
+  // setCurrentGraph(graphId) {
+  //   if (this.graphs.has(graphId)) {
+  //     this.currentGraph = this.graphs.get(graphId);
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
-  updateGraph(graphId, dataset, style) {
-    const graph = this.graphs.get(graphId);
-    if (graph) {
-      graph.setDataset(dataset);
-      graph.updateStyle(style);
-      this.notify({ type: "graphUpdated" });
-      return true;
-    }
-    return false;
-  }
-
-
-
-
-
+  // updateGraph(graphId, dataset, style) {
+  //   const graph = this.graphs.get(graphId);
+  //   if (graph) {
+  //     graph.setDataset(dataset);
+  //     graph.updateStyle(style);
+  //     this.notify({ type: "graphUpdated" });
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
 
 

@@ -1,20 +1,16 @@
 import React, {useState, useEffect} from "react";
 import {
     Card,
-    Typography,
     Row,
     Col,
-    Tag,
     Spin,
-    Divider,
     List,
     Button,
 } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import Plot from "react-plotly.js";
 import VisualizationManager from "./VisualizationManager";
 import GraphManager from "./GraphManager";
-
-const {Title, Paragraph} = Typography;
 const visualizationManager = new VisualizationManager();
 
 const GraphSection = () => {
@@ -89,6 +85,12 @@ const GraphSection = () => {
     };
 
 
+    const deleteGraph = (graphId) => {
+      setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
+      GraphManager.deleteGraph(graphId);
+  };
+
+
     const handleLayerGraphs = () => {
         setCombineGraphs(!combineGraphs);
       };
@@ -155,7 +157,13 @@ const GraphSection = () => {
                             >
                               {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
                             </Button>
-                          </List.Item>
+                            <Button
+                            type="primary"
+                            danger
+                            icon={<CloseOutlined />}
+                            onClick={() => deleteGraph(graph.graphId)}
+                        />
+                        </List.Item>
                         )}
                       />
                     </Col>

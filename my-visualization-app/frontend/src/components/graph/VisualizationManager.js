@@ -1,5 +1,3 @@
-import Plot from "react-plotly.js";
-import Plotly from 'plotly.js-dist';
 import GraphStyle from "./GraphStyle";
 import { chartCategories } from "./ChartCategories";
 
@@ -9,95 +7,6 @@ class VisualizationManager {
     }
 
     chartCategories = chartCategories;
-
-
-
-
-    //dividing visualize to have a more clear code -ezgi
-
-    // /**
-    //  * Generate Plotly visualization data
-    //  */
-    // visualize(graph) {
-    //     const {dataset, type, selectedFeatures = [], name, style, fittedCurve} = graph;
-
-    //     if (!type) {
-    //         return null;
-    //     }
-    //     if (!dataset || typeof dataset !== "object") {
-    //         return null;
-    //     }
-
-    //     // Extraction of `x` and `y` axis data
-    //     const featureData = selectedFeatures.map((feature) => dataset?.[feature] || []);
-    //     if (!featureData.every(Array.isArray) || featureData.some((arr) => arr.length === 0)) {
-    //         console.error("Error: One or more selected features are not valid arrays.", featureData);
-    //         return null;
-    //     }
-
-    //     // Getting the latest `GraphStyle`
-    //     const graphStyle = graph.style instanceof GraphStyle ? graph.style : new GraphStyle();
-
-    //     // raw data
-    //     let plotData = {
-    //         type: type,
-    //         mode: type === "scatter" || type === "scatter3d" ? "markers" : undefined,
-    //         marker: {
-    //             color: graphStyle.getMarkerStyle()?.color || "blue",
-    //             size: graphStyle.getMarkerStyle()?.size || 8
-    //         },
-    //     };
-
-    //     if (featureData.length >= 1) plotData.x = featureData[0];
-    //     if (featureData.length >= 2) plotData.y = featureData[1];
-    //     if (featureData.length >= 3) plotData.z = featureData[2];
-
-    //     if (type === "scatterpolar" && featureData.length >= 2) {
-    //         plotData.r = featureData[0];
-    //         plotData.theta = featureData[1];
-    //         delete plotData.x;
-    //         delete plotData.y;
-    //     }
-
-    //     let traces = [plotData];
-
-    //     // Amendments to the `fittedCurve` data format
-    //     let fittedX = [];
-    //     let fittedY = [];
-
-    //     if (Array.isArray(fittedCurve) && fittedCurve.length > 0) {
-    //         fittedX = fittedCurve.map(point => point.x);
-    //         fittedY = fittedCurve.map(point => point.y);
-    //     }
-
-    //     // The fitted curve is plotted only if `fittedX` and `fittedY` are present.
-    //     if (fittedX.length > 0 && fittedY.length > 0) {
-    //         let fittedTrace = {
-    //             type: "scatter",
-    //             mode: "lines",
-    //             x: fittedX,
-    //             y: fittedY,
-    //             line: {color: "red", width: 2},
-    //             name: "Fitted Curve",
-    //         };
-
-    //         traces.push(fittedTrace);
-    //     } else {
-    //         console.warn("No valid fitted curve data found.");
-    //     }
-
-    //     // Build `layout`
-    //     const layout = {
-    //         title: name,
-    //         xaxis: {title: selectedFeatures[0] || "X"},
-    //         yaxis: {title: selectedFeatures[1] || "Y"},
-    //         ...graphStyle.getLayout(),
-    //     };
-
-    //     return {data: traces, layout};
-    // }
-
-
     visualize(graph) {
         const {dataset, type, selectedFeatures = [], name, fittedCurve} = graph;
 
@@ -295,11 +204,6 @@ class VisualizationManager {
     #buildLayout(name, selectedFeatures) {
         
         const layout = {
-            title: { 
-                text: name, 
-                font: { size: 20, color: "#333" }, 
-                x: 0.5  
-            },
             xaxis: { 
                 title: selectedFeatures[0] || "X", 
                 gridcolor: "#DDDDDD", 
