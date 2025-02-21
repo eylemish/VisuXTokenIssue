@@ -127,6 +127,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
             features: oversampledFeature,
             records: oversampledRecord,
             new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()) + "_Oversampled_" + method + "_" + factor
+            + datasetManager.getSuffix(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()))
           };
           const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
               method: "POST",

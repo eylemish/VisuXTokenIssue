@@ -30,6 +30,21 @@ class DatasetManager {
     return this.datasetMap.get(datasetId) || "Not Found";
   }
 
+  //Get the number of datasets with the same name.
+  getSuffix(name) {
+    let count = 0
+    for(const datasetName of this.datasetMap.values()){
+      if(datasetName == name){
+        count++;
+      }
+    }
+    if(count - 1 == 0){
+      return ""
+    }else{
+      return "(" + count.toString() + ")"
+    }
+  }
+
   // Set the current dataset ID
   setCurrentDatasetId(datasetId) {
     if (!datasetId || !this.datasetIds.has(datasetId)) {
@@ -72,6 +87,7 @@ class DatasetManager {
   getAllDatasetsName() {
     return Array.from(this.datasetMap.values());
   }
+
 
   // Get the column names of the dataset
   async getDatasetColumns(datasetId) {

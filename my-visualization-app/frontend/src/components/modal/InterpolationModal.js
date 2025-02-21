@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Modal, Button, Select, message, Table, Input, Checkbox, InputNumber, Radio} from "antd";
+import {Modal, Button, Select, message, Table, InputNumber, Radio} from "antd";
 
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
@@ -90,7 +90,8 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             dataset_id: datasetId,
             features: [xColumn, yColumn],
             records: interpolatedData,
-            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+"_Interpolated_Dataset_" + method
+            new_dataset_name: datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+"_Interpolated_" + method
+            + datasetManager.getSuffix(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()))
         };
         const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
             method: "POST",
@@ -172,11 +173,6 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
 
         message.success("Graph created successfully!");
     };
-
-    const resultColumns = [
-        {title: xColumn || "X Value", dataIndex: xColumn, key: xColumn},
-        {title: yColumn || "Y Value", dataIndex: yColumn, key: yColumn},
-    ];
 
     const renderTable = () => {
         if (!interpolatedData || !Array.isArray(interpolatedData) || interpolatedData.length === 0) {

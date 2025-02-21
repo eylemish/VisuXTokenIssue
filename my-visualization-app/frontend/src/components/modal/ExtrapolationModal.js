@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {Modal, Button, Input, Select, message, Table, InputNumber, Radio} from "antd";
-import Action from "../Action";
-import {ConsoleSqlOutlined} from "@ant-design/icons";
 
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
@@ -187,7 +185,8 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             dataset_id: datasetId,
             features: [xColumn, yColumn],
             records: extrapolatedData,
-            new_dataset_name:datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+ "_Extrapolated Dataset+" + method
+            new_dataset_name:datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId())+ "_Extrapolated_" + method
+            + datasetManager.getSuffix(datasetManager.getDatasetNameById(datasetManager.getCurrentDatasetId()))
         };
         const result = await fetch("http://127.0.0.1:8000/api/create_dataset/", {
             method: "POST",
