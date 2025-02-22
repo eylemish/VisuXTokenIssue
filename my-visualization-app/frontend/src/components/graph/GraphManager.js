@@ -218,6 +218,28 @@ class GraphManager {
     return true;
   }
 
+  addMoreYAxis(graphId, newAxis) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
+      return false;
+    }
+    const currentAxes = graph.getMoreYAxes();
+    graph.setMoreYAxes([...currentAxes, newAxis]);
+    return true;
+  }
+
+  removeMoreYAxis(graphId, axisToRemove) {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      console.warn(`Graph ID ${graphId} not found.`);
+      return false;
+    }
+    const updatedAxes = graph.getMoreYAxes().filter(axis => axis !== axisToRemove);
+    graph.setMoreYAxes(updatedAxes);
+    return true;
+  }
+
 
   //these 3 are all related to notifying other claasses about changes
   notify(data) {

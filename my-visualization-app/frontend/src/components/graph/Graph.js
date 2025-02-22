@@ -20,6 +20,7 @@ class Graph {
     this.fittedCurve = null; // Stores curve-fitting data
     this.datasetId = datasetId;
     this.showedDatapoints = Array.from({ length: this.dataset[selectedFeatures[0]].length }, (v, i) => i + 1);
+    this.moreYAxes = [];
   }
 
   updateDataset(newDataset) {
@@ -100,6 +101,14 @@ class Graph {
 
   getFittedCurve() {
     return this.fittedCurve;
+  }
+
+  setMoreYAxes(newMoreYAxes) {
+    this.moreYAxes = newMoreYAxes;
+  }
+
+  getMoreYAxes() {
+    return this.moreYAxes;
   }
 
   getType() {
