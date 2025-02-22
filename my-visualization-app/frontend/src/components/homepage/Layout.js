@@ -7,6 +7,7 @@ import GraphSection from "../graph/GraphSection";
 import LogWindow from "../log/LogWindow";
 import EditGraphPanel from "../graph/EditGraphPanel";
 import DataTable from "../table/DataTable";
+import GraphCard from "../graph/GraphCard";
 
 const gridConfig = {
   cols: 12,
@@ -23,6 +24,7 @@ const defaultLayout = [
   { i: "graphWindow", x: 0, y: 5, w: 6, h: 5, minW: 6, minH: 4 },
   { i: "editWindow", x: 0, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
 ];
+
 
 //This function is for layout, the normal layout is downwards, this ensures that when there is space on the right side, it will be aligned to the right.
 const getDefaultLayout = ({ showGraph, showData, showLog, showTable, showGraphEdit }) => {
@@ -61,6 +63,7 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
   const [gridWidth, setGridWidth] = useState(gridConfig.width);
 
   const [graphWindows, setGraphWindows] = useState([]);
+  const [graphCards, setGraphCards] = useState({});
 
  // const logManager = uiController.getLogManager(); // Access to the log manager via UIController
 
@@ -77,6 +80,28 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
 
 
   useEffect(() => {
+    setLayout((prevLayout) => {
+        if (!showGraph) return prevLayout;
+
+        const newLayout = [...prevLayout];
+
+        Object.keys(graphCards).forEach((graphId, index) => {
+            if (!newLayout.some((item) => item.i === graphId)) {
+                const xPos = (index * 6) % gridConfig.cols;
+                const yPos = Math.floor((index * 6) / gridConfig.cols) * 5;
+                newLayout.push({ i: graphId, x: xPos, y: yPos, w: 6, h: 5, minW: 5, minH: 4 });
+            }
+        });
+
+        return newLayout;
+    });
+}, [showGraph, graphCards]);
+
+
+
+
+
+  useEffect(() => {
     const handleResize = () => {
       setGridWidth(window.innerWidth - 200);
     };
@@ -86,8 +111,32 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
 
   const onLayoutChange = (newLayout) => {
     setLayout(newLayout);
+
+    setGraphCards((prevGraphCards) => {
+        const updatedGraphCards = { ...prevGraphCards };
+
+        newLayout.forEach((item) => {
+            if (updatedGraphCards[item.i]) {
+                updatedGraphCards[item.i] = {
+                    ...updatedGraphCards[item.i],
+                    w: item.w,
+                    h: item.h,
+                    width: item.w * (gridConfig.width / gridConfig.cols),
+                    height: item.h * gridConfig.rowHeight,
+                };
+            }
+        });
+
+        return updatedGraphCards;
+    });
+
     console.log("Updated Layout:", newLayout);
-  };
+};
+
+
+
+
+
 
   // Update the layout when `showGraph`, `showData`, `showLog` 'showTable' 'showgraphedit' change.
   useEffect(() => {
@@ -95,22 +144,6 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
   }, [showGraph, showData, showLog, showTable, showGraphEdit]);
 
 
-
-
-  const openGraph = (graphId) => {
-  const newWindow = uiController.openGraphWindow(graphId);
-  console.log("New Graph Window:", newWindow); // Make sure the window data is correct
-  if (newWindow) {
-    setGraphWindows([...graphWindows, newWindow]);
-  } else {
-    console.error("Failed to open GraphWindow: Invalid graph ID");
-  }
-};
-
-  const closeGraph = (windowId) => {
-    uiController.closeGraphWindow(windowId);
-    setGraphWindows(graphWindows.filter((win) => win.id !== windowId));
-  };
 
 
   useEffect(() => {
@@ -127,6 +160,13 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
   }, []);
 
 
+  const updateGraphCards = (updatedGraphCards) => {
+    if (showGraph) {
+      setGraphCards(updatedGraphCards);
+    }
+  };
+
+
   return (
     <div>
       <GridLayout
@@ -139,6 +179,8 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
           containerPadding={[24, 24]} // Distance from the border of the content
           onLayoutChange={onLayoutChange}
           draggableHandle=".drag-handle"
+          isDraggable={true}
+          isResizable={true}
       >
 
         {/* Render DataWindow only if showData is true */}
@@ -155,12 +197,45 @@ const LayoutContainer = ({uiController, showGraph, showData, showLog, showTable,
           </div>
         )}
 
+
         {/* Render GraphSection only if showGraph is true */}
         {showGraph && (
           <div key="graphSection" className="drag-handle" style={{ height: "100%", width: "100%" }}>
-            <GraphSection style={{ flex: 1 }} />
+            <GraphSection style={{ flex: 1 }} updateGraphCards={updateGraphCards} />
           </div>
         )}
+
+
+
+        {/* all the graph cards are*/}
+        {showGraph &&
+    Object.keys(graphCards).map((graphId, index) =>
+        graphCards[graphId] ? (
+            <div
+                key={graphId}
+                data-grid={{
+                    i: graphId,
+                    x: (index * 6) % gridConfig.cols,
+                    y: Math.floor(index / (gridConfig.cols / 6)) * 5,
+                    w: graphCards[graphId].w || 6,
+                    h: graphCards[graphId].h || 6,
+                    minW: 5,
+                    minH: 4,
+                    maxW: 8,
+                    maxH: 6,
+                    isResizable: true,
+                    isDraggable: true,
+                }}
+            >
+                <GraphCard
+                    graphId={graphId}
+                    graphData={graphCards[graphId]}
+                />
+            </div>
+        ) : null
+    )}
+
+
 
 
         {/* new graph edit */}

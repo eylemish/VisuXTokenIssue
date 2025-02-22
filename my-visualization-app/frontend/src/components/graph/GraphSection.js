@@ -1,19 +1,13 @@
-import React, {useState, useEffect} from "react";
-import {
-    Card,
-    Row,
-    Col,
-    Spin,
-    List,
-    Button,
-} from "antd";
+import React, { useState, useEffect } from "react";
+import { Card, Row, Col, Spin, List, Button } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
-import Plot from "react-plotly.js";
-import VisualizationManager from "./VisualizationManager";
 import GraphManager from "./GraphManager";
+import VisualizationManager from "./VisualizationManager";
+
 const visualizationManager = new VisualizationManager();
 
-const GraphSection = () => {
+// in GraphCard.js show individual graphs
+const GraphSection = ({ updateGraphCards }) => {
     const [graphDetails, setGraphDetails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [visibleGraphs, setVisibleGraphs] = useState({});
@@ -21,7 +15,6 @@ const GraphSection = () => {
 
     useEffect(() => {
         const handleGraphChange = (data) => {
-            console.log("GraphSection received update event:", data);
             if (data.type === "graphUpdated" || data.type === "curveFittingUpdated") {
                 setGraphDetails((prevState) =>
                     prevState.map((graph) => {
@@ -42,24 +35,22 @@ const GraphSection = () => {
         GraphManager.onChange(handleGraphChange);
 
         const graphs = GraphManager.getAllGraphs();
-        const validGraphDetails = graphs
-            .map((graph) => {
-                const graphScript = visualizationManager.visualize(graph);
-                if (graphScript) {
-                    return {
-                        graphId: graph.id,
-                        graphName: graph.name,
-                        graphType: graph.type,
-                        selectedFeatures: graph.selectedFeatures,
-                        graphScript: graphScript,
-                        visible: graph.visible,
-                        color: graph.style?.colorScheme || "#ffffff",
-                        style: graph.style,
-                    };
-                }
-                return null;
-            })
-            .filter((graph) => graph !== null);
+        const validGraphDetails = graphs.map((graph) => {
+            const graphScript = visualizationManager.visualize(graph);
+            if (graphScript) {
+                return {
+                    graphId: graph.id,
+                    graphName: graph.name,
+                    graphType: graph.type,
+                    selectedFeatures: graph.selectedFeatures,
+                    graphScript: graphScript,
+                    visible: graph.visible,
+                    color: graph.style?.colorScheme || "#ffffff",
+                    style: graph.style,
+                };
+            }
+            return null;
+        }).filter((graph) => graph !== null);
 
         setGraphDetails(validGraphDetails);
 
@@ -68,6 +59,13 @@ const GraphSection = () => {
             return acc;
         }, {});
         setVisibleGraphs(initialVisibleGraphs);
+
+        // give `graphDetails` to `LayoutContainer`
+        updateGraphCards(validGraphDetails.reduce((acc, graph) => {
+            acc[graph.graphId] = graph;
+            return acc;
+        }, {}));
+
         setLoading(false);
 
         return () => {
@@ -75,162 +73,113 @@ const GraphSection = () => {
         };
     }, []);
 
+    // in `LayoutContainer` which graph to show
     const toggleGraphVisibility = (graphId) => {
         setVisibleGraphs((prevState) => ({
             ...prevState,
             [graphId]: !prevState[graphId],
         }));
 
-        GraphManager.changeVisibility(graphId);
+        // `GraphCard` data
+        updateGraphCards((prevCards) => ({
+            ...prevCards,
+            [graphId]: visibleGraphs[graphId] ? null : graphDetails.find(graph => graph.graphId === graphId),
+        }));
     };
 
-
     const deleteGraph = (graphId) => {
-      setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
-      GraphManager.deleteGraph(graphId);
-  };
+        setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
+        GraphManager.deleteGraph(graphId);
 
+        // delete
+        updateGraphCards((prevCards) => {
+            const newCards = { ...prevCards };
+            delete newCards[graphId];
+            return newCards;
+        });
+    };
 
     const handleLayerGraphs = () => {
         setCombineGraphs(!combineGraphs);
-      };
-    
-      const combineGraphData = () => {
-        const combinedData = graphDetails
-          .filter((graph) => visibleGraphs[graph.graphId])
-          .map((graph, index) => {
-            const color = graph.color || `hsl(${(index * 50) % 360}, 100%, 50%)`;
-            return {
-              ...graph.graphScript?.data[0],
-              name: graph.graphName,
-              line: { color: color },
-            };
-          });
-    
-        const layout = {
-          title: "Combined Graphs",
-          xaxis: { title: graphDetails[0]?.xAxis },
-          yaxis: { title: graphDetails[0]?.yAxis },
-          showlegend: true,
-        };
-        return { data: combinedData, layout };
-      };
 
-      return (
-        <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-          <Button onClick={handleLayerGraphs} style={{ marginBottom: "20px" }}>
-            {combineGraphs ? "Show Individual Graphs" : "Layer Graphs"}
-          </Button>
-    
-          {loading ? (
-            <Spin size="large" />
-          ) : (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              {graphDetails.length > 0 ? (
-                <>
-                  <Row style={{ width: "100%" }}>
-                    <Col span={24}>
-                      <List
-                        size="large"
-                        bordered
-                        dataSource={graphDetails}
-                        renderItem={(graph) => (
-                          <List.Item
-                            style={{ display: "flex", alignItems: "center" }}
-                          >
-                            <span
-                              style={{ cursor: "pointer" }}
-                              onClick={() => toggleGraphVisibility(graph.graphId)}
-                            >
-                              {`Graph ID: ${graph.graphName} - ${graph.graphType}`}
-                            </span>
-                            <Button
-                              onClick={() => toggleGraphVisibility(graph.graphId)}
-                              style={{ marginLeft: "auto" }}
-                            >
-                              {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
-                            </Button>
-                            <Button
-                            type="primary"
-                            danger
-                            icon={<CloseOutlined />}
-                            onClick={() => deleteGraph(graph.graphId)}
-                        />
-                        </List.Item>
-                        )}
-                      />
-                    </Col>
-    
-                    <Col span={24} style={{ marginTop: "20px" }}>
-                      <Card style={{ width: "100%", padding: "10px" }} bordered={true}>
-                        {combineGraphs ? (
-                          <div
-                            style={{
-                              maxWidth: "600px",
-                              margin: "0 auto",
-                            }}
-                          >
-                            <Plot
-                              key={Math.random()}
-                              data={combineGraphData().data}
-                              layout={combineGraphData().layout}
-                              config={{ responsive: true }}
-                              style={{
-                                width: "100%",
-                                height: "300px",
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          graphDetails.map((graph) => {
-                            const { graphScript, graphId, graphName } = graph;
-                            const { data, layout } = graphScript || {};
-                            return (
-                              <div key={graphId}>
-                                {visibleGraphs[graphId] && (
-                                  <Card
-                                    style={{
-                                      width: "100%",
-                                      padding: "10px",
-                                      marginTop: "20px",
-                                    }}
-                                    title={`Graph ID: ${graphName}`}
-                                    bordered={true}
-                                  >
-                                    <Plot
-                                      key={Math.random()}
-                                      data={data}
-                                      layout={layout}
-                                      config={{ responsive: true }}
-                                      style={{
-                                        width: "100%",
-                                        height: "300px",
-                                      }}
-                                    />
-                                  </Card>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
-                      </Card>
-                    </Col>
-                  </Row>
-                </>
-              ) : (
-                <p>No Graphs Available</p>
-              )}
-            </div>
-          )}
-        </Card>
-      );
+        if (!combineGraphs) {
+            const combinedData = graphDetails
+                .filter(graph => visibleGraphs[graph.graphId])
+                .map((graph, index) => ({
+                    ...graph.graphScript?.data[0],
+                    name: graph.graphName,
+                    line: { color: graph.color || `hsl(${(index * 50) % 360}, 100%, 50%)` },
+                }));
+
+            const layout = {
+                title: "Combined Graphs",
+                xaxis: { title: graphDetails[0]?.xAxis || "X-axis" },
+                yaxis: { title: graphDetails[0]?.yAxis || "Y-axis" },
+                showlegend: true,
+            };
+
+            //  `LayoutContainer` show combined graph，and hide individual `GraphCard`
+            updateGraphCards({ combinedGraph: { graphId: "combinedGraph", graphScript: { data: combinedData, layout } } });
+
+        } else {
+                // show individual
+    updateGraphCards((prevCards) => {
+        const newCards = { ...prevCards };
+        delete newCards["combinedGraph"];  // delete combined
+
+
+        graphDetails.forEach(graph => {
+            if (visibleGraphs[graph.graphId]) {
+                newCards[graph.graphId] = graph;
+            }
+        });
+
+        return newCards;
+            });
+        }
     };
-    
-    export default GraphSection;
+
+    return (
+        <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <Button onClick={handleLayerGraphs} style={{ marginBottom: "20px" }}>
+                {combineGraphs ? "Show Individual Graphs" : "Layer Graphs"}
+            </Button>
+
+            {loading ? <Spin size="large" /> : (
+                <Row style={{ width: "100%" }}>
+                    <Col span={24}>
+                        <List
+                            size="large"
+                            bordered
+                            dataSource={graphDetails}
+                            renderItem={(graph) => (
+                                <List.Item style={{ display: "flex", alignItems: "center" }}>
+                                    <span
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => toggleGraphVisibility(graph.graphId)}
+                                    >
+                                        {`Graph ID: ${graph.graphName} - ${graph.graphType}`}
+                                    </span>
+                                    <Button
+                                        onClick={() => toggleGraphVisibility(graph.graphId)}
+                                        style={{ marginLeft: "auto" }}
+                                    >
+                                        {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
+                                    </Button>
+                                    <Button
+                                        type="primary"
+                                        danger
+                                        icon={<CloseOutlined />}
+                                        onClick={() => deleteGraph(graph.graphId)}
+                                    />
+                                </List.Item>
+                            )}
+                        />
+                    </Col>
+                </Row>
+            )}
+        </Card>
+    );
+};
+
+export default GraphSection;
