@@ -278,26 +278,62 @@ class VisualizationManager {
           }
           const xFeature = graph.selectedFeatures[0];
           const xData = graph.dataset[xFeature] || [];
-          const trace = {
-            type: "scatter",
-            mode: "lines+markers",
-            x: xData,
-            y: axisData,
-            line: {
-              color: graph.style?.getMarkerStyle()?.color || "blue",
-              width: 2,
-            },
-            marker: {
-              size: 8,
-            },
-            name: axisName,
-          };
+
+          let trace = null;
+          switch (graph.type) {
+            case "scatter":
+            case "line":
+              trace = {
+                type: "scatter",
+                mode: "lines+markers",
+                x: xData,
+                y: axisData,
+                line: {
+                  color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                  width: 2,
+                },
+                marker: {
+                  size: 8,
+                },
+                name: axisName,
+              };
+              break;
+            case "bar":
+              trace = {
+                type: "bar",
+                x: xData,
+                y: axisData,
+                marker: {
+                  color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                },
+                name: axisName,
+              };
+              break;
+            case "area":
+              trace = {
+                type: "scatter",
+                mode: "lines",
+                fill: "tozeroy",
+                x: xData,
+                y: axisData,
+                line: {
+                  color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                  width: 2,
+                },
+                name: axisName,
+              };
+              break;
+            default:
+              console.warn("This type not allowed", graph.type);
+              return;
+          }
           additionalTraces.push(trace);
         }
       });
     }
     return additionalTraces;
   }
+
 }
 
 export default VisualizationManager;

@@ -249,7 +249,7 @@ const EditGraphPanel = () => {
   // When "Add Multiple Y" button is clicked, add an additional Y axis.
   const handleAddMultipleYClick = () => {
     if (!selectedGraphForEdit) return;
-    if (selectedGraph?.graphType === "line") {
+    if (selectedGraph?.graphType === "line" || selectedGraph?.graphType === "bar" || selectedGraph.graphType === "area") {
       const newAxis = null;
       setAdditionalYAxes([...additionalYAxes, newAxis]);
       GraphManager.addMoreYAxis(selectedGraphForEdit, newAxis);
@@ -345,9 +345,9 @@ const EditGraphPanel = () => {
               onClick={handleAddMultipleYClick}
               style={{
                 marginTop: "10px",
-                backgroundColor: selectedGraph && selectedGraph.graphType !== "line" ? "#d9d9d9" : "",
+                backgroundColor: selectedGraph && !(selectedGraph.graphType === "line" || selectedGraph.graphType === "bar" || selectedGraph.graphType === "area") ? "#d9d9d9" : "",
               }}
-              disabled={selectedGraph && selectedGraph.graphType !== "line"}
+              disabled={selectedGraph && !( selectedGraph.graphType === "line" || selectedGraph.graphType === "bar" || selectedGraph.graphType === "area") }
             >
               Add Multiple Y
             </Button>
