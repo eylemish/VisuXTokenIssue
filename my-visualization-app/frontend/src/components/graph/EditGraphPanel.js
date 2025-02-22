@@ -404,6 +404,19 @@ const EditGraphPanel = () => {
           >
             Apply Include
           </Button>
+
+          <Button
+      type="default"
+      onClick={() => {
+        const dataset = selectedGraph?.graphObject.dataset;
+        const featureKey = selectedGraph?.graphObject.selectedFeatures[0];
+        if (dataset && featureKey) {
+          handleFilterChange("include", 1, dataset[featureKey]?.length);
+        }
+      }}
+    >
+      Include All
+    </Button>
         </Input.Group>
       </div>
 
@@ -426,6 +439,19 @@ const EditGraphPanel = () => {
           >
             Apply Exclude
           </Button>
+
+          <Button
+      type="default"
+      onClick={() => {
+        const dataset = selectedGraph?.graphObject.dataset;
+        const featureKey = selectedGraph?.graphObject.selectedFeatures[0];
+        if (dataset && featureKey) {
+          handleFilterChange("exclude", 1, dataset[featureKey]?.length);
+        }
+      }}
+    >
+      Exclude All
+    </Button>
         </Input.Group>
       </div>
 
