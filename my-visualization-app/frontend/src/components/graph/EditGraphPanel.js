@@ -5,6 +5,7 @@ import GraphManager from "./GraphManager";
 import VisualizationManager from "./VisualizationManager";
 import CurveFittingModal from "../modal/CurveFittingModal";
 import { chartCategories } from "./ChartCategories";
+import "./EditGraphPanel.css";
 
 const EditGraphPanel = () => {
   const [graphDetails, setGraphDetails] = useState([]);
@@ -365,10 +366,12 @@ const EditGraphPanel = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ marginBottom: "10px" }}>
+        <div style={{ display: "flex", flexDirection: "column", width: "200px"}}>
+          <div style={{ marginBottom: "10px", width: "150px" }}>
             <label style={{ marginRight: "8px" }}>Color: </label>
-            <ChromePicker color={editColor} onChange={handleColorChange} disableAlpha />
+            <div style={{ width: "25px" }}>
+      <ChromePicker color={editColor} onChange={handleColorChange} disableAlpha />
+    </div>
           </div>
           <Button type="primary" onClick={handleEditGraphSubmit}>
             Recolour Graph

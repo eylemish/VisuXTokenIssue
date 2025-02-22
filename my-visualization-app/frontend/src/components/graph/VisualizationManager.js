@@ -132,6 +132,7 @@ class VisualizationManager {
         size: 8,
         symbol: "circle",
       },
+      name: graph.selectedFeatures[1],
     };
   }
 
