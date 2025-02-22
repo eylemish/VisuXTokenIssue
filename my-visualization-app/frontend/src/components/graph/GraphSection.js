@@ -158,7 +158,7 @@ const GraphSection = ({ updateGraphCards }) => {
                                         style={{ cursor: "pointer" }}
                                         onClick={() => toggleGraphVisibility(graph.graphId)}
                                     >
-                                        {`Graph ID: ${graph.graphName} - ${graph.graphType}`}
+                                        {`${graph.graphName} - ${graph.graphType} - (${graph.selectedFeatures?.join(", ")})`}
                                     </span>
                                     <Button
                                         onClick={() => toggleGraphVisibility(graph.graphId)}

@@ -243,10 +243,10 @@ const EditGraphPanel = () => {
     <Card title="Edit Graph" style={{ width: "100%" }}>
       <div style={{ marginBottom: "10px" }}>
         <label style={{ marginRight: "8px" }}>Graph: </label>
-        <Select style={{ width: 250 }} placeholder="Select a graph" value={selectedGraphForEdit} onChange={handleGraphSelect}>
+        <Select style={{ width: 400 }} placeholder="Select a graph" value={selectedGraphForEdit} onChange={handleGraphSelect}>
           {graphDetails.map((graph) => (
             <Select.Option key={graph.graphId} value={graph.graphId}>
-              {`Graph ${graph.graphName} - ${graph.graphType}`}
+              {`${graph.graphName} - ${graph.graphType} - (${graph.graphFeatures?.join(", ")})`}
             </Select.Option>
           ))}
         </Select>
