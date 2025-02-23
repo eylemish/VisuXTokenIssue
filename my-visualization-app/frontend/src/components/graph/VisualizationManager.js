@@ -1,30 +1,79 @@
-import GraphStyle from "./GraphStyle";
 import { chartCategories } from "./ChartCategories";
 
 class VisualizationManager {
-  constructor() {
-    this.graphStyle = new GraphStyle();
-  }
 
-  chartCategories = chartCategories;
+  EMPTY_ARRAY_LENGTH = 0;
+  TO_BE_X_AXIS = 0;
+  TO_BE_Y_AXIS = 1;
+  TO_BE_Z_AXIS = 2;
+  TO_BE_RADIUS = 0;
+  TO_BE_ANGLE = 1;
+  DEFAULT_MARKER_SIZE = 8;
+  LINE_WIDTH = 2;
+  CURVEFITTING_DONT_EXIST = 0;
+  NON_EMPTY_X = 0;
+  NON_EMPTY_Y = 0;
+  X_AND_Y_LENGTH = 2;
+  X_Y_AND_Z_LENGTH = 3;
+  MORE_TRACES_EXIST = 0;
+  NO_DATA_SHOWING = 0;
+  MARGIN_PLACE = 50;
+  ONE_FOR_NOT_STARTING_FROM_ZERO = 1;
+  OBJECT = "object";
+  UNVALID_ARRAY_ERROR = "Error: One or more selected features are not valid arrays.";
+  SCATTER_TYPE = "scatter";
+  BAR_TYPE = "bar";
+  LINE_TYPE = "line";
+  SCATTERPOLAR_TYPE = "scatterpolar";
+  HEATMAP_TYPE = "heatmap";
+  SCATTER3D_TYPE = "scatter3d";
+  PIE_TYPE = "pie";
+  AREA_TYPE = "area";
+  UNVALID_TYPE_ERROR = "Unsupported graph type:";
+  MARKERS_MODE = "markers";
+  LINES_MODE = "lines";
+  LINES_MARKERS_MODE = "lines+markers";
+  DEFAULT_GRAPH_COLOR = "blue";
+  CIRCLE_FOR_LINE = "circle";
+  VIRIDIS_COLOR_SCALE = "Viridis";
+  TOZEROY_FILL = "tozeroy";
+  ORANGE_HEX = "#FF7F0E";
+  BLUE_HEX = "#1F77B4";
+  GREEN_HEX = "#2CA02C";
+  RED_HEX = "#D62728";
+  PURPLE_HEX = "#9467BD";
+  GREY_HEX = "#DDDDDD";
+  DARK_GREY_HEX = "#BBBBBB";
+  BACKGROUND_GREY = "rgba(245, 245, 245, 0.9)";
+  BACKGROUND_WHITE = "white";
+  CURVEFITTING_NAME = "Fitted Curve";
+  CURVEFITTING_ERROR = "No valid fitted curve data found.";
+  X_NAME = "X";
+  Y_NAME = "Y";
+  Z_NAME = "Z";
 
+  chartCategories = chartCategories; // Defining chart categories for graph type functions
+
+  // Main method that visualizes the graph by using smaller methods and connecting them
   visualize(graph) {
-    const { dataset, type, selectedFeatures = [], name, fittedCurve} = graph;
+    const { dataset, type, selectedFeatures = [], fittedCurve} = graph;
 
-    if (!type || !dataset || typeof dataset !== "object") {
+    // Checking the type and dataset to see if the graph object is valid
+    if (!type || !dataset || typeof dataset !== this.OBJECT) {
       return null;
     }
 
+    // Taking data values of related features from the dataset
     const featureData = this.#extractFeatureData(dataset, selectedFeatures);
     if (!featureData) return null;
 
-    // Filtering data points
+    // Filtering data points by numbers 
     const filteredData = this.#filterDataByShowedDatapoints(
       featureData,
       graph.showedDatapoints
     );
 
-    // First trace
+    // Creating the plot data and making it first trace for plotly rendering
     let plotData = this.#applyGraphStyle(graph, filteredData);
     let traces = [plotData];
 
@@ -34,160 +83,164 @@ class VisualizationManager {
       traces.push(fittedTrace);
     }
 
-    // More Traces for Y Axes
+    // Creating more traces if user selected more than one feature for Y Axis
     const moreTraces = this.#applyMoreTraces(graph);
-    if (moreTraces && moreTraces.length > 0) {
+    if (moreTraces && moreTraces.length > this.MORE_TRACES_EXIST) {
       traces = traces.concat(moreTraces);
     }
 
-    // Layout
-    const layout = this.#buildLayout(name, selectedFeatures);
+    // Creating the layout of visualized graph
+    const layout = this.#buildLayout(selectedFeatures);
 
     return { data: traces, layout };
   }
 
+  // Extracts data from the dataset related to the selected features
   #extractFeatureData(dataset, selectedFeatures) {
+    //Mapping the selected features to their corresponding data values, so that each feature is properly mapped from the dataset.
     const featureData = selectedFeatures.map(
       (feature) => dataset?.[feature] || []
     );
-    if (
-      !featureData.every(Array.isArray) ||
-      featureData.some((arr) => arr.length === 0)
+
+    //Controlling that all features are valid arrays and not empty. It prevents errors if the data is malformed somehow.
+    if (!featureData.every(Array.isArray) 
+      || featureData.some((arr) => arr.length === this.EMPTY_ARRAY_LENGTH) //using "some" so it would catch even if one array is not valid
     ) {
-      console.error(
-        "Error: One or more selected features are not valid arrays.",
-        featureData
-      );
+      console.error( this.UNVALID_ARRAY_ERROR, featureData );
       return null;
     }
     return featureData;
   }
 
+  // Filtering the dataset based on the data points chosen by the user that should be shown
   #filterDataByShowedDatapoints(featureData, showedDatapoints) {
     return featureData.map((feature) => {
-      return feature.filter((_, idx) => showedDatapoints.includes(idx + 1));
+      // user chooses the showable data points starting from 1 so "index + 1 " is used
+      // "_" corresponds to data point
+      return feature.filter((_, index) => showedDatapoints.includes(index + 1));
     });
   }
 
+  // Method that returns a style depending on the graph type because every type needs different values
   #applyGraphStyle(graph, featureData) {
     switch (graph.type) {
-      case "scatter":
+      case this.SCATTER_TYPE:
         return this.#scatterPlot(featureData, graph);
-      case "bar":
+      case this.BAR_TYPE:
         return this.#barChart(featureData, graph);
-      case "line":
+      case this.LINE_TYPE:
         return this.#lineChart(featureData, graph);
-      case "scatterpolar":
+      case this.SCATTERPOLAR_TYPE:
         return this.#polarChart(featureData, graph);
-      case "heatmap":
+      case this.HEATMAP_TYPE:
         return this.#heatmapChart(featureData, graph);
-      case "scatter3d":
+      case this.SCATTER3D_TYPE:
         return this.#scatter3DPlot(featureData, graph);
-      case "pie":
+      case this.PIE_TYPE:
         return this.#pieChart(featureData, graph);
-      case "area":
+      case this.AREA_TYPE:
         return this.#areaChart(featureData, graph);
       default:
-        console.warn("Unsupported graph type:", graph.type);
+        console.warn(this.UNVALID_ARRAY_ERROR, graph.type);
         return null;
     }
   }
 
   #scatterPlot(featureData, graph) {
     return {
-      type: "scatter",
-      mode: "markers",
-      x: featureData[0],
-      y: featureData[1],
+      type: this.SCATTER_TYPE,
+      mode: this.MARKERS_MODE,
+      x: featureData[this.TO_BE_X_AXIS],
+      y: featureData[this.TO_BE_Y_AXIS],
       marker: {
-        color: graph.style?.getMarkerStyle()?.color || "blue",
-        size: graph.style?.getMarkerStyle()?.size || 8,
+        color: graph.style?.getMarkerStyle()?.color || this.DEFAULT_GRAPH_COLOR,
+        size: graph.style?.getMarkerStyle()?.size || this.DEFAULT_MARKER_SIZE,
       },
     };
   }
 
   #barChart(featureData, graph) {
     return {
-      type: "bar",
-      x: featureData[0],
-      y: featureData[1],
+      type: this.BAR_TYPE,
+      x: featureData[this.TO_BE_X_AXIS],
+      y: featureData[this.TO_BE_Y_AXIS],
       marker: {
-        color: graph.style?.getMarkerStyle()?.color || "blue",
+        color: graph.style?.getMarkerStyle()?.color || this.DEFAULT_GRAPH_COLOR,
       },
     };
   }
 
   #lineChart(featureData, graph) {
     return {
-      type: "scatter",
-      mode: "lines+markers",
-      x: featureData[0],
-      y: featureData[1],
+      type: this.SCATTER_TYPE,
+      mode: this.LINES_MARKERS_MODE,
+      x: featureData[this.TO_BE_X_AXIS],
+      y: featureData[this.TO_BE_Y_AXIS],
       line: {
-        color: graph.style?.getMarkerStyle()?.color || "green",
-        width: 2,
+        color: graph.style?.getMarkerStyle()?.color || this.DEFAULT_GRAPH_COLOR,
+        width: this.LINE_WIDTH,
       },
       marker: {
         color: graph.style?.getMarkerStyle()?.color,
-        size: 8,
-        symbol: "circle",
+        size: this.DEFAULT_GRAPH_COLOR,
+        symbol: this.CIRCLE_FOR_LINE,
       },
-      name: graph.selectedFeatures[1],
+      name: graph.selectedFeatures[this.TO_BE_Y_AXIS],
     };
   }
 
   #polarChart(featureData, graph) {
     return {
-      type: "scatterpolar",
-      r: featureData[0],
-      theta: featureData[1],
+      type: this.SCATTERPOLAR_TYPE,
+      r: featureData[this.TO_BE_RADIUS],
+      theta: featureData[this.TO_BE_ANGLE],
       marker: {
-        color: graph.style?.getMarkerStyle()?.color || "purple",
-        size: graph.style?.getMarkerStyle()?.size || 8,
+        color: graph.style?.getMarkerStyle()?.color || this.DEFAULT_GRAPH_COLOR,
+        size: graph.style?.getMarkerStyle()?.size || this.DEFAULT_MARKER_SIZE,
       },
     };
   }
 
   #scatter3DPlot(featureData, graph) {
     return {
-      type: "scatter3d",
-      mode: "markers",
-      x: featureData[0],
-      y: featureData[1],
-      z: featureData[2],
+      type: this.SCATTER3D_TYPE,
+      mode: this.MARKERS_MODE,
+      x: featureData[this.TO_BE_X_AXIS],
+      y: featureData[this.TO_BE_Y_AXIS],
+      z: featureData[this.TO_BE_Z_AXIS],
       marker: {
-        color: graph.style?.getMarkerStyle()?.color || "red",
-        size: graph.style?.getMarkerStyle()?.size || 8,
+        color: graph.style?.getMarkerStyle()?.color || this.DEFAULT_GRAPH_COLOR,
+        size: graph.style?.getMarkerStyle()?.size || this.DEFAULT_MARKER_SIZE,
       },
     };
   }
 
   #heatmapChart(featureData, graph) {
     return {
-      type: "heatmap",
-      x: featureData[0],
-      y: featureData[1],
-      z: featureData[2],
-      colorscale: "Viridis",
+      type: this.HEATMAP_TYPE,
+      x: featureData[this.TO_BE_X_AXIS],
+      y: featureData[this.TO_BE_Y_AXIS],
+      z: featureData[this.TO_BE_Z_AXIS],
+      colorscale: this.VIRIDIS_COLOR_SCALE,
     };
   }
 
   #pieChart(featureData, graph) {
-    const labels = featureData[0] || [];
-    const values = featureData[0] || [];
+    const labels = featureData[this.TO_BE_X_AXIS] || [];
+    const values = featureData[this.TO_BE_X_AXIS] || [];
     return {
-      type: "pie",
+      type: this.PIE_TYPE,
       labels: labels,
       values: values,
       marker: {
         colors:
           graph.style?.getMarkerStyle()?.color ||
           [
-            "#FF7F0E",
-            "#1F77B4",
-            "#2CA02C",
-            "#D62728",
-            "#9467BD",
+            this.ORANGE_HEX,
+            this.BLUE_HEX,
+            this.GREEN_HEX,
+            this.PURPLE_HEX,
+            this.RED_HEX,
           ],
       },
     };
@@ -195,14 +248,14 @@ class VisualizationManager {
 
   #areaChart(featureData, graph) {
     return {
-      type: "scatter",
-      mode: "lines",
-      fill: "tozeroy",
-      x: featureData[0],
-      y: featureData[1],
+      type: this.SCATTER_TYPE,
+      mode: this.LINES_MODE,
+      fill: this.TOZEROY_FILL,
+      x: featureData[this.TO_BE_X_AXIS],
+      y: featureData[this.TO_BE_Y_AXIS],
       line: {
-        color: graph.style?.getMarkerStyle()?.color || "blue",
-        width: 2,
+        color: graph.style?.getMarkerStyle()?.color || this.DEFAULT_GRAPH_COLOR,
+        width: this.LINE_WIDTH,
       },
     };
   }
@@ -211,50 +264,50 @@ class VisualizationManager {
     let fittedX = [];
     let fittedY = [];
 
-    if (Array.isArray(fittedCurve) && fittedCurve.length > 0) {
+    if (Array.isArray(fittedCurve) && fittedCurve.length > this.CURVEFITTING_DONT_EXIST) {
       fittedX = fittedCurve.map((point) => point.x);
       fittedY = fittedCurve.map((point) => point.y);
     }
 
-    if (fittedX.length > 0 && fittedY.length > 0) {
+    if (fittedX.length > this.NON_EMPTY_X && fittedY.length > this.NON_EMPTY_Y) {
       return {
-        type: "scatter",
-        mode: "lines",
+        type: this.SCATTER_TYPE,
+        mode: this.LINES_MODE,
         x: fittedX,
         y: fittedY,
-        line: { color: "red", width: 2 },
-        name: "Fitted Curve",
+        line: { color: this.RED_HEX, width: this.LINE_WIDTH },
+        name: this.CURVEFITTING_NAME,
       };
     } else {
-      console.warn("No valid fitted curve data found.");
+      console.warn(this.CURVEFITTING_ERROR);
       return null;
     }
   }
 
-  #buildLayout(name, selectedFeatures) {
+  #buildLayout(selectedFeatures) {
     const layout = {
       xaxis: {
-        title: selectedFeatures[0] || "X",
-        gridcolor: "#DDDDDD",
-        zerolinecolor: "#BBBBBB",
+        title: selectedFeatures[this.TO_BE_X_AXIS] || this.X_NAME,
+        gridcolor: this.GREY_HEX,
+        zerolinecolor: this.DARK_GREY_HEX,
       },
-      ...(selectedFeatures.length >= 2 && {
+      ...(selectedFeatures.length >= this.X_AND_Y_LENGTH && {
         yaxis: {
-          title: selectedFeatures[1] || "Y",
-          gridcolor: "#DDDDDD",
-          zerolinecolor: "#BBBBBB",
+          title: selectedFeatures[this.TO_BE_Y_AXIS] || this.Y_NAME,
+          gridcolor: this.GREY_HEX,
+          zerolinecolor: this.DARK_GREY_HEX,
         },
       }),
-      ...(selectedFeatures.length === 3 && {
+      ...(selectedFeatures.length === this.X_Y_AND_Z_LENGTH && {
         zaxis: {
-          title: selectedFeatures[2] || "Z",
-          gridcolor: "#DDDDDD",
-          zerolinecolor: "#BBBBBB",
+          title: selectedFeatures[this.TO_BE_Z_AXIS] || this.Z_NAME,
+          gridcolor: this.GREY_HEX,
+          zerolinecolor: this.DARK_GREY_HEX,
         },
       }),
-      plot_bgcolor: "rgba(245, 245, 245, 0.9)",
-      paper_bgcolor: "white",
-      margin: { l: 50, r: 50, t: 50, b: 50 },
+      plot_bgcolor: this.BACKGROUND_GREY,
+      paper_bgcolor: this.BACKGROUND_WHITE,
+      margin: { l: this.MARGIN_PLACE, r: this.MARGIN_PLACE, t: this.MARGIN_PLACE, b: this.MARGIN_PLACE },
     };
 
     return layout;
@@ -269,37 +322,37 @@ class VisualizationManager {
           if (
             graph.showedDatapoints &&
             Array.isArray(graph.showedDatapoints) &&
-            graph.showedDatapoints.length > 0
+            graph.showedDatapoints.length > this.NO_DATA_SHOWING
           ) {
-            axisData = axisData.filter((_, idx) =>
-              graph.showedDatapoints.includes(idx + 1)
+            axisData = axisData.filter((_, index) =>
+              graph.showedDatapoints.includes(index + this.ONE_FOR_NOT_STARTING_FROM_ZERO)
             );
           }
-          const xFeature = graph.selectedFeatures[0];
+          const xFeature = graph.selectedFeatures[this.TO_BE_X_AXIS];
           const xData = graph.dataset[xFeature] || [];
 
           let trace = null;
           switch (graph.type) {
-            case "scatter":
-            case "line":
+            case this.SCATTER_TYPE:
+            case this.LINE_TYPE:
               trace = {
-                type: "scatter",
-                mode: "lines+markers",
+                type: this.SCATTER_TYPE,
+                mode: this.LINES_MARKERS_MODE,
                 x: xData,
                 y: axisData,
                 line: {
                   color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                  width: 2,
+                  width: this.LINE_WIDTH,
                 },
                 marker: {
-                  size: 8,
+                  size: this.DEFAULT_MARKER_SIZE,
                 },
                 name: axisName,
               };
               break;
-            case "bar":
+            case this.BAR_TYPE:
               trace = {
-                type: "bar",
+                type: this.BAR_TYPE,
                 x: xData,
                 y: axisData,
                 marker: {
@@ -308,22 +361,22 @@ class VisualizationManager {
                 name: axisName,
               };
               break;
-            case "area":
+            case this.AREA_TYPE:
               trace = {
-                type: "scatter",
-                mode: "lines",
-                fill: "tozeroy",
+                type: this.SCATTER_TYPE,
+                mode: this.LINES_MODE,
+                fill: this.TOZEROY_FILL,
                 x: xData,
                 y: axisData,
                 line: {
                   color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                  width: 2,
+                  width: this.LINE_WIDTH,
                 },
                 name: axisName,
               };
               break;
             default:
-              console.warn("This type not allowed", graph.type);
+              console.warn(this.UNVALID_TYPE_ERROR, graph.type);
               return;
           }
           additionalTraces.push(trace);
