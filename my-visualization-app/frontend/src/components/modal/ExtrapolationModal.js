@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {Modal, Button, Input, Select, message, Table, InputNumber, Radio} from "antd";
 
+const EMPTY_DATA_NUMBER = 0;
+const FIRST_ELEMENT_INDEX = 0;
+
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
     let cookieValue = null;
@@ -104,7 +107,7 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             return;
         }
 
-        if (!Array.isArray(extrapolatedData) || extrapolatedData.length === 0) {
+        if (!Array.isArray(extrapolatedData) || extrapolatedData.length === EMPTY_DATA_NUMBER) {
             message.error("Extrapolated data is empty or not properly structured!");
             return;
         }
@@ -112,7 +115,7 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
         console.log("extrapolatedData structure:", extrapolatedData);
 
         // Getting the first data to check the structure
-        const firstEntry = extrapolatedData[0];
+        const firstEntry = extrapolatedData[FIRST_ELEMENT_INDEX];
         if (!firstEntry) {
             message.error("Extrapolated data is empty!");
             return;
@@ -157,11 +160,11 @@ const ExtrapolationModal = ({visible, onCancel, uiController, logAction, onUpdat
     };
 
     const renderTable = () => {
-        if (!extrapolatedData || !Array.isArray(extrapolatedData) || extrapolatedData.length === 0) {
+        if (!extrapolatedData || !Array.isArray(extrapolatedData) || extrapolatedData.length === EMPTY_DATA_NUMBER) {
             return <p style={{textAlign: "center", color: "gray"}}>No data available</p>;
         }
 
-        const firstRow = extrapolatedData[0] || {};
+        const firstRow = extrapolatedData[FIRST_ELEMENT_INDEX] || {};
         const columns = Object.keys(firstRow).map((key) => ({
             title: key,
             dataIndex: key,

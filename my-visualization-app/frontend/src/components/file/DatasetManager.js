@@ -1,4 +1,9 @@
+const COUNT = 0;
+const ONE_SAME_DATASET_NAME = 1;
+
+
 class DatasetManager {
+
   constructor() {
     if (!DatasetManager.instance) {
       this.datasetMap = new Map();
@@ -32,13 +37,13 @@ class DatasetManager {
 
   //Get the number of datasets with the same name.
   getSuffix(name) {
-    let count = 0
+    let count = COUNT
     for(const datasetName of this.datasetMap.values()){
       if(datasetName == name){
         count++;
       }
     }
-    if(count - 1 == 0){
+    if(count == ONE_SAME_DATASET_NAME){
       return ""
     }else{
       return "(" + count.toString() + ")"

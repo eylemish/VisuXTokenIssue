@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {Modal, Button, Select, message, Table, InputNumber, Radio} from "antd";
 
+const EMPTY_DATA_NUMBER = 0;
+const FIRST_ELEMENT_INDEX = 0;
+
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
     let cookieValue = null;
@@ -123,7 +126,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
             return;
         }
 
-        if (!Array.isArray(interpolatedData) || interpolatedData.length === 0) {
+        if (!Array.isArray(interpolatedData) || interpolatedData.length === EMPTY_DATA_NUMBER) {
             message.error("Interpolated data is empty or not properly structured!");
             return;
         }
@@ -131,7 +134,7 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
         console.log("interpolatedData structure:", interpolatedData);
 
         // Take the first piece of data and make sure that xColumn and yColumn exist.
-        const firstEntry = interpolatedData[0];
+        const firstEntry = interpolatedData[FIRST_ELEMENT_INDEX];
         if (!firstEntry) {
             message.error("Interpolated data is empty!");
             return;
@@ -175,11 +178,11 @@ const InterpolationModal = ({visible, onCancel, uiController, logAction, onUpdat
     };
 
     const renderTable = () => {
-        if (!interpolatedData || !Array.isArray(interpolatedData) || interpolatedData.length === 0) {
+        if (!interpolatedData || !Array.isArray(interpolatedData) || interpolatedData.length === EMPTY_DATA_NUMBER) {
             return <p style={{textAlign: "center", color: "gray"}}>No data available</p>;
         }
 
-        const firstRow = interpolatedData[0] || {};
+        const firstRow = interpolatedData[FIRST_ELEMENT_INDEX] || {};
         const columns = Object.keys(firstRow).map((key) => ({
             title: key,
             dataIndex: key,
