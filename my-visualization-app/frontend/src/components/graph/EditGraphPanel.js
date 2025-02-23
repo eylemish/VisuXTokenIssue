@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Card, Select, Button, Dropdown, Space, Menu, Input, Divider } from "antd";
 import { ChromePicker } from "react-color";
 import GraphManager from "./GraphManager";
-import VisualizationManager from "./VisualizationManager";
 import CurveFittingModal from "../modal/CurveFittingModal";
 import { chartCategories } from "./ChartCategories";
 import "./EditGraphPanel.css";
@@ -14,14 +13,12 @@ const EditGraphPanel = () => {
   const [selectedX, setSelectedX] = useState(null);
   const [selectedY, setSelectedY] = useState(null);
   const [selectedZ, setSelectedZ] = useState(null);
-  const [selectedType, setSelectedType] = useState(null);
   const [curveFitVisible, setCurveFitVisible] = useState(false);
   const [additionalYAxes, setAdditionalYAxes] = useState([]);
   const [filterData, setFilterData] = useState({
     include: [],
     exclude: []
   });
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   useEffect(() => {
     const fetchGraphs = () => {
@@ -62,7 +59,6 @@ const EditGraphPanel = () => {
     setAdditionalYAxes(moreYAxes || []);
   };
 
-  const toggleFilterVisibility = () => setIsFilterVisible(!isFilterVisible);
 
   const handleColorChange = (color) => {
     setEditColor(color.hex);
@@ -233,7 +229,6 @@ const EditGraphPanel = () => {
 
   const handleTypeChange = (newType) => {
     if (!selectedGraphForEdit) return;
-    setSelectedType(newType);
     GraphManager.changeType(selectedGraphForEdit, newType);
 
     const updatedGraph = graphDetails.find(

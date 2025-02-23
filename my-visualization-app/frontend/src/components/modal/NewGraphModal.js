@@ -1,16 +1,5 @@
 import { useState, useEffect } from "react";
 import { Modal, Tabs, Card, Row, Col, Button, Checkbox, message, Input } from "antd";
-import {
-  BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
-  AreaChartOutlined,
-  HeatMapOutlined,
-  RadarChartOutlined,
-  PictureOutlined,
-  DotChartOutlined,
-  AppstoreOutlined
-} from "@ant-design/icons";
 import datasetManager from "../file/DatasetManager";
 import { chartCategories } from "../graph/ChartCategories";
 

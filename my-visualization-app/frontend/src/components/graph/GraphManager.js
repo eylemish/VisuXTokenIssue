@@ -1,7 +1,6 @@
 import { enableMock, mockGraphs } from "./mockData";
 import VisualizationManager from "./VisualizationManager";
 import Graph from "./Graph";
-import { chartCategories } from "./ChartCategories";
 
 class GraphManager {
   constructor() {
@@ -110,28 +109,7 @@ class GraphManager {
     }
     return graph || null;
   }
-
-  // setCurrentGraph(graphId) {
-  //   if (this.graphs.has(graphId)) {
-  //     this.currentGraph = this.graphs.get(graphId);
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
-  // updateGraph(graphId, dataset, style) {
-  //   const graph = this.graphs.get(graphId);
-  //   if (graph) {
-  //     graph.setDataset(dataset);
-  //     graph.updateStyle(style);
-  //     this.notify({ type: "graphUpdated" });
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
-
-
+  
   getAllGraphs() {
     return Array.from(this.graphs.values());
   }

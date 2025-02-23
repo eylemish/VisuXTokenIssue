@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Card, Spin } from "antd";
-import Plotly from "plotly.js-dist";
 import Plot from "react-plotly.js";
 import GraphManager from "./GraphManager";
 import VisualizationManager from "./VisualizationManager";

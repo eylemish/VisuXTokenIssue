@@ -117,7 +117,6 @@ class Graph {
 
   setType(newType) {
     const oldType = this.type;
-    this.type = newType;
 
     const oldRequiredFeatures = this.getRequiredFeatures(oldType);
     const newRequiredFeatures = this.getRequiredFeatures(newType);
@@ -129,6 +128,8 @@ class Graph {
     } else if (newRequiredFeatures < oldRequiredFeatures) {
       this.selectedFeatures = this.selectedFeatures.slice(0, newRequiredFeatures);
     }
+
+    this.type = newType;
   }
 
   getRequiredFeatures(graphType) {

@@ -9,7 +9,7 @@ class VisualizationManager {
   chartCategories = chartCategories;
 
   visualize(graph) {
-    const { dataset, type, selectedFeatures = [], name, fittedCurve, moreYAxes } = graph;
+    const { dataset, type, selectedFeatures = [], name, fittedCurve} = graph;
 
     if (!type || !dataset || typeof dataset !== "object") {
       return null;
@@ -190,7 +190,6 @@ class VisualizationManager {
             "#9467BD",
           ],
       },
-      hole: 0.3,
     };
   }
 
