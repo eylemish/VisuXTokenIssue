@@ -183,7 +183,7 @@ class VisualizationManager {
       marker: {
         color: graph.style?.getMarkerStyle()?.color,
         size: this.DEFAULT_GRAPH_COLOR,
-        symbol: this.CIRCLE_FOR_LINE,
+        symbol: this.CIRCLE_FOR_LINE, //circle for clearly showing each data point
       },
       name: graph.selectedFeatures[this.TO_BE_Y_AXIS],
     };
@@ -260,15 +260,19 @@ class VisualizationManager {
     };
   }
 
+  //showing a red "curve fitting" line on the graph
   #applyFittedCurve(fittedCurve) {
     let fittedX = [];
     let fittedY = [];
 
+    //only contine if fittedCurve is a valid array
     if (Array.isArray(fittedCurve) && fittedCurve.length > this.CURVEFITTING_DONT_EXIST) {
+      //mapping the datav to seperate x and y
       fittedX = fittedCurve.map((point) => point.x);
       fittedY = fittedCurve.map((point) => point.y);
     }
 
+    //creating the plotly data if every array is valid
     if (fittedX.length > this.NON_EMPTY_X && fittedY.length > this.NON_EMPTY_Y) {
       return {
         type: this.SCATTER_TYPE,
@@ -284,6 +288,7 @@ class VisualizationManager {
     }
   }
 
+  //building layout by adjusting the axises, placing them and havng a darker background
   #buildLayout(selectedFeatures) {
     const layout = {
       xaxis: {
@@ -313,17 +318,22 @@ class VisualizationManager {
     return layout;
   }
 
+  //Applying multiple y axes by adding more traces
   #applyMoreTraces(graph) {
     const additionalTraces = [];
+    // applying only if graph has more than 1 Y axes
     if (graph.moreYAxes && Array.isArray(graph.moreYAxes)) {
       graph.moreYAxes.forEach((axisName) => {
+        // taking the related data values from the features
         if (graph.dataset && graph.dataset[axisName]) {
           let axisData = graph.dataset[axisName];
           if (
+            // only showing the data points chosen by user
             graph.showedDatapoints &&
             Array.isArray(graph.showedDatapoints) &&
             graph.showedDatapoints.length > this.NO_DATA_SHOWING
           ) {
+            // starting from + 1 because data points are starting getting numbered from 1(not 0)
             axisData = axisData.filter((_, index) =>
               graph.showedDatapoints.includes(index + this.ONE_FOR_NOT_STARTING_FROM_ZERO)
             );
@@ -332,6 +342,8 @@ class VisualizationManager {
           const xData = graph.dataset[xFeature] || [];
 
           let trace = null;
+
+          // adjusting the plotly data depending on the graph type
           switch (graph.type) {
             case this.SCATTER_TYPE:
             case this.LINE_TYPE:
@@ -341,6 +353,7 @@ class VisualizationManager {
                 x: xData,
                 y: axisData,
                 line: {
+                  // so that each trace looks clearly
                   color: `hsl(${Math.random() * 360}, 100%, 50%)`,
                   width: this.LINE_WIDTH,
                 },
@@ -356,6 +369,7 @@ class VisualizationManager {
                 x: xData,
                 y: axisData,
                 marker: {
+                  // so that each trace looks clearly
                   color: `hsl(${Math.random() * 360}, 100%, 50%)`,
                 },
                 name: axisName,
@@ -369,6 +383,7 @@ class VisualizationManager {
                 x: xData,
                 y: axisData,
                 line: {
+                  // so that each trace looks clearly
                   color: `hsl(${Math.random() * 360}, 100%, 50%)`,
                   width: this.LINE_WIDTH,
                 },
@@ -379,6 +394,7 @@ class VisualizationManager {
               console.warn(this.UNVALID_TYPE_ERROR, graph.type);
               return;
           }
+          //adding every extra Y axis by "for each" from the start of the function
           additionalTraces.push(trace);
         }
       });
