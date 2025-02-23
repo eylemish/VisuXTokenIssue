@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from "react";
 import { Modal, Button, InputNumber, Select, message, Table } from "antd";
 
+const DEFAULT_OVERSMPLE_FACTOR = 2;
+const VALID_OVERSAMPLE_FACTOR = 0;
+
 // Get CSRF Token（fit Django）
 function getCSRFToken() {
   let cookieValue = null;
@@ -20,7 +23,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
   const [datasetId, setDatasetId] = useState(null);
   const [xColumn, setXColumn] = useState(null);
   const [yColumn, setYColumn] = useState(null);
-  const [factor, setOversamplingFactor] = useState(2); // Default oversampling multiplier
+  const [factor, setOversamplingFactor] = useState(DEFAULT_OVERSMPLE_FACTOR); // Default oversampling multiplier
 
   const [columns, setColumns] = useState([]); // Store column names
   const [originalData, setOriginalData] = useState([]);
@@ -53,7 +56,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
   }, [datasetId]); // Dependent on `datasetId`, triggered on change
 
   const handleOversample = async () => {
-    if (!datasetId || !xColumn || !yColumn || factor <= 0) {
+    if (!datasetId || !xColumn || !yColumn || factor <= VALID_OVERSAMPLE_FACTOR) {
       message.error("Please select a dataset, two columns, and enter a valid oversampling factor!");
       return;
     }
