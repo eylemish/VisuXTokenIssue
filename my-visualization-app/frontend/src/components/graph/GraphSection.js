@@ -10,11 +10,12 @@ const visualizationManager = new VisualizationManager();
 const GraphSection = ({ updateGraphCards }) => {
     const [graphDetails, setGraphDetails] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [combineGraphs, setCombineGraphs] = useState(false);
+
     const [visibleGraphs, setVisibleGraphs] = useState(() => {
         const savedState = localStorage.getItem("visibleGraphs");
         return savedState ? JSON.parse(savedState) : {};
     });
-    const [combineGraphs, setCombineGraphs] = useState(false);
 
     useEffect(() => {
         const handleGraphChange = (data) => {
@@ -57,39 +58,16 @@ const GraphSection = ({ updateGraphCards }) => {
 
         setGraphDetails(validGraphDetails);
 
-        const initialVisibleGraphs = validGraphDetails.reduce((acc, graph) => {
-            acc[graph.graphId] = graph.visible;
-            return acc;
-        }, {});
-
 
         setVisibleGraphs((prevState) => {
-        const newState = { ...prevState };
-
-        graphDetails.forEach(graph => {
-            if (!(graph.graphId in newState)) {
-                newState[graph.graphId] = true;
-            }
-        });
-
-        localStorage.setItem("visibleGraphs", JSON.stringify(newState));
-        return newState;
-        });
-
-        // give `graphDetails` to `LayoutContainer`
-        updateGraphCards((prevCards) => {
-        const newCards = { ...prevCards };
-
-        //  `graphDetails`， `visibleGraphs`  `true` GraphCard
-        graphDetails.forEach(graph => {
-            if (visibleGraphs[graph.graphId]) {
-                newCards[graph.graphId] = graph;
-            } else {
-                delete newCards[graph.graphId];
-            }
-        });
-
-        return newCards;
+            const newState = { ...prevState };
+            validGraphDetails.forEach(graph => {
+                if (!(graph.graphId in newState)) {
+                    newState[graph.graphId] = true; // new graph open
+                }
+            });
+            localStorage.setItem("visibleGraphs", JSON.stringify(newState));
+            return newState;
         });
 
         setLoading(false);
@@ -97,117 +75,108 @@ const GraphSection = ({ updateGraphCards }) => {
         return () => {
             GraphManager.offChange(handleGraphChange);
         };
-    }, [graphDetails, visibleGraphs]);
+    }, []);
 
-    // in `LayoutContainer` which graph to show
+    // update `updateGraphCards` and `visibleGraphs`
+    useEffect(() => {
+        updateGraphCards((prevCards) => {
+            const newCards = { ...prevCards };
+            graphDetails.forEach(graph => {
+                if (visibleGraphs[graph.graphId]) {
+                    newCards[graph.graphId] = graph;
+                } else {
+                    delete newCards[graph.graphId];
+                }
+            });
+            return newCards;
+        });
+    }, [visibleGraphs, graphDetails]);
+
+    // `GraphCard` on/off
     const toggleGraphVisibility = (graphId) => {
-    setVisibleGraphs((prevState) => {
-    const newState = { ...prevState, [graphId]: !prevState[graphId] };
-    localStorage.setItem("visibleGraphs", JSON.stringify(newState));
-
-    updateGraphCards((prevCards) => {
-        const newCards = { ...prevCards };
-        if (newState[graphId]) {
-            newCards[graphId] = graphDetails.find(graph => graph.graphId === graphId);
-        } else {
-            delete newCards[graphId];
-        }
-        return newCards;
-    });
-
-    return newState;
-});
-
-
-    GraphManager.changeVisibility(graphId);
+        setVisibleGraphs((prevState) => {
+            const newState = { ...prevState, [graphId]: !prevState[graphId] };
+            localStorage.setItem("visibleGraphs", JSON.stringify(newState));
+            return newState;
+        });
     };
 
 
     const deleteGraph = (graphId) => {
-    setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
-    GraphManager.deleteGraph(graphId);
+        setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
+        GraphManager.deleteGraph(graphId);
 
-    setVisibleGraphs((prevState) => {
-        const newState = { ...prevState };
-        delete newState[graphId]; // delete in `visibleGraphs`
-        localStorage.setItem("visibleGraphs", JSON.stringify(newState)); // update `localStorage`
-        return newState;
-    });
-
-    updateGraphCards((prevCards) => {
-        const newCards = { ...prevCards };
-        delete newCards[graphId];
-        return newCards;
-    });
-
-};
+        setVisibleGraphs((prevState) => {
+            const newState = { ...prevState };
+            delete newState[graphId];
+            localStorage.setItem("visibleGraphs", JSON.stringify(newState));
+            return newState;
+        });
+    };
 
 
     const handleLayerGraphs = () => {
-    setCombineGraphs((prevCombine) => {
-        const newCombineState = !prevCombine;
+        setCombineGraphs((prevCombine) => {
+            const newCombineState = !prevCombine;
 
-        if (newCombineState) {
+            if (newCombineState) {
+                // combine data
+                const combinedData = graphDetails
+                    .filter(graph => visibleGraphs[graph.graphId])
+                    .map((graph, index) => ({
+                        ...graph.graphScript?.data[0],
+                        name: graph.graphName,
+                        line: { color: graph.color || `hsl(${(index * 50) % 360}, 100%, 50%)` },
+                    }));
 
-            const combinedData = graphDetails
-                .filter(graph => visibleGraphs[graph.graphId])
-                .map((graph, index) => ({
-                    ...graph.graphScript?.data[0],
-                    name: graph.graphName,
-                    line: { color: graph.color || `hsl(${(index * 50) % 360}, 100%, 50%)` },
-                }));
+                const layout = {
+                    title: "Combined Graphs",
+                    xaxis: { title: graphDetails[0]?.xAxis || "X-axis" },
+                    yaxis: { title: graphDetails[0]?.yAxis || "Y-axis" },
+                    showlegend: true,
+                };
 
-            const layout = {
-                title: "Combined Graphs",
-                xaxis: { title: graphDetails[0]?.xAxis || "X-axis" },
-                yaxis: { title: graphDetails[0]?.yAxis || "Y-axis" },
-                showlegend: true,
-            };
+                updateGraphCards({ combinedGraph: { graphId: "combinedGraph", graphScript: { data: combinedData, layout } } });
 
-
-            updateGraphCards({ combinedGraph: { graphId: "combinedGraph", graphScript: { data: combinedData, layout } } });
-
-            // hide  `GraphCard`
-            setVisibleGraphs((prevState) => {
-                const newState = { ...prevState };
-                Object.keys(newState).forEach(graphId => {
-                    newState[graphId] = false;
+                // hide `GraphCard`
+                setVisibleGraphs(() => {
+                    const newState = {};
+                    graphDetails.forEach(graph => {
+                        newState[graph.graphId] = false;
+                    });
+                    localStorage.setItem("visibleGraphs", JSON.stringify(newState));
+                    return newState;
                 });
-                localStorage.setItem("visibleGraphs", JSON.stringify(newState)); // in localStorage
-                return newState;
-            });
 
-        } else {
-
-            updateGraphCards((prevCards) => {
-                const newCards = { ...prevCards };
-                delete newCards["combinedGraph"];
-
+            } else {
                 // show `GraphCard`
-                graphDetails.forEach(graph => {
-                    if (visibleGraphs[graph.graphId]) {
-                        newCards[graph.graphId] = graph;
-                    }
+                updateGraphCards((prevCards) => {
+                    const newCards = { ...prevCards };
+                    delete newCards["combinedGraph"];
+
+                    graphDetails.forEach(graph => {
+                        if (visibleGraphs[graph.graphId]) {
+                            newCards[graph.graphId] = graph;
+                        }
+                    });
+
+                    return newCards;
                 });
 
-                return newCards;
-            });
 
-            // show `visibleGraphs`
-            setVisibleGraphs((prevState) => {
-                const newState = { ...prevState };
-                graphDetails.forEach(graph => {
-                    newState[graph.graphId] = true; // show `GraphCard`
-                });
-                localStorage.setItem("visibleGraphs", JSON.stringify(newState));
-                return newState;
+                setVisibleGraphs(() => {
+                    const newState = {};
+                    graphDetails.forEach(graph => {
+                        newState[graph.graphId] = true;
+                    });
+                    localStorage.setItem("visibleGraphs", JSON.stringify(newState));
+                    return newState;
                 });
             }
 
             return newCombineState;
         });
     };
-
 
     return (
         <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -224,24 +193,13 @@ const GraphSection = ({ updateGraphCards }) => {
                             dataSource={graphDetails}
                             renderItem={(graph) => (
                                 <List.Item style={{ display: "flex", alignItems: "center" }}>
-                                    <span
-                                        style={{ cursor: "pointer" }}
-                                        onClick={() => toggleGraphVisibility(graph.graphId)}
-                                    >
-                                        {`${graph.graphName} - ${graph.graphType} - (${graph.selectedFeatures?.join(", ")})`}
+                                    <span style={{ cursor: "pointer" }} onClick={() => toggleGraphVisibility(graph.graphId)}>
+                                        {`${graph.graphName || "Graph"} - ${graph.graphType} - (${graph.selectedFeatures?.join(", ")})`}
                                     </span>
-                                    <Button
-                                        onClick={() => toggleGraphVisibility(graph.graphId)}
-                                        style={{ marginLeft: "auto" }}
-                                    >
+                                    <Button onClick={() => toggleGraphVisibility(graph.graphId)} style={{ marginLeft: "auto" }}>
                                         {visibleGraphs[graph.graphId] ? "Hide" : "Show"}
                                     </Button>
-                                    <Button
-                                        type="primary"
-                                        danger
-                                        icon={<CloseOutlined />}
-                                        onClick={() => deleteGraph(graph.graphId)}
-                                    />
+                                    <Button type="primary" danger icon={<CloseOutlined />} onClick={() => deleteGraph(graph.graphId)} />
                                 </List.Item>
                             )}
                         />
