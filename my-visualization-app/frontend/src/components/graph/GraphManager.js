@@ -44,7 +44,7 @@ class GraphManager {
       {}
     );
 
-    this.addGraphToMap(newGraph);
+    this.#addGraphToMap(newGraph);
     this.notify({ type: "graphUpdated" });
     return newGraph;
   }
@@ -52,7 +52,7 @@ class GraphManager {
   /**
    * Add a graph object to the internal graph map.
    */
-  addGraphToMap(graph) {
+  #addGraphToMap(graph) {
     if (!(graph instanceof Graph)) {
       console.error("Invalid Graph object.");
       return false;
