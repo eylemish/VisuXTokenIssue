@@ -6,7 +6,6 @@ class GraphManager {
   constructor() {
     if (!GraphManager.instance) {
       this.graphs = new Map();
-      this.currentGraph = null;
       this.visualizationManager = new VisualizationManager();
       this.eventListeners = [];
       GraphManager.instance = this;
@@ -66,9 +65,6 @@ class GraphManager {
     return true;
   }
 
-
-
-
   /**
    * Apply curve fitting to a graph and notify listeners.
    */
@@ -91,17 +87,6 @@ class GraphManager {
     return false;
   }
 
-  // replaceGraph(graphId, newGraph) {
-  //   if (this.graphs.has(graphId)) {
-  //     this.graphs.set(graphId, newGraph);
-  //     if (this.currentGraph?.id === graphId) {
-  //       this.currentGraph = newGraph;
-  //     }
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
   getGraphById(graphId) {
     const graph = this.graphs.get(graphId);
     if (!graph) {
@@ -109,7 +94,7 @@ class GraphManager {
     }
     return graph || null;
   }
-  
+
   getAllGraphs() {
     return Array.from(this.graphs.values());
   }
@@ -170,7 +155,6 @@ class GraphManager {
     return true;
   }
 
-  
   restoreRangeToGraph(graphId, min, max) {
     const graph = this.graphs.get(graphId);
     if (!graph) {
@@ -182,7 +166,6 @@ class GraphManager {
     this.notify({ type: "graphUpdated", graphId });
     return true;
   }
-
 
    excludeRangeToGraph(graphId, min, max) {
     const graph = this.graphs.get(graphId);
@@ -217,7 +200,6 @@ class GraphManager {
     graph.setMoreYAxes(updatedAxes);
     return true;
   }
-
 
   //these 3 are all related to notifying other claasses about changes
   notify(data) {
