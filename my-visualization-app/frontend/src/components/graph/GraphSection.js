@@ -103,16 +103,24 @@ const GraphSection = ({ updateGraphCards }) => {
 
 
     const deleteGraph = (graphId) => {
-        setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
-        GraphManager.deleteGraph(graphId);
+    setGraphDetails((prevGraphs) => prevGraphs.filter(graph => graph.graphId !== graphId));
+    GraphManager.deleteGraph(graphId);
 
-        setVisibleGraphs((prevState) => {
-            const newState = { ...prevState };
-            delete newState[graphId];
-            localStorage.setItem("visibleGraphs", JSON.stringify(newState));
-            return newState;
-        });
-    };
+    // delete data in `visibleGraphs`
+    setVisibleGraphs((prevState) => {
+        const newState = { ...prevState };
+        delete newState[graphId];
+        localStorage.setItem("visibleGraphs", JSON.stringify(newState));
+        return newState;
+    });
+
+    updateGraphCards((prevCards) => {
+        const newCards = { ...prevCards };
+        delete newCards[graphId];  // delete `GraphCard`
+        return newCards;
+    });
+};
+
 
 
     // const handleLayerGraphs = () => {
