@@ -233,7 +233,7 @@ const OversampleModal = ({ visible, onCancel, uiController ,logAction, onUpdateD
         <Button onClick={onCancel} style={{marginRight: 10}}>Cancel</Button>
         <Button type="primary" onClick={handleOversample} loading={loading}
                 style={{marginRight: 10}}>Confirm</Button>
-        {oversampledData && <Button type="primary" onClick={handleApply}>Apply Oversampling</Button>}
+        {oversampledData && <Button type="primary" onClick={handleApply}>Save dataset</Button>}
         </div>
        
         {showTable&&(<Table
