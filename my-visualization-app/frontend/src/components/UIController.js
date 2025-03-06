@@ -87,10 +87,10 @@ class UIController {
       console.log(`📡 Sending POST request to: ${url}`, data);
 
       // Getting a CSRF Token (for Django)
-      const csrfToken = this.getCSRFToken();
-      if (csrfToken) {
-        headers["X-CSRFToken"] = csrfToken;
-      }
+      // const csrfToken = this.getCSRFToken();
+      // if (csrfToken) {
+      //   headers["X-CSRFToken"] = csrfToken;
+      // }
 
       // Request Timeout Control
       const controller = new AbortController();
@@ -127,18 +127,18 @@ class UIController {
   /**
    * Getting a CSRF Token (for Django)
    */
-  getCSRFToken() {
-    let cookieValue = null;
-    if (document.cookie) {
-      document.cookie.split(";").forEach((cookie) => {
-        const [name, value] = cookie.trim().split("=");
-        if (name === "csrftoken") {
-          cookieValue = decodeURIComponent(value);
-        }
-      });
-    }
-    return cookieValue;
-  }
+  // getCSRFToken() {
+  //   let cookieValue = null;
+  //   if (document.cookie) {
+  //     document.cookie.split(";").forEach((cookie) => {
+  //       const [name, value] = cookie.trim().split("=");
+  //       if (name === "csrftoken") {
+  //         cookieValue = decodeURIComponent(value);
+  //       }
+  //     });
+  //   }
+  //   return cookieValue;
+  // }
 
   /* ============== GETTERS & SETTERS ============== */
 

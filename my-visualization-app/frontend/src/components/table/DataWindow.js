@@ -38,7 +38,7 @@ const DataWindow = () => {
             .then((result) => {
                 console.log("Fetched dataset:", result); // Debugging log
                 if (!result || result.error) {
-                    message.error("Dataset not found.");
+                    message.error("Dataset not found5.");
                     setLoading(false);
                     return;
                 }

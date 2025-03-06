@@ -1,4 +1,3 @@
-from .get_csrf_token_view import GetCsrfTokenView
 from .data_visualization_view import DataVisualizationView
 from .handle_user_action_view import HandleUserActionView
 from .upload_view import UploadView
@@ -12,7 +11,6 @@ from .processing_views import (InterpolateView, ExtrapolateView, CorrelationView
 
 __all__ = [
     "UploadDatasetView",
-    "GetCsrfTokenView",
     "HandleUserActionView",
     "DataVisualizationView",
     "UploadView",

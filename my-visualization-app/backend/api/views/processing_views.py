@@ -1,4 +1,4 @@
-from django.views.decorators.csrf import csrf_exempt
+
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from backend.server_handler.engine import Engine
@@ -9,7 +9,7 @@ import json
 import pandas as pd
 import numpy as np
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class FitCurveView(APIView):
     def post(self, request):
         try:
@@ -59,7 +59,7 @@ class FitCurveView(APIView):
             return JsonResponse({"error": str(e)}, status=400)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class InterpolateView(APIView):
     def post(self, request):
         try:
@@ -115,7 +115,7 @@ class InterpolateView(APIView):
             return JsonResponse({"error": str(e)}, status=400)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class ExtrapolateView(APIView):
     def post(self, request):
         try:
@@ -177,7 +177,7 @@ class ExtrapolateView(APIView):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class CorrelationView(APIView):
     def post(self, request):
         try:
@@ -216,7 +216,7 @@ class CorrelationView(APIView):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
+
 class DimensionalReductionView(APIView):
     def post(self, request):
         try:
@@ -267,7 +267,7 @@ class DimensionalReductionView(APIView):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class RecommendDimReductionView(APIView):
     def get(self, request):
         try:
@@ -287,7 +287,7 @@ class RecommendDimReductionView(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class OversampleDataView(APIView):
     def post(self, request):
         try:
@@ -380,7 +380,7 @@ class SuggestFeatureDroppingView(APIView):
             return JsonResponse({"features_to_drop": features_to_drop})
 
         except UploadedFile.DoesNotExist:
-            return JsonResponse({"error": "Dataset not found"}, status=404)
+            return JsonResponse({"error": "Dataset not found3"}, status=404)
         except ValueError as ve:
             return JsonResponse({"error": f"Invalid parameter: {str(ve)}"}, status=400)
         except Exception as e:
@@ -401,7 +401,7 @@ class SuggestFeatureCombiningView(APIView):
             try:
                 data_file = UploadedFile.objects.get(id=dataset_id)
             except UploadedFile.DoesNotExist:
-                return JsonResponse({"error": "Dataset not found"}, status=404)
+                return JsonResponse({"error": "Dataset not found4"}, status=404)
 
             # read file
             dataset_df = Engine.data_to_panda(data_file)

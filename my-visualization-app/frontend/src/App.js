@@ -10,26 +10,26 @@ import { useEffect } from "react";
 
 const { Header, Sider, Content } = Layout;
 
-const fetchCsrfToken = async () => {
-  try {
-    const response = await fetch("http://localhost:8000/api/get_csrf_token/", {
-      credentials: "include", // Make sure Django sends cookies
-    });
-    const data = await response.json();
-    // Store to localStorage for subsequent requests.
-    document.cookie = `csrftoken=${data.csrfToken}; path=/;`;
-    localStorage.setItem("csrfToken", data.csrfToken);
+// const fetchCsrfToken = async () => {
+//   try {
+//     const response = await fetch("http://localhost:8000/api/get_csrf_token/", {
+//       credentials: "include", // Make sure Django sends cookies
+//     });
+//     const data = await response.json();
+//     // Store to localStorage for subsequent requests.
+//     document.cookie = `csrftoken=${data.csrfToken}; path=/;`;
+//     localStorage.setItem("csrfToken", data.csrfToken);
 
-    // Pop up CSRF token in browser (debugging only)
+//     // Pop up CSRF token in browser (debugging only)
 
-  } catch (error) {
-    console.error("Error fetching CSRF token:", error);
-  }
-};
+//   } catch (error) {
+//     console.error("Error fetching CSRF token:", error);
+//   }
+// };
 
 const App = () => {
   useEffect(() => {
-    fetchCsrfToken();
+    // fetchCsrfToken();
   }, []);
   const [uiController] = useState(new UIController());
 

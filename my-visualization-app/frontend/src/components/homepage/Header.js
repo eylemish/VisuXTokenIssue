@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layout, Button } from 'antd';
 import FileComponent from "../file/FileComponent";
+import UIComponent from '../UIComponent';
 
 const { Header } = Layout;
 
@@ -12,6 +13,9 @@ const HeaderNav = ({ uiController }) => {
           </div>
           <div style={{marginLeft: "auto"}}>
               <FileComponent uiController={uiController}/>
+          </div>
+          <div style={{marginLeft: "auto"}}>
+              <UIComponent uiController={uiController}/>
           </div>
       </Header>
   );

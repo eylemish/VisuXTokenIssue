@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 import json
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 
 class DatabaseManager(object):
     def __init__(self, db_path):
